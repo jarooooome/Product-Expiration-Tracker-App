@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Customize Your App"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp" />
+
+        <!-- User Name -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your Name (Optional)"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/userNameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your name"
+            android:padding="16dp"
+            android:background="@drawable/edittext_background"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Color Theme Selection -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Choose Color Theme"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Theme Selection using RadioGroup -->
+        <RadioGroup
+            android:id="@+id/themeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:orientation="vertical">
+
+            <!-- White/Light Theme (DEFAULT) -->
+            <RadioButton
+                android:id="@+id/themeWhite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Light (Default)"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:paddingVertical="12dp" />
+
+            <!-- Green Theme -->
+            <RadioButton
+                android:id="@+id/themeGreen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Green"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:paddingVertical="12dp" />
+
+            <!-- Blue Theme -->
+            <RadioButton
+                android:id="@+id/themeBlue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Blue"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:paddingVertical="12dp" />
+
+            <!-- Pink Theme -->
+            <RadioButton
+                android:id="@+id/themePink"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pink"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:paddingVertical="12dp" />
+
+            <!-- Purple Theme -->
+            <RadioButton
+                android:id="@+id/themePurple"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Purple"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:paddingVertical="12dp" />
+
+            <!-- Black/Dark Theme -->
+            <RadioButton
+                android:id="@+id/themeBlack"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dark"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:paddingVertical="12dp" />
+
+        </RadioGroup>
+
+        <!-- Notifications -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notifications"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Enable expiry reminders"
+                android:textSize="16sp"
+                android:textColor="#666666" />
+
+            <Switch
+                android:id="@+id/notificationSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </LinearLayout>
+
+        <!-- Finish Button -->
+        <Button
+            android:id="@+id/finishButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Finish Setup"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:background="#4CAF50"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp" />
+
+    </LinearLayout>
+</ScrollView>

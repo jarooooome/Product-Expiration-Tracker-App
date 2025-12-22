@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_main_gradient"
+    tools:context=".MainActivity">
+
+    <!-- App Logo/Icon -->
+    <ImageView
+        android:id="@+id/appLogo"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
+        android:layout_marginTop="100dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/app_logo"
+        android:contentDescription="App Logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- App Title -->
+    <TextView
+        android:id="@+id/appTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📦 ExpiryTrack"
+        android:textColor="#FFFFFF"
+        android:textSize="42sp"
+        android:textStyle="bold"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appLogo" />
+
+    <!-- App Subtitle -->
+    <TextView
+        android:id="@+id/appSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="track. save. sustain"
+        android:textColor="#E8F5E9"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appTitle" />
+
+    <!-- DOTS CONTAINER - Now positioned independently -->
+    <FrameLayout
+        android:id="@+id/dotsContainer"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="48dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appSubtitle">
+
+        <!-- Centered container for dots -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:clipChildren="false">
+
+            <View
+                android:id="@+id/dot1"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/dot_shape" />
+
+            <View
+                android:id="@+id/dot2"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/dot_shape" />
+
+            <View
+                android:id="@+id/dot3"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:background="@drawable/dot_shape" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Loading Text - Constrained to DOTS CONTAINER (not affected by dot movement) -->
+    <TextView
+        android:id="@+id/loadingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading your products..."
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dotsContainer" />
+
+    <!-- Version Info -->
+    <TextView
+        android:id="@+id/versionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Version 1.0"
+        android:textColor="#C8E6C9"
+        android:textSize="14sp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loadingText" />
+
+    <!-- Skip Button -->
+    <Button
+        android:id="@+id/skipButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SKIP"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#388E3C"
+        android:textAllCaps="false"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="64dp"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/versionText" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
