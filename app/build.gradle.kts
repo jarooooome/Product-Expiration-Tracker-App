@@ -4,14 +4,16 @@ plugins {
 
 android {
     namespace = "com.example.productexpirationtrackerapp"
+
+    // Change compileSdk to 30
     compileSdk {
-        version = release(36)
+        version = release(30)
     }
 
     defaultConfig {
         applicationId = "com.example.productexpirationtrackerapp"
-        minSdk = 31
-        targetSdk = 36
+        minSdk = 30      // Change minSdk to 30
+        targetSdk = 30   // Change targetSdk to 30
         versionCode = 1
         versionName = "1.0"
 
@@ -27,6 +29,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
