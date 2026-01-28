@@ -20,12 +20,17 @@ public class SetupActivity extends AppCompatActivity {
     private Button finishButton;
     private SharedPreferences preferences;
 
+    // ADD THIS CONSTANT (must match MainActivity)
+    private static final String PREFS_NAME = "AppPrefs";
+    private static final String PREF_SETUP_COMPLETED = "setup_completed";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
 
-        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        // Use the SAME preferences name as MainActivity
+        preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         // Initialize views
         themeGroup = findViewById(R.id.themeGroup);
@@ -129,8 +134,8 @@ public class SetupActivity extends AppCompatActivity {
         // Save notification preference
         editor.putBoolean("notifications", notificationSwitch.isChecked());
 
-        // Mark as setup completed
-        editor.putBoolean("setup_completed", true);
+        // MARK AS SETUP COMPLETED - USING CORRECT KEY
+        editor.putBoolean(PREF_SETUP_COMPLETED, true);  // Changed from "setup_completed"
 
         editor.apply();
 
@@ -160,7 +165,9 @@ public class SetupActivity extends AppCompatActivity {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
         } catch (Exception e) {
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            // If ProductListActivity doesn't exist yet, show error
+            Toast.makeText(this, "Please create ProductListActivity first", Toast.LENGTH_LONG).show();
+            // You can go back to MainActivity or stay here
         }
     }
 

@@ -18,6 +18,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.Date; // Add this import
+import java.util.List; // Add this import
+import android.util.Log; // Add this import
+
 public class MainActivity extends AppCompatActivity {
 
     private View dot1, dot2, dot3;
@@ -31,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "AppPrefs";
     private static final String PREF_FIRST_TIME = "is_first_time"; // Changed from setup_completed
     private static final String PREF_SETUP_COMPLETED = "setup_completed";
+
+    // Add database instance variable
+    private AppDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +70,77 @@ public class MainActivity extends AppCompatActivity {
                 setupSkipButton();
             }
         }, 100);
+
+        // ============ ADD ONLY THIS DATABASE TEST SECTION ============
+        // Initialize and test database (run this once)
+        testDatabaseSetup();
+        // ============ END OF DATABASE TEST SECTION ============
     }
 
+    // ============ ADD THIS NEW METHOD ============
+    private void testDatabaseSetup() {
+        // Initialize database
+        database = AppDatabase.getDatabase(this);
+
+        // Test database in background thread
+        new Thread(() -> {
+            try {
+                // Get current product count
+                List<Product> existingProducts = database.productDao().getAllProducts();
+                int initialCount = existingProducts.size();
+
+                // Only add test data if database is empty
+                if (initialCount == 0) {
+                    // Add test products
+                    Product milk = new Product("Milk", "2024-12-31");
+                    Product eggs = new Product("Eggs", "2024-12-15");
+                    Product bread = new Product("Bread", "2024-12-20");
+
+                    database.productDao().insert(milk);
+                    database.productDao().insert(eggs);
+                    database.productDao().insert(bread);
+
+                    // Get updated product list
+                    List<Product> allProducts = database.productDao().getAllProducts();
+
+                    // Log results
+                    Log.d("DatabaseTest", "Added 3 test products");
+                    Log.d("DatabaseTest", "Total products: " + allProducts.size());
+
+                    for (Product p : allProducts) {
+                        Log.d("DatabaseTest", "Product: " + p.getDisplayText());
+                    }
+
+                    // Update loading text on main thread
+                    runOnUiThread(() -> {
+                        if (loadingText != null) {
+                            loadingText.setText("Database initialized with " + allProducts.size() + " products");
+                        }
+                    });
+                } else {
+                    Log.d("DatabaseTest", "Database already has " + initialCount + " products");
+
+                    runOnUiThread(() -> {
+                        if (loadingText != null) {
+                            loadingText.setText("Found " + initialCount + " products in database");
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                Log.e("DatabaseTest", "Error: " + e.getMessage(), e);
+
+                runOnUiThread(() -> {
+                    if (loadingText != null) {
+                        loadingText.setText("Database error - check logs");
+                    }
+                    Toast.makeText(MainActivity.this, "Database error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+    // ============ END OF NEW METHOD ============
+
+    // ALL YOUR EXISTING METHODS BELOW - NO CHANGES NEEDED
     private void initializeViews() {
         try {
             dot1 = findViewById(R.id.dot1);
@@ -88,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // ============ ONLY UPDATE THIS METHOD ============
     private void checkFirstTimeUser() {
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         boolean isFirstTime = preferences.getBoolean(PREF_FIRST_TIME, true); // Default to true (first time)
@@ -103,10 +180,20 @@ public class MainActivity extends AppCompatActivity {
                         goToProductList();
                     }
                 }, 1000); // Short delay to show logo
+            } else {
+                // USER HAS SEEN ONBOARDING BUT NOT COMPLETED SETUP
+                // Go to SetupActivity after splash (with 1 second delay like ProductList)
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        goToSetup();
+                    }
+                }, 1000); // Same 1 second delay as above
             }
         }
         // If it's first time, we'll show animations and then decide in proceedToMainApp()
     }
+    // ============ END OF UPDATED METHOD ============
 
     private void resetDots() {
         if (dot1 != null) {
