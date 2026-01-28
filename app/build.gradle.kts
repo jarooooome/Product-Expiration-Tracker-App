@@ -5,15 +5,15 @@ plugins {
 android {
     namespace = "com.example.productexpirationtrackerapp"
 
-    // Change compileSdk to 30
+    // Upgrade compileSdk to 36 for library compatibility
     compileSdk {
-        version = release(30)
+        version = release(36)
     }
 
     defaultConfig {
         applicationId = "com.example.productexpirationtrackerapp"
-        minSdk = 30      // Change minSdk to 30
-        targetSdk = 30   // Change targetSdk to 30
+        minSdk = 30          // keep minSdk for Android 11+
+        targetSdk = 36       // upgrade targetSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -38,13 +38,18 @@ android {
 
 dependencies {
     implementation(libs.appcompat)
-    implementation("com.google.android.material:material:1.8.0") // downgraded from 1.9.0
+    implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation("com.airbnb.android:lottie:5.2.0") // downgraded from 6.3.0
+    implementation("com.airbnb.android:lottie:6.3.0")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
-}
+    implementation("com.google.android.material:material:1.11.0")
 
+    // Add Room database for Java
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+}

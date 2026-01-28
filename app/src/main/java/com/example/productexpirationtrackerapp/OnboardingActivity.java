@@ -22,6 +22,11 @@ public class OnboardingActivity extends AppCompatActivity {
     private LinearLayout dotsLayout;
     private OnboardingAdapter adapter;
 
+    // ADD THESE 3 LINES - SharedPreferences constants
+    private static final String PREFS_NAME = "AppPrefs";
+    private static final String PREF_FIRST_TIME = "is_first_time";
+    private static final String PREF_SETUP_COMPLETED = "setup_completed";
+
     // Page change callback for animations
     private ViewPager2.OnPageChangeCallback pageChangeCallback = new ViewPager2.OnPageChangeCallback() {
         @Override
@@ -242,10 +247,28 @@ public class OnboardingActivity extends AppCompatActivity {
     }
 
     private void goToSetupScreen() {
+        // ADD THIS METHOD CALL - Save that onboarding was completed
+        saveOnboardingCompleted();
+
         Intent intent = new Intent(OnboardingActivity.this, SetupActivity.class);
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
+    }
+
+    // ADD THIS ENTIRE METHOD - Saves to SharedPreferences
+    private void saveOnboardingCompleted() {
+        android.content.SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        android.content.SharedPreferences.Editor editor = preferences.edit();
+
+        // Mark as NOT first time anymore
+        editor.putBoolean(PREF_FIRST_TIME, false);
+        // Mark setup as NOT completed yet (user needs to complete setup)
+        editor.putBoolean(PREF_SETUP_COMPLETED, false);
+        editor.apply();
+
+        // Optional: Log for debugging
+        android.util.Log.d("Onboarding", "Saved: First time = false, Setup completed = false");
     }
 
     @Override
