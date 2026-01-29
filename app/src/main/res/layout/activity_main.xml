@@ -1,137 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_main_gradient"
-    tools:context=".MainActivity">
+    android:background="@drawable/gradient_bg_default">
 
-    <!-- App Logo/Icon -->
-    <ImageView
-        android:id="@+id/appLogo"
-        android:layout_width="170dp"
-        android:layout_height="170dp"
-        android:layout_marginTop="100dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/app_logo"
-        android:contentDescription="App Logo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!-- Gradient Overlay (optional glass frosted effect) -->
+    <View
+        android:id="@+id/gradient_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/frosted_glass_overlay"
+        android:alpha="0.05" />
 
-    <!-- App Title -->
-    <TextView
-        android:id="@+id/appTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="📦 ExpiryTrack"
-        android:textColor="#FFFFFF"
-        android:textSize="42sp"
-        android:textStyle="bold"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appLogo" />
+    <!-- Main Content Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
 
-    <!-- App Subtitle -->
-    <TextView
-        android:id="@+id/appSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="track. save. sustain"
-        android:textColor="#E8F5E9"
-        android:textSize="18sp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appTitle" />
+        <!-- Top Spacer for Logo -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-    <!-- DOTS CONTAINER - Now positioned independently -->
-    <FrameLayout
-        android:id="@+id/dotsContainer"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="48dp"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appSubtitle">
+        <!-- Logo Container with Liquid Glass Effect -->
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp">
 
-        <!-- Centered container for dots -->
+            <!-- Glass background with border -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/glass_circle_bg" />
+
+            <!-- Logo content (replace with your logo if available) -->
+            <TextView
+                android:id="@+id/logoText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="ET"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:gravity="center"
+                />
+
+        </FrameLayout>
+
+        <!-- Title with Liquid Glass Container -->
+        <LinearLayout
+            android:id="@+id/titleContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/appTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ExpiryTrack"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:gravity="center"
+                />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="8dp" />
+
+            <TextView
+                android:id="@+id/appSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Track. Save. Sustain."
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:alpha="0.85"
+                android:gravity="center"
+                />
+
+        </LinearLayout>
+
+        <!-- Animated Dots Container with Liquid Glass Effect -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_gravity="center"
-            android:clipChildren="false">
+            android:gravity="center_horizontal"
+            android:layout_marginVertical="24dp"
+            android:padding="16dp"
+            android:background="@drawable/glass_rounded_bg">
 
             <View
                 android:id="@+id/dot1"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginEnd="12dp"
-                android:background="@drawable/dot_shape" />
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="@drawable/dot_bg" />
 
             <View
                 android:id="@+id/dot2"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginEnd="12dp"
-                android:background="@drawable/dot_shape" />
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="@drawable/dot_bg" />
 
             <View
                 android:id="@+id/dot3"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:background="@drawable/dot_shape" />
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="@drawable/dot_bg" />
+
         </LinearLayout>
-    </FrameLayout>
 
-    <!-- Loading Text - Constrained to DOTS CONTAINER (not affected by dot movement) -->
-    <TextView
-        android:id="@+id/loadingText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Loading your products..."
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dotsContainer" />
+        <!-- Loading Text Container with Glass Effect -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="16dp"
+            android:padding="16dp"
+            android:background="@drawable/glass_rounded_bg">
 
-    <!-- Version Info -->
-    <TextView
-        android:id="@+id/versionText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Version 1.0"
-        android:textColor="#C8E6C9"
-        android:textSize="14sp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/loadingText" />
+            <TextView
+                android:id="@+id/loadingText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Initializing app..."
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:alpha="0.9"
+                android:gravity="center"
+                />
 
-    <!-- Skip Button -->
-    <Button
-        android:id="@+id/skipButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SKIP"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#388E3C"
-        android:textAllCaps="false"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="64dp"
-        android:elevation="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/versionText" />
+        </FrameLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Spacer -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Bottom Container with Version and Skip Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/versionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Version 1.0"
+                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:alpha="0.7"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"
+                />
+
+            <!-- Skip Button with Liquid Glass Effect -->
+            <Button
+                android:id="@+id/skipButton"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="SKIP"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="32dp"
+                android:visibility="gone"
+                android:background="@drawable/glass_button_bg"
+                android:textColor="@color/white"
+                 />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
