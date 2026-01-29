@@ -1,5 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
+    <!-- BASIC COLORS (Add these) -->
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+
+    <!-- White/Light Theme -->
+    <color name="color_primary_white">#4CAF50</color> <!-- Green as primary for white theme -->
+    <color name="color_primary_light">#F5F5F5</color>
+    <color name="color_text_white">#333333</color>
+    <color name="color_accent_white">#FF9800</color>
+    <color name="color_background_white">#FFFFFF</color>
+
+    <!-- Green Theme -->
+    <color name="color_primary_green">#4CAF50</color>
+    <color name="color_primary_light_green">#E8F5E9</color>
+    <color name="color_text_green">#1B5E20</color>
+    <color name="color_accent_green">#FF9800</color>
+    <color name="color_background_green">#FFFFFF</color>
+
+    <!-- Blue Theme -->
+    <color name="color_primary_blue">#2196F3</color>
+    <color name="color_primary_light_blue">#E3F2FD</color>
+    <color name="color_text_blue">#0D47A1</color>
+    <color name="color_accent_blue">#FF9800</color>
+    <color name="color_background_blue">#FFFFFF</color>
+
+    <!-- Pink Theme -->
+    <color name="color_primary_pink">#E91E63</color>
+    <color name="color_primary_light_pink">#FCE4EC</color>
+    <color name="color_text_pink">#880E4F</color>
+    <color name="color_accent_pink">#FF9800</color>
+    <color name="color_background_pink">#FFFFFF</color>
+
+    <!-- Purple Theme -->
+    <color name="color_primary_purple">#9C27B0</color>
+    <color name="color_primary_light_purple">#F3E5F5</color>
+    <color name="color_text_purple">#4A148C</color>
+    <color name="color_accent_purple">#FF9800</color>
+    <color name="color_background_purple">#FFFFFF</color>
+
+    <!-- Black/Dark Theme -->
+    <color name="color_primary_black">#212121</color>
+    <color name="color_primary_light_black">#424242</color>
+    <color name="color_text_black">#FFFFFF</color>
+    <color name="color_accent_black">#FF9800</color>
+    <color name="color_background_black">#303030</color>
 </resources>
