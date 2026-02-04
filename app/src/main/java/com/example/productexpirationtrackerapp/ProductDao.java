@@ -1,5 +1,6 @@
 package com.example.productexpirationtrackerapp;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -22,6 +23,11 @@ public interface ProductDao {
     @Query("DELETE FROM products WHERE id = :productId")
     void deleteById(int productId);
 
+    // UPDATE THIS METHOD to return LiveData
+    @Query("SELECT * FROM products ORDER BY expiryDate ASC")
+    LiveData<List<Product>> getAllProductsLiveData();
+
+    // Keep the non-LiveData version if needed elsewhere
     @Query("SELECT * FROM products ORDER BY expiryDate ASC")
     List<Product> getAllProducts();
 
@@ -33,4 +39,8 @@ public interface ProductDao {
 
     @Query("SELECT * FROM products WHERE expiryDate BETWEEN :startDate AND :endDate")
     List<Product> getProductsExpiringBetween(Date startDate, Date endDate);
+
+    // NEW: Add category filtering query
+    @Query("SELECT * FROM products WHERE category = :category ORDER BY expiryDate ASC")
+    LiveData<List<Product>> getProductsByCategory(String category);
 }
