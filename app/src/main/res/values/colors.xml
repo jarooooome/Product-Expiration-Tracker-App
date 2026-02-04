@@ -3,6 +3,8 @@
     <!-- BASIC COLORS (Add these) -->
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
+    <color name="color_primary">#2196F3</color>
+    <color name="color_gray">#E0E0E0</color>
 
     <!-- White/Light Theme -->
     <color name="color_primary_white">#4CAF50</color> <!-- Green as primary for white theme -->

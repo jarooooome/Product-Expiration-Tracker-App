@@ -58,4 +58,9 @@ public class ProductRepository {
             }
         });
     }
+
+    // NEW: Add category filtering method
+    public LiveData<List<Product>> getProductsByCategory(String category) {
+        return productDao.getProductsByCategory(category);
+    }
 }

@@ -16,14 +16,16 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,7 +37,7 @@ public class AddProductActivity extends AppCompatActivity {
 
     private EditText productNameEditText;
     private EditText expiryDateEditText;
-    private EditText categoryEditText;
+    private Spinner categorySpinner;
     private EditText quantityEditText;
     private EditText notesEditText;
     private Button datePickerButton;
@@ -58,6 +60,7 @@ public class AddProductActivity extends AppCompatActivity {
 
     private Bitmap productPhotoBitmap;
     private String productPhotoPath;
+    private String selectedCategory = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +79,9 @@ public class AddProductActivity extends AppCompatActivity {
 
         // Initialize views
         initializeViews();
+
+        // Setup category spinner
+        setupCategorySpinner();
 
         // Apply theme from database
         applyThemeFromDatabase();
@@ -180,7 +186,7 @@ public class AddProductActivity extends AppCompatActivity {
     private void initializeViews() {
         productNameEditText = findViewById(R.id.productNameEditText);
         expiryDateEditText = findViewById(R.id.expiryDateEditText);
-        categoryEditText = findViewById(R.id.categoryEditText);
+        categorySpinner = findViewById(R.id.categorySpinner);
         quantityEditText = findViewById(R.id.quantityEditText);
         notesEditText = findViewById(R.id.notesEditText);
         datePickerButton = findViewById(R.id.datePickerButton);
@@ -196,6 +202,39 @@ public class AddProductActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, 7);
         expiryDateEditText.setText(dateFormat.format(calendar.getTime()));
+    }
+
+    private void setupCategorySpinner() {
+        // Create an ArrayAdapter using the string array and default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.product_categories, android.R.layout.simple_spinner_item);
+
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Apply the adapter to the spinner
+        categorySpinner.setAdapter(adapter);
+
+        // Set selection listener
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Get selected category
+                String category = parent.getItemAtPosition(position).toString();
+
+                // Only set selectedCategory if it's not the default "Select Category" option
+                if (position > 0) {
+                    selectedCategory = category;
+                } else {
+                    selectedCategory = "";
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectedCategory = "";
+            }
+        });
     }
 
     private void setupClickListeners() {
@@ -287,21 +326,35 @@ public class AddProductActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == CAMERA_REQUEST_CODE && data != null) {
                 // Handle camera photo
-                productPhotoBitmap = (Bitmap) data.getExtras().get("data");
-                if (productPhotoBitmap != null) {
-                    productPhotoPreview.setImageBitmap(productPhotoBitmap);
-                    removePhotoButton.setVisibility(View.VISIBLE);
+                try {
+                    productPhotoBitmap = (Bitmap) data.getExtras().get("data");
+                    if (productPhotoBitmap != null) {
+                        productPhotoPreview.setImageBitmap(productPhotoBitmap);
+                        removePhotoButton.setVisibility(View.VISIBLE);
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(this, "Error loading camera photo", Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == GALLERY_REQUEST_CODE && data != null) {
-                // Handle gallery photo
+                // Handle gallery photo with better error handling
                 Uri selectedImage = data.getData();
                 try {
+                    // Load image with options to prevent memory issues
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 4; // Reduce image size by 4x
+
                     InputStream inputStream = getContentResolver().openInputStream(selectedImage);
-                    productPhotoBitmap = BitmapFactory.decodeStream(inputStream);
-                    productPhotoPreview.setImageBitmap(productPhotoBitmap);
-                    removePhotoButton.setVisibility(View.VISIBLE);
-                } catch (FileNotFoundException e) {
-                    Toast.makeText(this, "Could not load image", Toast.LENGTH_SHORT).show();
+                    productPhotoBitmap = BitmapFactory.decodeStream(inputStream, null, options);
+                    inputStream.close();
+
+                    if (productPhotoBitmap != null) {
+                        productPhotoPreview.setImageBitmap(productPhotoBitmap);
+                        removePhotoButton.setVisibility(View.VISIBLE);
+                    } else {
+                        Toast.makeText(this, "Could not load image", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -346,7 +399,7 @@ public class AddProductActivity extends AppCompatActivity {
         // Get values from form
         String productName = productNameEditText.getText().toString().trim();
         String expiryDateStr = expiryDateEditText.getText().toString().trim();
-        String category = categoryEditText.getText().toString().trim();
+        String category = selectedCategory;
         String quantity = quantityEditText.getText().toString().trim();
         String notes = notesEditText.getText().toString().trim();
 

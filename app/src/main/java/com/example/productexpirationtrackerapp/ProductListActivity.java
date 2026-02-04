@@ -9,9 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -33,12 +31,18 @@ public class ProductListActivity extends AppCompatActivity {
     private ListView productListView;
     private View rootView;
 
+    // NEW: Category filter buttons
+    private Button categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
+
     // Data
     private ArrayList<Product> productList;
     private ProductListAdapter adapter;
     private SharedPreferences preferences;
     private UserRepository userRepository;
     private ProductViewModel productViewModel;
+
+    // NEW: Current category tracking
+    private String currentCategory = "All"; // Default category
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,9 @@ public class ProductListActivity extends AppCompatActivity {
         // Initialize ALL UI components
         initializeViews();
 
+        // NEW: Initialize category buttons
+        initializeCategoryButtons();
+
         // Apply theme from database
         applyThemeFromDatabase();
 
@@ -80,6 +87,9 @@ public class ProductListActivity extends AppCompatActivity {
 
         // Setup button click listeners
         setupClickListeners();
+
+        // NEW: Load all products by default
+        loadAllProducts();
 
         Log.d(TAG, "ProductListActivity setup complete");
     }
@@ -239,6 +249,15 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
+    // NEW: Initialize category buttons
+    private void initializeCategoryButtons() {
+        categoryAllButton = findViewById(R.id.categoryAllButton);
+        categoryFoodButton = findViewById(R.id.categoryFoodButton);
+        categoryMedicineButton = findViewById(R.id.categoryMedicineButton);
+        categoryDrinksButton = findViewById(R.id.categoryDrinksButton);
+        categoryOtherButton = findViewById(R.id.categoryOtherButton);
+    }
+
     private void setupProductList() {
         Log.d(TAG, "Setting up product list from database");
 
@@ -260,9 +279,6 @@ public class ProductListActivity extends AppCompatActivity {
             titleTextView.setText("📦 " + userName + "'s Products");
             Log.d(TAG, "Title set to: " + titleTextView.getText());
         }
-
-        // Load products from database
-        loadProductsFromDatabase();
     }
 
     private void setupClickListeners() {
@@ -291,6 +307,62 @@ public class ProductListActivity extends AppCompatActivity {
                     Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
                     startActivityForResult(intent, 200); // Use different request code
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+            });
+        }
+
+        // NEW: Category button click listeners
+        if (categoryAllButton != null) {
+            categoryAllButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "All";
+                    setActiveCategoryButton(categoryAllButton);
+                    loadAllProducts();
+                }
+            });
+        }
+
+        if (categoryFoodButton != null) {
+            categoryFoodButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "Food";
+                    setActiveCategoryButton(categoryFoodButton);
+                    loadProductsByCategory("Food");
+                }
+            });
+        }
+
+        if (categoryMedicineButton != null) {
+            categoryMedicineButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "Medicine";
+                    setActiveCategoryButton(categoryMedicineButton);
+                    loadProductsByCategory("Medicine");
+                }
+            });
+        }
+
+        if (categoryDrinksButton != null) {
+            categoryDrinksButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "Drinks";
+                    setActiveCategoryButton(categoryDrinksButton);
+                    loadProductsByCategory("Drinks");
+                }
+            });
+        }
+
+        if (categoryOtherButton != null) {
+            categoryOtherButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "Other";
+                    setActiveCategoryButton(categoryOtherButton);
+                    loadProductsByCategory("Other");
                 }
             });
         }
@@ -344,6 +416,51 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
+    // NEW: Set active category button
+    private void setActiveCategoryButton(Button activeButton) {
+        // Reset all buttons to gray
+        categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+        categoryFoodButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+        categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+        categoryDrinksButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+        categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+
+        // Set active button to blue
+        activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2196F3));
+    }
+
+    // NEW: Load all products
+    private void loadAllProducts() {
+        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
+            @Override
+            public void onChanged(List<Product> products) {
+                updateProductList(products);
+            }
+        });
+    }
+
+    // NEW: Load products by category
+    private void loadProductsByCategory(String category) {
+        productViewModel.getProductsByCategory(category).observe(this, new Observer<List<Product>>() {
+            @Override
+            public void onChanged(List<Product> products) {
+                updateProductList(products);
+            }
+        });
+    }
+
+    // NEW: Update product list with data
+    private void updateProductList(List<Product> products) {
+        if (products != null) {
+            productList.clear();
+            productList.addAll(products);
+            adapter.updateData(products);
+            updateProductCount();
+
+            Log.d(TAG, "Updated product list with " + products.size() + " products (Category: " + currentCategory + ")");
+        }
+    }
+
     // Handle result from ProductDetailActivity (for deletion) and AddProductActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -375,7 +492,7 @@ public class ProductListActivity extends AppCompatActivity {
                 productCountText.setText("No products added yet");
             } else {
                 productCountText.setText("Total: " + productList.size() + " product" +
-                        (productList.size() == 1 ? "" : "s"));
+                        (productList.size() == 1 ? "" : "s") + " (" + currentCategory + ")");
             }
             Log.d(TAG, "Updated product count: " + productList.size());
         }

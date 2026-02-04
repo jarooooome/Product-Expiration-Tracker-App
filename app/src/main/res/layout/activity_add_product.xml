@@ -155,11 +155,10 @@
             android:textSize="18sp"
             android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/categoryEditText"
+        <Spinner
+            android:id="@+id/categorySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="e.g., Dairy, Meat, Vegetables"
             android:padding="16dp"
             android:background="@drawable/edittext_background"
             android:layout_marginBottom="24dp" />

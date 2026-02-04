@@ -39,4 +39,8 @@ public interface ProductDao {
 
     @Query("SELECT * FROM products WHERE expiryDate BETWEEN :startDate AND :endDate")
     List<Product> getProductsExpiringBetween(Date startDate, Date endDate);
+
+    // NEW: Add category filtering query
+    @Query("SELECT * FROM products WHERE category = :category ORDER BY expiryDate ASC")
+    LiveData<List<Product>> getProductsByCategory(String category);
 }

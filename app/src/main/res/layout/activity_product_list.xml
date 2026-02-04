@@ -48,6 +48,71 @@
         android:textColor="#FFFFFF"
         android:layout_marginBottom="16dp" />
 
+    <!-- Category Filter Buttons -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:id="@+id/categoryFilterLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
+
+            <!-- All Products Button -->
+            <Button
+                android:id="@+id/categoryAllButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_primary" />
+
+            <!-- Food Button -->
+            <Button
+                android:id="@+id/categoryFoodButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Food"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_gray" />
+
+            <!-- Medicine Button -->
+            <Button
+                android:id="@+id/categoryMedicineButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Medicine"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_gray" />
+
+            <!-- Drinks Button -->
+            <Button
+                android:id="@+id/categoryDrinksButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Drinks"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_gray" />
+
+            <!-- Other Button -->
+            <Button
+                android:id="@+id/categoryOtherButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other"
+                android:padding="12dp"
+                android:backgroundTint="@color/color_gray" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
     <!-- Product Count -->
     <TextView
         android:id="@+id/productCountText"
