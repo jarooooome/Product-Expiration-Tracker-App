@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -33,8 +34,8 @@ public class ProductListActivity extends AppCompatActivity {
     private View rootView;
 
     // Data
-    private ArrayList<String> productDisplayList;
-    private ArrayAdapter<String> adapter;
+    private ArrayList<Product> productList;
+    private ProductListAdapter adapter;
     private SharedPreferences preferences;
     private UserRepository userRepository;
     private ProductViewModel productViewModel;
@@ -107,7 +108,7 @@ public class ProductListActivity extends AppCompatActivity {
                 Log.d(TAG, "Products loaded from database: " + products.size());
 
                 // Clear current list
-                productDisplayList.clear();
+                productList.clear();
 
                 if (products == null || products.isEmpty()) {
                     Log.d(TAG, "No products in database");
@@ -115,20 +116,14 @@ public class ProductListActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Convert database products to display format
-                SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-
-                for (Product product : products) {
-                    String displayText = product.getName() + " - Expires: " +
-                            displayFormat.format(product.getExpiryDate());
-                    productDisplayList.add(displayText);
-                }
+                // Add all products to list
+                productList.addAll(products);
 
                 // Update adapter
-                adapter.notifyDataSetChanged();
+                adapter.updateData(products);
                 updateProductCount();
 
-                Log.d(TAG, "Display list updated with " + productDisplayList.size() + " products");
+                Log.d(TAG, "Product list updated with " + productList.size() + " products");
             }
         });
     }
@@ -247,15 +242,11 @@ public class ProductListActivity extends AppCompatActivity {
     private void setupProductList() {
         Log.d(TAG, "Setting up product list from database");
 
-        // Initialize display list
-        productDisplayList = new ArrayList<>();
+        // Initialize product list
+        productList = new ArrayList<>();
 
-        // Create adapter for the ListView
-        adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_list_item_1,
-                productDisplayList
-        );
+        // Create custom adapter
+        adapter = new ProductListAdapter(this, productList);
 
         // Set adapter to ListView
         if (productListView != null) {
@@ -291,14 +282,15 @@ public class ProductListActivity extends AppCompatActivity {
             });
         }
 
-        // Add button - add new product
+        // Add button - open AddProductActivity
         if (addButton != null) {
             addButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "Add button clicked");
-                    // For testing, add a sample product
-                    addSampleProduct();
+                    Log.d(TAG, "Add button clicked - opening AddProductActivity");
+                    Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
+                    startActivityForResult(intent, 200); // Use different request code
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
             });
         }
@@ -308,29 +300,23 @@ public class ProductListActivity extends AppCompatActivity {
             productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    // Get the actual product from ViewModel
-                    productViewModel.getAllProducts().observe(ProductListActivity.this, new Observer<List<Product>>() {
-                        @Override
-                        public void onChanged(List<Product> products) {
-                            if (position < products.size()) {
-                                Product product = products.get(position);
+                    if (position < productList.size()) {
+                        Product product = productList.get(position);
 
-                                Log.d(TAG, "Opening product details: " + product.getName());
+                        Log.d(TAG, "Opening product details: " + product.getName());
 
-                                // Open ProductDetailActivity
-                                Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
-                                intent.putExtra("product_id", product.getId());
-                                intent.putExtra("product_name", product.getName());
+                        // Open ProductDetailActivity
+                        Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
+                        intent.putExtra("product_id", product.getId());
+                        intent.putExtra("product_name", product.getName());
 
-                                // Convert date to string for passing
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                                intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
+                        // Convert date to string for passing
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                        intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
 
-                                startActivityForResult(intent, 100);
-                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                            }
-                        }
-                    });
+                        startActivityForResult(intent, 100);
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    }
                 }
             });
         }
@@ -340,50 +326,34 @@ public class ProductListActivity extends AppCompatActivity {
             productListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    // Get product from ViewModel
-                    productViewModel.getAllProducts().observe(ProductListActivity.this, new Observer<List<Product>>() {
-                        @Override
-                        public void onChanged(List<Product> products) {
-                            if (position < products.size()) {
-                                Product product = products.get(position);
+                    if (position < productList.size()) {
+                        Product product = productList.get(position);
 
-                                // Delete from database
-                                productViewModel.delete(product);
+                        // Delete from database
+                        productViewModel.delete(product);
 
-                                Toast.makeText(ProductListActivity.this,
-                                        "Removed: " + product.getName(),
-                                        Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProductListActivity.this,
+                                "Removed: " + product.getName(),
+                                Toast.LENGTH_SHORT).show();
 
-                                Log.d(TAG, "Item long clicked and removed from database: " + product.getName());
-                            }
-                        }
-                    });
+                        Log.d(TAG, "Item long clicked and removed from database: " + product.getName());
+                    }
                     return true;
                 }
             });
         }
     }
 
-    private void addSampleProduct() {
-        // Create a sample product for testing
-        String[] products = {"🍌 Banana", "🥦 Broccoli", "🥩 Steak", "🐟 Fish", "🍇 Grapes", "🥑 Avocado"};
-        String[] dates = {"2025-01-05", "2025-01-08", "2025-01-12", "2025-01-15", "2025-01-20", "2025-01-25"};
-
-        // Pick a random product
-        int randomIndex = (int) (Math.random() * products.length);
-
-        // Create and insert product
-        Product newProduct = new Product(products[randomIndex], dates[randomIndex]);
-        productViewModel.insert(newProduct);
-
-        Toast.makeText(this, "Added: " + products[randomIndex], Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "Added new product to database: " + products[randomIndex]);
-    }
-
-    // Handle result from ProductDetailActivity (for deletion)
+    // Handle result from ProductDetailActivity (for deletion) and AddProductActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 200 && resultCode == RESULT_OK) {
+            // Product was added successfully from AddProductActivity
+            Toast.makeText(this, "Product added!", Toast.LENGTH_SHORT).show();
+            // The list will automatically update due to LiveData observation
+        }
 
         if (requestCode == 100 && resultCode == RESULT_OK) {
             if (data != null && data.hasExtra("deleted_product_id")) {
@@ -401,13 +371,13 @@ public class ProductListActivity extends AppCompatActivity {
 
     private void updateProductCount() {
         if (productCountText != null) {
-            if (productDisplayList.isEmpty()) {
+            if (productList.isEmpty()) {
                 productCountText.setText("No products added yet");
             } else {
-                productCountText.setText("Total: " + productDisplayList.size() + " product" +
-                        (productDisplayList.size() == 1 ? "" : "s"));
+                productCountText.setText("Total: " + productList.size() + " product" +
+                        (productList.size() == 1 ? "" : "s"));
             }
-            Log.d(TAG, "Updated product count: " + productDisplayList.size());
+            Log.d(TAG, "Updated product count: " + productList.size());
         }
     }
 }
