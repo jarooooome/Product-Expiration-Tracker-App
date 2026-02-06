@@ -1,20 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    ENHANCED SPLASH SCREEN LAYOUT
+    Premium design with orbital animations and glassmorphism
+
+    NEW FEATURES:
+    - Orbital rotating rings around logo
+    - Checkmark badge (shows when loading complete)
+    - Enhanced glassmorphism progress bar
+    - Better spacing and visual hierarchy
+    - Floating particle effect placeholders
+    - Premium gradient background
+
+    CHANGES FROM ORIGINAL:
+    1. Added orbital ring layers
+    2. Added checkmark badge container
+    3. Improved logo container structure
+    4. Enhanced progress bar styling
+    5. Better animations support
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_bg_default"
+    android:background="@drawable/gradient_bg_premium"
     android:clickable="true"
     android:focusable="true">
 
-    <!-- Gradient Overlay (optional glass frosted effect) -->
+    <!-- Gradient Overlay (subtle glass frosted effect) -->
     <View
         android:id="@+id/gradient_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/frosted_glass_overlay"
-        android:alpha="0.05" />
+        android:alpha="0.03" />
 
     <!-- Main Content Container -->
     <LinearLayout
@@ -28,100 +47,167 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1.2" />
 
-        <!-- Logo Container with Liquid Glass Effect -->
+        <!-- ========================================= -->
+        <!-- ENHANCED LOGO CONTAINER WITH ORBITAL RINGS -->
+        <!-- ========================================= -->
         <FrameLayout
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:id="@+id/logoContainer"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="32dp">
+            android:layout_marginBottom="40dp">
 
-            <!-- Glass background with border -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/glass_circle_bg" />
+            <!-- Outer Orbital Ring (Rotates Clockwise) -->
+            <ImageView
+                android:id="@+id/orbitalRingOuter"
+                android:layout_width="180dp"
+                android:layout_height="180dp"
+                android:layout_gravity="center"
+                android:src="@drawable/orbital_ring"
+                android:alpha="0.6"
+                android:contentDescription="Outer orbital ring" />
 
-            <!-- Logo content -->
-            <TextView
-                android:id="@+id/logoText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="ET"
-                android:textSize="48sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:gravity="center" />
+            <!-- Inner Orbital Ring (Rotates Counter-Clockwise) -->
+            <ImageView
+                android:id="@+id/orbitalRingInner"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_gravity="center"
+                android:src="@drawable/orbital_ring"
+                android:alpha="0.5"
+                android:contentDescription="Inner orbital ring" />
+
+            <!-- Main Logo Circle Container -->
+            <FrameLayout
+                android:id="@+id/logoCircleContainer"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center">
+
+                <!-- Glass background with gradient -->
+                <View
+                    android:id="@+id/logoBackground"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/logo_circle_premium" />
+
+                <!-- Logo Text "ET" -->
+                <TextView
+                    android:id="@+id/logoText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/et_logo"
+                    android:textSize="48sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:gravity="center"
+                    android:letterSpacing="0.05" />
+
+            </FrameLayout>
+
+            <!-- Checkmark Badge (appears when loading complete) -->
+            <FrameLayout
+                android:id="@+id/checkmarkBadge"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
+                android:visibility="gone"
+                android:background="@drawable/checkmark_badge_bg">
+
+                <!-- Checkmark Icon (Unicode) -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="✓"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:gravity="center" />
+
+            </FrameLayout>
 
         </FrameLayout>
 
-        <!-- Title with Liquid Glass Container -->
+        <!-- ========================================= -->
+        <!-- TITLE CONTAINER -->
+        <!-- ========================================= -->
         <LinearLayout
             android:id="@+id/titleContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="20dp">
 
             <TextView
                 android:id="@+id/appTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ExpiryTrack"
-                android:textSize="36sp"
+                android:text="@string/app_title"
+                android:textSize="38sp"
                 android:textStyle="bold"
                 android:textColor="@color/white"
-                android:gravity="center" />
+                android:gravity="center"
+                android:letterSpacing="0.02"
+                android:shadowColor="#40000000"
+                android:shadowDx="0"
+                android:shadowDy="2"
+                android:shadowRadius="4" />
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="8dp" />
+                android:layout_height="12dp" />
 
             <TextView
                 android:id="@+id/appSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Track. Save. Sustain."
-                android:textSize="14sp"
+                android:text="@string/app_subtitle"
+                android:textSize="15sp"
                 android:textColor="@color/white"
-                android:alpha="0.85"
-                android:gravity="center" />
+                android:alpha="0.9"
+                android:gravity="center"
+                android:letterSpacing="0.08" />
 
         </LinearLayout>
 
-        <!-- Loading Container -->
+        <!-- ========================================= -->
+        <!-- LOADING CONTAINER -->
+        <!-- ========================================= -->
         <LinearLayout
+            android:id="@+id/loadingContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginVertical="16dp">
+            android:layout_marginVertical="24dp">
 
             <!-- Loading Text -->
             <TextView
                 android:id="@+id/loadingText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Initializing app..."
+                android:text="@string/initializing_app"
                 android:textSize="14sp"
                 android:textColor="@color/white"
-                android:alpha="0.9"
+                android:alpha="0.85"
                 android:gravity="center"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="20dp" />
 
-            <!-- Loading Progress Bar -->
+            <!-- Enhanced Glass Progress Bar -->
             <ProgressBar
                 android:id="@+id/loadingProgress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="200dp"
-            android:layout_height="4dp"
-            android:max="100"
-            android:progress="0"
-            android:progressTint="@color/white"
-            android:progressBackgroundTint="@color/white"
-            android:alpha="0.7" />
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="240dp"
+                android:layout_height="8dp"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/glass_progress_bar"
+                android:elevation="2dp" />
 
         </LinearLayout>
 
@@ -129,41 +215,46 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1.5" />
 
-        <!-- Bottom Container -->
+        <!-- ========================================= -->
+        <!-- BOTTOM CONTAINER -->
+        <!-- ========================================= -->
         <LinearLayout
             android:id="@+id/bottomContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="16dp">
 
+            <!-- Version Text -->
             <TextView
                 android:id="@+id/versionText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Version 1.0"
+                android:text="@string/version_1_0"
                 android:textSize="12sp"
                 android:textColor="@color/white"
-                android:alpha="0.7"
+                android:alpha="0.6"
                 android:gravity="center"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="12dp" />
 
             <!-- Tap to Continue Text -->
             <TextView
                 android:id="@+id/tapToContinueText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/touch_screen_to_continue"
-            android:textSize="14sp"
-            android:textColor="@color/white"
-            android:alpha="0.85"
-            android:gravity="center"
-            android:visibility="gone"
-            android:padding="12dp"
-            android:background="@drawable/glass_button_bg"
-            android:layout_marginTop="16dp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/touch_screen_to_continue"
+                android:textSize="15sp"
+                android:textColor="@color/white"
+                android:alpha="0.95"
+                android:gravity="center"
+                android:visibility="gone"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="14dp"
+                android:background="@drawable/glass_button_bg"
+                android:layout_marginTop="8dp" />
 
         </LinearLayout>
 
