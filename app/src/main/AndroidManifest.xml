@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <uses-permission android:name="android.permission.VIBRATE" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -27,7 +27,7 @@
 
         <!-- Setup Screen -->
         <activity
-            android:name=".SetupActivity"
+            android:name=".SetupActivity_Enhanced"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="false" />
 
@@ -55,7 +55,6 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
-
     </application>
 
 </manifest>

@@ -18,6 +18,18 @@
     <string name="debug_database">Debug Database</string>
     <string name="finish_setup">Finish Setup</string>
 
+    <!-- NEW Enhanced strings -->
+    <string name="setup_step_progress">Step %1$d of 3</string>
+    <string name="live_preview">LIVE PREVIEW</string>
+    <string name="sample_product_for">Sample Product for %1$s</string>
+    <string name="expires_in_days_preview">Expires in %1$d days</string>
+    <string name="alert_timing">Alert Timing</string>
+    <string name="days_before_expiry">%1$d day before expiry</string>
+    <string name="days_plural_before_expiry">%1$d days before expiry</string>
+    <string name="settings_saved_success">✓ Settings saved successfully!</string>
+    <string name="setup_completed_success">✓ Setup completed!</string>
+    <string name="using_default_settings">Using default settings</string>
+
     <string name="back_button">Back button</string>
     <string name="add_product">Add Product</string>
     <string name="camera_icon">Camera icon</string>
@@ -172,4 +184,20 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
+    <!-- Setup Progress -->
+    <string name="setup_step_1_of_3">Step 1 of 3</string>
+    <string name="step_number_1">1️⃣</string>
+    <string name="step_number_2">2️⃣</string>
+    <string name="step_number_3">3️⃣</string>
+
+    <!-- Live Preview -->
+    <string name="live_preview_label">📦 LIVE PREVIEW</string>
+    <string name="sample_product_name">Sample Product for User</string>
+    <string name="sample_expiry_days">Expires in 3 days</string>
+
+    <!-- Alert Timing -->
+    <string name="alert_timing_label">Alert Timing</string>
+    <string name="default_alert_days">3 days before expiry</string>
+    <string name="min_alert_days">1 day</string>
+    <string name="max_alert_days">7 days</string>
 </resources>

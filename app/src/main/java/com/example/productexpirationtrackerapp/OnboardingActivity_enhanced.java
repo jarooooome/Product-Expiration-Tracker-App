@@ -296,7 +296,7 @@ public class OnboardingActivity_enhanced extends AppCompatActivity {
         editor.putBoolean(PREF_FIRST_TIME, false);
         editor.apply();
 
-        Intent intent = new Intent(OnboardingActivity_enhanced.this, SetupActivity.class);
+        Intent intent = new Intent(OnboardingActivity_enhanced.this, SetupActivity_Enhanced.class);
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();

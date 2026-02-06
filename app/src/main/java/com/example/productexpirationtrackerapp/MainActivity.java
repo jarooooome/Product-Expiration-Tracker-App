@@ -479,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void goToSetup() {
         try {
-            Intent intent = new Intent(MainActivity.this, SetupActivity.class);
+            Intent intent = new Intent(MainActivity.this, SetupActivity_Enhanced.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
