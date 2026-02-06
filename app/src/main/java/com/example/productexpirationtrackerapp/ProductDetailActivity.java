@@ -1,40 +1,40 @@
 package com.example.productexpirationtrackerapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class ProductDetailActivity extends AppCompatActivity {
 
-    private TextView titleTextView;
-    private Button backButton, editButton, deleteButton;
-    private ImageView productPhoto;
-    private TextView productNameText, expiryDateText, daysLeftText;
-    private TextView categoryText, quantityText, notesText;
+    private ImageButton backButton;
+    private ImageButton searchButton;
+    private ImageButton editButton;
+    private TextView productName;
+    private TextView allTab;
+    private TextView medicineTab;
+    private TextView expiryStatus;
+    private TextView quantityValue;
+    private TextView categoryLabel;
+    private TextView locationValue;
+    private TextView storageLabel;
+    private TextView itemsExpiringText;
+    private BottomNavigationView bottomNavigation;
 
-    private ProductViewModel productViewModel;
-    private UserRepository userRepository;
-
-    private int productId;
+    private AppDatabase database;
     private Product currentProduct;
+    private int productId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,218 +42,201 @@ public class ProductDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_product_detail);
 
         // Get product ID from intent
-        Intent intent = getIntent();
-        productId = intent.getIntExtra("product_id", -1);
-
+        productId = getIntent().getIntExtra("PRODUCT_ID", -1);
         if (productId == -1) {
-            Toast.makeText(this, "Error: Product not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_product_not_found), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Initialize ViewModel
-        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
-
-        // Initialize UserRepository for theme
-        userRepository = new UserRepository(getApplication());
-
-        // Initialize views
         initializeViews();
-
-        // Apply theme
-        applyThemeFromDatabase();
-
-        // Setup click listeners
-        setupClickListeners();
-
-        // Load product details
+        setupDatabase();
+        setupButtons();
+        setupBottomNavigation();
         loadProductDetails();
     }
 
     private void initializeViews() {
-        titleTextView = findViewById(R.id.titleTextView);
         backButton = findViewById(R.id.backButton);
+        searchButton = findViewById(R.id.searchButton);
         editButton = findViewById(R.id.editButton);
-        deleteButton = findViewById(R.id.deleteButton);
-
-        productPhoto = findViewById(R.id.productPhoto);
-        productNameText = findViewById(R.id.productNameText);
-        expiryDateText = findViewById(R.id.expiryDateText);
-        daysLeftText = findViewById(R.id.daysLeftText);
-        categoryText = findViewById(R.id.categoryText);
-        quantityText = findViewById(R.id.quantityText);
-        notesText = findViewById(R.id.notesText);
+        productName = findViewById(R.id.productName);
+        allTab = findViewById(R.id.allTab);
+        medicineTab = findViewById(R.id.medicineTab);
+        expiryStatus = findViewById(R.id.expiryStatus);
+        quantityValue = findViewById(R.id.quantityValue);
+        categoryLabel = findViewById(R.id.categoryLabel);
+        locationValue = findViewById(R.id.locationValue);
+        storageLabel = findViewById(R.id.storageLabel);
+        itemsExpiringText = findViewById(R.id.itemsExpiringText);
+        bottomNavigation = findViewById(R.id.bottomNavigation);
     }
 
-    private void applyThemeFromDatabase() {
-        User user = userRepository.getUserSync();
-        if (user != null) {
-            String theme = user.getColorTheme();
-            ThemeUtils.applyTheme(this, theme);
-            applyCustomThemeColors(theme);
-        }
+    private void setupDatabase() {
+        database = AppDatabase.getDatabase(this);
     }
 
-    private void applyCustomThemeColors(String theme) {
-        int primaryColor;
+    private void setupButtons() {
+        backButton.setOnClickListener(v -> finish());
 
-        switch (theme) {
-            case "green":
-                primaryColor = getResources().getColor(R.color.color_primary_green);
-                break;
-            case "blue":
-                primaryColor = getResources().getColor(R.color.color_primary_blue);
-                break;
-            case "pink":
-                primaryColor = getResources().getColor(R.color.color_primary_pink);
-                break;
-            case "purple":
-                primaryColor = getResources().getColor(R.color.color_primary_purple);
-                break;
-            case "black":
-                primaryColor = getResources().getColor(R.color.color_primary_black);
-                break;
-            case "white":
-            default:
-                primaryColor = getResources().getColor(R.color.color_primary_white);
-                break;
-        }
+        searchButton.setOnClickListener(v ->
+                Toast.makeText(this, getString(R.string.search_coming_soon), Toast.LENGTH_SHORT).show()
+        );
 
-        // Apply button colors
-        if (backButton != null) backButton.setBackgroundColor(primaryColor);
-        if (editButton != null) editButton.setBackgroundColor(primaryColor);
-        if (deleteButton != null) deleteButton.setBackgroundColor(0xFFF44336); // Red for delete
+        editButton.setOnClickListener(v ->
+                Toast.makeText(this, getString(R.string.edit_coming_soon), Toast.LENGTH_SHORT).show()
+        );
+
+        // Tab listeners
+        allTab.setOnClickListener(v -> selectTab(allTab, medicineTab));
+        medicineTab.setOnClickListener(v -> selectTab(medicineTab, allTab));
     }
 
-    private void setupClickListeners() {
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    private void selectTab(TextView selectedTab, TextView otherTab) {
+        // Visual feedback for selected tab
+        selectedTab.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
+        selectedTab.setBackgroundResource(R.drawable.tab_selected);
+
+        otherTab.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+        otherTab.setBackground(null);
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                startActivity(new Intent(ProductDetailActivity.this, HomeActivity.class));
                 finish();
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                return true;
+            } else if (itemId == R.id.nav_inventory) {
+                startActivity(new Intent(ProductDetailActivity.this, InventoryActivity.class));
+                finish();
+                return true;
+            } else if (itemId == R.id.nav_settings) {
+                startActivity(new Intent(ProductDetailActivity.this, SettingsActivity.class));
+                finish();
+                return true;
             }
-        });
 
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editProduct();
-            }
-        });
-
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                confirmDelete();
-            }
+            return false;
         });
     }
 
     private void loadProductDetails() {
-        // Observe all products to find the one with matching ID
-        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
-            @Override
-            public void onChanged(List<Product> products) {
-                for (Product product : products) {
-                    if (product.getId() == productId) {
-                        currentProduct = product;
-                        displayProductDetails(product);
-                        break;
-                    }
+        new Thread(() -> {
+            try {
+                currentProduct = database.productDao().getProductById(productId);
+
+                if (currentProduct == null) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, getString(R.string.product_not_found), Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+                    return;
                 }
+
+                runOnUiThread(this::displayProductDetails);
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(this, getString(R.string.error_loading_product_details, e.getMessage()),
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                });
             }
-        });
+        }).start();
     }
 
-    private void displayProductDetails(Product product) {
-        // Set product name
-        productNameText.setText(product.getName());
-        titleTextView.setText(product.getName() + " Details");
+    private void displayProductDetails() {
+        // Product name
+        productName.setText(currentProduct.getName());
 
-        // Set expiry date
-        SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-        expiryDateText.setText(displayFormat.format(product.getExpiryDate()));
+        // Quantity
+        quantityValue.setText(String.valueOf(currentProduct.getQuantity()));
 
-        // Calculate and set days left
-        calculateAndSetDaysLeft(product.getExpiryDate());
-
-        // Set product photo
-        if (product.hasPhoto()) {
-            byte[] photoBytes = product.getPhoto();
-            Bitmap bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
-            productPhoto.setImageBitmap(bitmap);
+        // Category
+        if (currentProduct.getCategory() != null && !currentProduct.getCategory().isEmpty()) {
+            categoryLabel.setText(currentProduct.getCategory());
         } else {
-            productPhoto.setImageResource(android.R.drawable.ic_menu_gallery);
+            categoryLabel.setText(getString(R.string.uncategorized));
         }
 
-        // Set category, quantity, and notes using the helper methods from Product.java
-        categoryText.setText(product.hasCategory() ? product.getCategory() : "Not specified");
-        quantityText.setText(product.hasQuantity() ? product.getQuantity() : "Not specified");
-        notesText.setText(product.hasNotes() ? product.getNotes() : "No notes");
-    }
-
-    private void calculateAndSetDaysLeft(Date expiryDate) {
-        Date now = new Date();
-        long timeDiff = expiryDate.getTime() - now.getTime();
-        long days = TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
-
-        if (days < 0) {
-            daysLeftText.setText("EXPIRED " + Math.abs(days) + " days ago");
-            daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-        } else if (days == 0) {
-            daysLeftText.setText("EXPIRES TODAY!");
-            daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
-        } else if (days <= 3) {
-            daysLeftText.setText(days + " days left - URGENT!");
-            daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
-        } else if (days <= 7) {
-            daysLeftText.setText(days + " days left - SOON");
-            daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_orange_light));
+        // Storage location
+        if (currentProduct.getStorageLocation() != null && !currentProduct.getStorageLocation().isEmpty()) {
+            locationValue.setText(currentProduct.getStorageLocation());
+            storageLabel.setText(currentProduct.getCategory() != null ? currentProduct.getCategory() : "");
         } else {
-            daysLeftText.setText(days + " days left - FRESH");
-            daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+            locationValue.setText(getString(R.string.not_specified));
+            storageLabel.setText("");
+        }
+
+        // Expiry status
+        long daysUntilExpiry = calculateDaysUntilExpiry(currentProduct.getExpiryDate());
+        updateExpiryStatus(daysUntilExpiry);
+
+        // Items expiring this week (placeholder - would need to query database)
+        itemsExpiringText.setVisibility(View.GONE);
+    }
+
+    private long calculateDaysUntilExpiry(Date expiryDate) {
+        if (expiryDate == null) {
+            return 999;
+        }
+
+        try {
+            Date today = new Date();
+
+            // Reset time portion for both dates
+            Date todayReset = resetTime(today);
+            Date expiryDateReset = resetTime(expiryDate);
+
+            long diffInMillis = expiryDateReset.getTime() - todayReset.getTime();
+            return TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            // Use Log instead of printStackTrace
+            android.util.Log.e("ProductDetail", "Error calculating days until expiry", e);
+            return 999;
         }
     }
 
-    private void editProduct() {
-        Toast.makeText(this, "Edit feature coming soon!", Toast.LENGTH_SHORT).show();
-        // You can implement edit functionality here
-        // Intent editIntent = new Intent(this, EditProductActivity.class);
-        // editIntent.putExtra("product_id", productId);
-        // startActivityForResult(editIntent, 100);
+    private Date resetTime(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 
-    private void confirmDelete() {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Product")
-                .setMessage("Are you sure you want to delete \"" + currentProduct.getName() + "\"?")
-                .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        deleteProduct();
-                    }
-                })
-                .setNegativeButton("CANCEL", null)
-                .show();
-    }
+    private void updateExpiryStatus(long daysUntilExpiry) {
+        int redColor = ContextCompat.getColor(this, android.R.color.holo_red_light);
+        int orangeColor = ContextCompat.getColor(this, android.R.color.holo_orange_light);
+        int greenColor = ContextCompat.getColor(this, android.R.color.holo_green_light);
 
-    private void deleteProduct() {
-        if (currentProduct != null) {
-            productViewModel.delete(currentProduct);
-
-            // Send result back to ProductListActivity
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("deleted_product_id", productId);
-            setResult(RESULT_OK, resultIntent);
-
-            Toast.makeText(this, "Deleted: " + currentProduct.getName(), Toast.LENGTH_SHORT).show();
-            finish();
+        if (daysUntilExpiry < 0) {
+            expiryStatus.setText(getString(R.string.expired_days_ago, Math.abs(daysUntilExpiry)));
+            expiryStatus.setTextColor(redColor);
+        } else if (daysUntilExpiry == 0) {
+            // Check if you have the string resource, if not use a fallback
+            String expiresTodayText = "Expires today";
+            try {
+                expiresTodayText = getString(R.string.expires_today);
+            } catch (android.content.res.Resources.NotFoundException e) {
+                // Resource not found, use fallback text
+            }
+            expiryStatus.setText(expiresTodayText);
+            expiryStatus.setTextColor(orangeColor);
+        } else if (daysUntilExpiry == 1) {
+            expiryStatus.setText(getString(R.string.expires_tomorrow));
+            expiryStatus.setTextColor(orangeColor);
+        } else if (daysUntilExpiry <= 7) {
+            expiryStatus.setText(getString(R.string.expires_in_days, daysUntilExpiry));
+            expiryStatus.setTextColor(orangeColor);
+        } else {
+            expiryStatus.setText(getString(R.string.expires_in_days, daysUntilExpiry));
+            expiryStatus.setTextColor(greenColor);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 }

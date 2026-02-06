@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
@@ -11,6 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProductExpirationTrackerApp">
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -44,7 +44,17 @@
             android:name=".AddProductActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
 
+        <activity
+            android:name=".InventoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
 
     </application>
 

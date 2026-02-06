@@ -5,6 +5,8 @@
     <color name="black">#FF000000</color>
     <color name="color_primary">#2196F3</color>
     <color name="color_gray">#E0E0E0</color>
+    <color name="dark_gray">#333333</color>
+    <color name="medium_gray">#666666</color>
 
     <!-- White/Light Theme -->
     <color name="color_primary_white">#4CAF50</color> <!-- Green as primary for white theme -->
@@ -19,6 +21,8 @@
     <color name="color_text_green">#1B5E20</color>
     <color name="color_accent_green">#FF9800</color>
     <color name="color_background_green">#FFFFFF</color>
+    <color name="light_green">#C8E6C9</color>
+    <color name="green">#4CAF50</color>
 
     <!-- Blue Theme -->
     <color name="color_primary_blue">#2196F3</color>
@@ -47,4 +51,13 @@
     <color name="color_text_black">#FFFFFF</color>
     <color name="color_accent_black">#FF9800</color>
     <color name="color_background_black">#303030</color>
+
+    <!-- Text colors for dynamic theme switching -->
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#D9FFFFFF</color>
+    <color name="text_hint">#99FFFFFF</color>
+
+    <color name="text_primary_dark">#FF212121</color>
+    <color name="text_secondary_dark">#FF666666</color>
+    <color name="text_hint_dark">#FF999999</color>
 </resources>

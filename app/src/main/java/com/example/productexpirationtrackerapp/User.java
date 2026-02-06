@@ -2,6 +2,7 @@ package com.example.productexpirationtrackerapp;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import java.util.Date;
 
 @Entity(tableName = "users")
 public class User {
@@ -11,16 +12,20 @@ public class User {
     private String userName;
     private String colorTheme;
     private boolean notifications;
-    private String createdAt;
+    private Date createdAt;
+
+    public User() {
+        this.createdAt = new Date();
+    }
 
     public User(String userName, String colorTheme, boolean notifications) {
         this.userName = userName;
         this.colorTheme = colorTheme;
         this.notifications = notifications;
-        this.createdAt = new java.util.Date().toString();
+        this.createdAt = new Date();
     }
 
-    // Getters and Setters
+    // Getters and setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -33,6 +38,6 @@ public class User {
     public boolean isNotifications() { return notifications; }
     public void setNotifications(boolean notifications) { this.notifications = notifications; }
 
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 }

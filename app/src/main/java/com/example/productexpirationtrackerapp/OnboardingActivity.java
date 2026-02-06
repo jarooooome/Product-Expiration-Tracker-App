@@ -1,59 +1,32 @@
 package com.example.productexpirationtrackerapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager2.widget.ViewPager2;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
+import android.view.animation.BounceInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class OnboardingActivity extends AppCompatActivity {
 
-    private ViewPager2 viewPager;
-    private Button skipButton, getStartedButton;
-    private LinearLayout dotsLayout;
-    private OnboardingAdapter adapter;
-
-    // ADD THESE 3 LINES - SharedPreferences constants
     private static final String PREFS_NAME = "AppPrefs";
     private static final String PREF_FIRST_TIME = "is_first_time";
-    private static final String PREF_SETUP_COMPLETED = "setup_completed";
 
-    // Page change callback for animations
-    private ViewPager2.OnPageChangeCallback pageChangeCallback = new ViewPager2.OnPageChangeCallback() {
-        @Override
-        public void onPageSelected(int position) {
-            super.onPageSelected(position);
-            updateDots(position);
-            updateButtons(position);
-
-            // Animate current page content
-            animateCurrentPage(position);
-        }
-
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            super.onPageScrolled(position, positionOffset, positionOffsetPixels);
-            // Parallax effect for dots
-            if (position < dotsLayout.getChildCount() - 1) {
-                View currentDot = dotsLayout.getChildAt(position);
-                View nextDot = dotsLayout.getChildAt(position + 1);
-
-                currentDot.setScaleX(1 - positionOffset * 0.3f);
-                currentDot.setScaleY(1 - positionOffset * 0.3f);
-                nextDot.setScaleX(0.7f + positionOffset * 0.3f);
-                nextDot.setScaleY(0.7f + positionOffset * 0.3f);
-            }
-        }
-    };
+    private ViewPager2 viewPager;
+    private LinearLayout indicatorLayout;
+    private TextView btnNext, btnSkip;
+    private List<OnboardingPage> pages;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,194 +34,117 @@ public class OnboardingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_onboarding);
 
         viewPager = findViewById(R.id.viewPager);
-        skipButton = findViewById(R.id.skipButton);
-        getStartedButton = findViewById(R.id.getStartedButton);
-        dotsLayout = findViewById(R.id.dotsLayout);
+        indicatorLayout = findViewById(R.id.indicatorLayout);
+        btnNext = findViewById(R.id.btnNext);
+        btnSkip = findViewById(R.id.btnSkip);
 
-        // Setup onboarding pages
-        List<OnboardingPage> pages = new ArrayList<>();
+        createPages();
+        setupViewPager();
+        setupIndicators();
+        setupListeners();
+    }
+
+    private void createPages() {
+        pages = new ArrayList<>();
         pages.add(new OnboardingPage(
-                "Welcome to ExpiryTrack",
-                "Never let your products expire again! Track all your items in one place.",
+                getString(R.string.onboarding_title_2),
+                getString(R.string.onboarding_desc_2),
                 "📦"
         ));
         pages.add(new OnboardingPage(
-                "Track Your Products",
-                "Add products with expiry dates and get organized. Add manually the dates.",
-                "📅"
-        ));
-        pages.add(new OnboardingPage(
-                "Get Smart Notifications",
-                "We'll remind you before products expire. Never waste food or money again!",
+                getString(R.string.onboarding_title_3),
+                getString(R.string.onboarding_desc_3),
                 "🔔"
         ));
         pages.add(new OnboardingPage(
-                "Customize Your Experience",
-                "Choose your theme and notification preferences. Make it yours!",
+                getString(R.string.onboarding_title_4),
+                getString(R.string.onboarding_desc_4),
                 "🎨"
         ));
+    }
 
-        // Setup adapter
-        adapter = new OnboardingAdapter(pages);
+    private void setupViewPager() {
+        OnboardingAdapter adapter = new OnboardingAdapter(pages);
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(1);
 
-        // Add page transformer for animations
-        viewPager.setPageTransformer(new DepthPageTransformer());
-
-        // Register page change callback
-        viewPager.registerOnPageChangeCallback(pageChangeCallback);
-
-        // Setup dots indicator
-        setupDotsIndicator(pages.size());
-
-        // Skip button click
-        skipButton.setOnClickListener(new View.OnClickListener() {
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onClick(View v) {
-                goToSetupScreen();
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                updateIndicators(position);
+
+                if (position == pages.size() - 1) {
+                    btnNext.setText(getString(R.string.get_started));
+                    btnSkip.setVisibility(View.GONE);
+                } else {
+                    btnNext.setText(getString(R.string.next));
+                    btnSkip.setVisibility(View.VISIBLE);
+                }
+
+                // Animate icon when page changes
+                animateIcon(position);
             }
         });
-
-        // Get Started button click
-        getStartedButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToSetupScreen();
-            }
-        });
-
-        // Add swipe gesture instructions
-        addSwipeHint();
     }
 
-    private void addSwipeHint() {
-        // Optional: Add a subtle animation to indicate swiping
-        Animation swipeHint = AnimationUtils.loadAnimation(this, R.anim.swipe_hint);
-        dotsLayout.startAnimation(swipeHint);
-    }
-
-    private void animateCurrentPage(int position) {
-        // Get current view from ViewPager
-        View currentView = viewPager.getChildAt(0);
-        if (currentView != null) {
-            TextView title = currentView.findViewById(R.id.titleText);
-            TextView description = currentView.findViewById(R.id.descriptionText);
-            TextView icon = currentView.findViewById(R.id.iconView);
-
-            if (title != null) {
-                title.setAlpha(0f);
-                title.setTranslationY(50f);
-                title.animate()
-                        .alpha(1f)
-                        .translationY(0f)
-                        .setDuration(500)
-                        .setInterpolator(new OvershootInterpolator())
-                        .start();
-            }
-
-            if (description != null) {
-                description.setAlpha(0f);
-                description.setTranslationY(30f);
-                description.animate()
-                        .alpha(1f)
-                        .translationY(0f)
-                        .setDuration(500)
-                        .setStartDelay(100)
-                        .setInterpolator(new OvershootInterpolator())
-                        .start();
-            }
-
-            if (icon != null) {
-                icon.setScaleX(0.5f);
-                icon.setScaleY(0.5f);
-                icon.setAlpha(0f);
-                icon.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .alpha(1f)
-                        .setDuration(600)
-                        .setStartDelay(200)
-                        .setInterpolator(new OvershootInterpolator(1.0f))
-                        .start();
-            }
-        }
-    }
-
-    private void setupDotsIndicator(int count) {
-        dotsLayout.removeAllViews();
-
-        for (int i = 0; i < count; i++) {
+    private void setupIndicators() {
+        indicatorLayout.removeAllViews();
+        for (int i = 0; i < pages.size(); i++) {
             View dot = new View(this);
-            int size = 12; // 12dp
-            int margin = 8; // 8dp
 
-            float scale = getResources().getDisplayMetrics().density;
-            int sizePx = (int) (size * scale + 0.5f);
-            int marginPx = (int) (margin * scale + 0.5f);
-
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePx, sizePx);
-            params.setMargins(marginPx, 0, marginPx, 0);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    getResources().getDimensionPixelSize(R.dimen.dot_size),
+                    getResources().getDimensionPixelSize(R.dimen.dot_size)
+            );
+            params.setMargins(
+                    getResources().getDimensionPixelSize(R.dimen.dot_margin),
+                    0,
+                    getResources().getDimensionPixelSize(R.dimen.dot_margin),
+                    0
+            );
             dot.setLayoutParams(params);
 
-            // Make dots circular
-            dot.setBackgroundResource(R.drawable.dot_indicator);
+            dot.setBackgroundResource(i == 0 ?
+                    R.drawable.dot_active :
+                    R.drawable.dot_inactive
+            );
 
-            if (i == 0) {
-                dot.setSelected(true);
-            } else {
-                dot.setSelected(false);
-            }
-
-            dotsLayout.addView(dot);
+            indicatorLayout.addView(dot);
         }
     }
 
-    private void updateDots(int position) {
-        for (int i = 0; i < dotsLayout.getChildCount(); i++) {
-            View dot = dotsLayout.getChildAt(i);
-            dot.setSelected(i == position);
-
-            // Scale animation for active dot
+    private void updateIndicators(int position) {
+        for (int i = 0; i < indicatorLayout.getChildCount(); i++) {
+            View dot = indicatorLayout.getChildAt(i);
             if (i == position) {
-                dot.animate()
-                        .scaleX(1.5f)
-                        .scaleY(1.5f)
-                        .setDuration(300)
-                        .start();
+                dot.setBackgroundResource(R.drawable.dot_active);
+                dot.animate().scaleX(1.5f).scaleY(1.5f).setDuration(200).start();
             } else {
-                dot.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(300)
-                        .start();
+                dot.setBackgroundResource(R.drawable.dot_inactive);
+                dot.animate().scaleX(1.0f).scaleY(1.0f).setDuration(200).start();
             }
         }
     }
 
-    private void updateButtons(int position) {
-        if (position == adapter.getItemCount() - 1) {
-            // Last page
-            skipButton.setVisibility(View.GONE);
-            getStartedButton.setVisibility(View.VISIBLE);
+    private void setupListeners() {
+        btnNext.setOnClickListener(v -> {
+            int current = viewPager.getCurrentItem();
+            if (current < pages.size() - 1) {
+                viewPager.setCurrentItem(current + 1, true);
+            } else {
+                completeOnboarding();
+            }
+        });
 
-            // Animate get started button
-            getStartedButton.setAlpha(0f);
-            getStartedButton.setTranslationY(50f);
-            getStartedButton.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setDuration(500)
-                    .setInterpolator(new OvershootInterpolator())
-                    .start();
-        } else {
-            skipButton.setVisibility(View.VISIBLE);
-            getStartedButton.setVisibility(View.GONE);
-        }
+        btnSkip.setOnClickListener(v -> completeOnboarding());
     }
 
-    private void goToSetupScreen() {
-        // ADD THIS METHOD CALL - Save that onboarding was completed
-        saveOnboardingCompleted();
+    private void completeOnboarding() {
+        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(PREF_FIRST_TIME, false);
+        editor.apply();
 
         Intent intent = new Intent(OnboardingActivity.this, SetupActivity.class);
         startActivity(intent);
@@ -256,24 +152,36 @@ public class OnboardingActivity extends AppCompatActivity {
         finish();
     }
 
-    // ADD THIS ENTIRE METHOD - Saves to SharedPreferences
-    private void saveOnboardingCompleted() {
-        android.content.SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        android.content.SharedPreferences.Editor editor = preferences.edit();
+    private void animateIcon(int position) {
+        // Find the current page view
+        View pageView = viewPager.findViewWithTag("page_" + position);
+        if (pageView != null) {
+            View icon = pageView.findViewById(R.id.iconText);
+            if (icon != null) {
+                // Bounce animation
+                ObjectAnimator bounceY = ObjectAnimator.ofFloat(icon, "scaleY", 0.8f, 1.2f, 1.0f);
+                bounceY.setDuration(600);
+                bounceY.setInterpolator(new BounceInterpolator());
+                bounceY.start();
 
-        // Mark as NOT first time anymore
-        editor.putBoolean(PREF_FIRST_TIME, false);
-        // Mark setup as NOT completed yet (user needs to complete setup)
-        editor.putBoolean(PREF_SETUP_COMPLETED, false);
-        editor.apply();
+                ObjectAnimator bounceX = ObjectAnimator.ofFloat(icon, "scaleX", 0.9f, 1.1f, 1.0f);
+                bounceX.setDuration(600);
+                bounceX.setInterpolator(new BounceInterpolator());
+                bounceX.start();
+            }
+        }
+    }
 
-        // Optional: Log for debugging
-        android.util.Log.d("Onboarding", "Saved: First time = false, Setup completed = false");
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Animate icon after a short delay
+        handler.postDelayed(() -> animateIcon(viewPager.getCurrentItem()), 300);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        viewPager.unregisterOnPageChangeCallback(pageChangeCallback);
+        handler.removeCallbacksAndMessages(null);
     }
 }

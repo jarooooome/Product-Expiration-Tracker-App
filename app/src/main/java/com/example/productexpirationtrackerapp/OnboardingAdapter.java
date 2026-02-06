@@ -4,11 +4,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
 
-public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.OnboardingViewHolder> {
+public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.ViewHolder> {
 
     private List<OnboardingPage> pages;
 
@@ -18,18 +20,21 @@ public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.On
 
     @NonNull
     @Override
-    public OnboardingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_onboarding_page, parent, false);
-        return new OnboardingViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull OnboardingViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         OnboardingPage page = pages.get(position);
+        holder.iconText.setText(page.getIcon());
         holder.titleText.setText(page.getTitle());
-        holder.descriptionText.setText(page.getDescription());
-        holder.iconView.setText(page.getIcon());
+        holder.descText.setText(page.getDescription());
+
+        // Tag for finding this view later for animation
+        holder.itemView.setTag("page_" + position);
     }
 
     @Override
@@ -37,14 +42,16 @@ public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.On
         return pages.size();
     }
 
-    static class OnboardingViewHolder extends RecyclerView.ViewHolder {
-        TextView titleText, descriptionText, iconView;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView iconText;
+        TextView titleText;
+        TextView descText;
 
-        public OnboardingViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            iconText = itemView.findViewById(R.id.iconText);
             titleText = itemView.findViewById(R.id.titleText);
-            descriptionText = itemView.findViewById(R.id.descriptionText);
-            iconView = itemView.findViewById(R.id.iconView);
+            descText = itemView.findViewById(R.id.descText);
         }
     }
 }
