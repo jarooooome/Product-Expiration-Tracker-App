@@ -443,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void goToOnboarding() {
         try {
-            Intent intent = new Intent(MainActivity.this, OnboardingActivity.class);
+            Intent intent = new Intent(MainActivity.this, OnboardingActivity_enhanced.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
