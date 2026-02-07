@@ -5,15 +5,13 @@ plugins {
 android {
     namespace = "com.example.productexpirationtrackerapp"
 
-    // Upgrade compileSdk to 36 for library compatibility
-    compileSdk {
-        version = release(36)
-    }
+    // FIXED: Correct compileSdk syntax
+    compileSdk = 34  // Changed from: compileSdk { version = release(36) }
 
     defaultConfig {
         applicationId = "com.example.productexpirationtrackerapp"
         minSdk = 30          // keep minSdk for Android 11+
-        targetSdk = 36       // upgrade targetSdk
+        targetSdk = 34       // Use 34 instead of 36 (36 might be too new)
         versionCode = 1
         versionName = "1.0"
 
@@ -53,14 +51,16 @@ dependencies {
     // CoordinatorLayout
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
 
-    // Room Database
+    // Room Database - THIS LOOKS CORRECT
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
+
+    // Optional: If you want to use Room with Kotlin coroutines
+    // implementation("androidx.room:room-ktx:$roomVersion")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
-

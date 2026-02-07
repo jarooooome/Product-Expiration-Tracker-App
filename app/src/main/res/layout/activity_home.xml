@@ -281,7 +281,6 @@
                                 android:focusable="true"
                                 android:paddingHorizontal="16dp"
                                 android:paddingVertical="8dp"
-                                android:selected="true"
                                 android:text="🔸 All"
                                 android:textColor="#FFFFFF"
                                 android:textSize="14sp"

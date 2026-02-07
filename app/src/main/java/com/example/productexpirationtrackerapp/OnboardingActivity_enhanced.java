@@ -211,7 +211,8 @@ public class OnboardingActivity_enhanced extends AppCompatActivity {
         int maxWidth = ((View) progressFill.getParent()).getWidth();
         int targetWidth = (int) (maxWidth * progress);
 
-        ObjectAnimator widthAnimator = (ObjectAnimator) ObjectAnimator.ofInt(params.width, targetWidth);
+        // FIXED LINE 214: Changed from ObjectAnimator to ValueAnimator
+        ValueAnimator widthAnimator = ValueAnimator.ofInt(params.width, targetWidth);
         widthAnimator.addUpdateListener(animation -> {
             params.width = (int) animation.getAnimatedValue();
             progressFill.setLayoutParams(params);

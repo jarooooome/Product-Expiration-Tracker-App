@@ -9,7 +9,9 @@ public class User {
     @PrimaryKey(autoGenerate = true)
     private int id;
 
-    private String userName;
+    private String name;        // Changed from userName
+    private String email;       // Added
+    private String password;    // Added
     private String colorTheme;
     private boolean notifications;
     private Date createdAt;
@@ -18,8 +20,10 @@ public class User {
         this.createdAt = new Date();
     }
 
-    public User(String userName, String colorTheme, boolean notifications) {
-        this.userName = userName;
+    public User(String name, String email, String password, String colorTheme, boolean notifications) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
         this.colorTheme = colorTheme;
         this.notifications = notifications;
         this.createdAt = new Date();
@@ -29,8 +33,14 @@ public class User {
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public String getUserName() { return userName; }
-    public void setUserName(String userName) { this.userName = userName; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public String getColorTheme() { return colorTheme; }
     public void setColorTheme(String colorTheme) { this.colorTheme = colorTheme; }

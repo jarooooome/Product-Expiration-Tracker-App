@@ -1,4 +1,5 @@
 package com.example.productexpirationtrackerapp;
+
 import androidx.annotation.NonNull;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
@@ -8,7 +9,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import android.content.Context;
 
-@Database(entities = {Product.class}, version = 2, exportSchema = false)
+@Database(entities = {Product.class, User.class}, version = 3, exportSchema = false) // ← Added User.class, increased version to 3
 @TypeConverters({DateConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
     public abstract ProductDao productDao();
@@ -27,6 +28,20 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("ALTER TABLE products ADD COLUMN photoPath TEXT");
         }
     };
+
+    private static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            // Create users table for the new User entity
+            database.execSQL("CREATE TABLE IF NOT EXISTS users (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "name TEXT, " +
+                    "email TEXT, " +
+                    "password TEXT" +
+                    ")");
+        }
+    };
+
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
@@ -35,7 +50,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     context.getApplicationContext(),
                                     AppDatabase.class,
                                     "product_database")
-                            .addMigrations(MIGRATION_1_2)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3) // ← Added both migrations
+                            .fallbackToDestructiveMigration() // ← Optional: for development
                             .build();
                 }
             }
