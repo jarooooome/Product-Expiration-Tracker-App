@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/productItemLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:layout_marginBottom="8dp">
+
+    <!-- Product Photo -->
+    <ImageView
+        android:id="@+id/productPhoto"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:scaleType="centerCrop"
+        android:background="#F0F0F0"
+        android:contentDescription="@string/product_photo"
+        android:layout_marginEnd="12dp" />
+
+    <!-- Product Details -->
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Product Name -->
+        <TextView
+            android:id="@+id/productName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/product_name" />
+
+        <!-- Expiry Date -->
+        <TextView
+            android:id="@+id/productExpiry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/expires_date" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

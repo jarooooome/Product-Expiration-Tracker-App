@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.VIBRATE" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,6 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProductExpirationTrackerApp">
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -21,13 +21,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".OnboardingActivity"
+            android:name=".OnboardingActivity_enhanced"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="false" />
 
         <!-- Setup Screen -->
         <activity
-            android:name=".SetupActivity"
+            android:name=".SetupActivity_Enhanced"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="false" />
 
@@ -40,7 +40,21 @@
         <activity android:name=".ProductDetailActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".AddProductActivity"
+            android:exported="false" />
 
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".InventoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

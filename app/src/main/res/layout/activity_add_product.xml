@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Top Bar -->
+        <LinearLayout
+            android:id="@+id/topBar"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="#FFFFFF"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:elevation="2dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Back Button -->
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_menu_revert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#000000"
+                android:contentDescription="@string/back_button"
+                android:importantForAccessibility="yes"
+                android:focusable="true"
+                android:clickable="true" />
+
+            <!-- Title -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/add_product"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:gravity="center" />
+
+            <!-- Spacer for alignment -->
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+
+        </LinearLayout>
+
+        <!-- Form Content -->
+        <LinearLayout
+            android:id="@+id/formContent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp"
+            app:layout_constraintTop_toBottomOf="@id/topBar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_max="400dp">
+
+            <!-- Barcode Scanner Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/barcodeScannerCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#E8F5E9">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:drawableStartCompat="@android:drawable/ic_menu_camera"
+                    app:drawableTint="#2E7D32"
+                    android:text="@string/scan_barcode"
+                    android:textSize="16sp"
+                    android:textColor="#1B5E20"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:minHeight="48dp" />
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Product Name -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/productNameContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/product_name"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:endIconMode="clear_text"
+                android:importantForAccessibility="yes"
+                android:labelFor="@+id/productNameInput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/productNameInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Brand -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/brandContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/brand"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:endIconMode="clear_text"
+                android:importantForAccessibility="yes"
+                android:labelFor="@+id/brandInput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/brandInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Category - SIMPLE VERSION (No AutoCompleteTextView) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/categoryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/category"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:endIconMode="clear_text"
+                android:importantForAccessibility="yes"
+                android:labelFor="@+id/categoryInput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/categoryInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Quantity/Need -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/quantityContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/quantity_need"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:endIconMode="clear_text"
+                android:importantForAccessibility="yes"
+                android:labelFor="@+id/quantityInput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/quantityInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Storage Location - FIXED hint color -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/storageLocationContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/storage_location"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:endIconMode="clear_text"
+                android:importantForAccessibility="yes"
+                android:labelFor="@+id/storageLocationInput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/storageLocationInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Expiration Date -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/expirationDateContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:hint="@string/expiration_date"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:endIconMode="custom"
+                app:endIconDrawable="@android:drawable/ic_menu_my_calendar"
+                android:importantForAccessibility="yes"
+                android:labelFor="@+id/expirationDateInput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/expirationDateInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666"
+                    android:focusable="false"
+                    android:clickable="true" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Save Button -->
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="150dp"
+                android:layout_height="56dp"
+            android:backgroundTint="#2E7D32"
+            android:elevation="4dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:text="@string/save"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="28dp"
+            android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

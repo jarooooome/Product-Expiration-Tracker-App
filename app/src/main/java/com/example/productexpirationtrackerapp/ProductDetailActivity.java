@@ -1,170 +1,242 @@
 package com.example.productexpirationtrackerapp;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.text.SimpleDateFormat;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class ProductDetailActivity extends AppCompatActivity {
 
-    private TextView productNameText, expiryDateText, daysLeftText, statusText;
-    private Button backButton, editButton, deleteButton;
+    private ImageButton backButton;
+    private ImageButton searchButton;
+    private ImageButton editButton;
+    private TextView productName;
+    private TextView allTab;
+    private TextView medicineTab;
+    private TextView expiryStatus;
+    private TextView quantityValue;
+    private TextView categoryLabel;
+    private TextView locationValue;
+    private TextView storageLabel;
+    private TextView itemsExpiringText;
+    private BottomNavigationView bottomNavigation;
 
-    private String productName;
-    private String expiryDate;
-    private int position;
+    private AppDatabase database;
+    private Product currentProduct;
+    private int productId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
 
-        // Get data passed from ProductListActivity
-        Intent intent = getIntent();
-        productName = intent.getStringExtra("product_name");
-        expiryDate = intent.getStringExtra("expiry_date");
-        position = intent.getIntExtra("position", -1);
+        // Get product ID from intent
+        productId = getIntent().getIntExtra("PRODUCT_ID", -1);
+        if (productId == -1) {
+            Toast.makeText(this, getString(R.string.error_product_not_found), Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // Initialize views
         initializeViews();
-
-        // Setup click listeners
-        setupClickListeners();
-
-        // Display product data
-        displayProductDetails();
+        setupDatabase();
+        setupButtons();
+        setupBottomNavigation();
+        loadProductDetails();
     }
 
     private void initializeViews() {
-        productNameText = findViewById(R.id.productName);
-        expiryDateText = findViewById(R.id.expiryDate);
-        daysLeftText = findViewById(R.id.daysLeft);
-        statusText = findViewById(R.id.statusText);
-
         backButton = findViewById(R.id.backButton);
+        searchButton = findViewById(R.id.searchButton);
         editButton = findViewById(R.id.editButton);
-        deleteButton = findViewById(R.id.deleteButton);
+        productName = findViewById(R.id.productName);
+        allTab = findViewById(R.id.allTab);
+        medicineTab = findViewById(R.id.medicineTab);
+        expiryStatus = findViewById(R.id.expiryStatus);
+        quantityValue = findViewById(R.id.quantityValue);
+        categoryLabel = findViewById(R.id.categoryLabel);
+        locationValue = findViewById(R.id.locationValue);
+        storageLabel = findViewById(R.id.storageLabel);
+        itemsExpiringText = findViewById(R.id.itemsExpiringText);
+        bottomNavigation = findViewById(R.id.bottomNavigation);
     }
 
-    private void setupClickListeners() {
-        // Back button
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    private void setupDatabase() {
+        database = AppDatabase.getDatabase(this);
+    }
+
+    private void setupButtons() {
+        backButton.setOnClickListener(v -> finish());
+
+        searchButton.setOnClickListener(v ->
+                Toast.makeText(this, getString(R.string.search_coming_soon), Toast.LENGTH_SHORT).show()
+        );
+
+        editButton.setOnClickListener(v ->
+                Toast.makeText(this, getString(R.string.edit_coming_soon), Toast.LENGTH_SHORT).show()
+        );
+
+        // Tab listeners
+        allTab.setOnClickListener(v -> selectTab(allTab, medicineTab));
+        medicineTab.setOnClickListener(v -> selectTab(medicineTab, allTab));
+    }
+
+    private void selectTab(TextView selectedTab, TextView otherTab) {
+        // Visual feedback for selected tab
+        selectedTab.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
+        selectedTab.setBackgroundResource(R.drawable.tab_selected);
+
+        otherTab.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+        otherTab.setBackground(null);
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                startActivity(new Intent(ProductDetailActivity.this, HomeActivity.class));
                 finish();
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                return true;
+            } else if (itemId == R.id.nav_inventory) {
+                startActivity(new Intent(ProductDetailActivity.this, InventoryActivity.class));
+                finish();
+                return true;
+            } else if (itemId == R.id.nav_settings) {
+                startActivity(new Intent(ProductDetailActivity.this, SettingsActivity.class));
+                finish();
+                return true;
             }
-        });
 
-        // Edit button
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editProduct();
-            }
+            return false;
         });
+    }
 
-        // Delete button
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                confirmDelete();
+    private void loadProductDetails() {
+        new Thread(() -> {
+            try {
+                currentProduct = database.productDao().getProductById(productId);
+
+                if (currentProduct == null) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, getString(R.string.product_not_found), Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+                    return;
+                }
+
+                runOnUiThread(this::displayProductDetails);
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(this, getString(R.string.error_loading_product_details, e.getMessage()),
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                });
             }
-        });
+        }).start();
     }
 
     private void displayProductDetails() {
-        // Set product name
-        productNameText.setText(productName);
+        // Product name
+        productName.setText(currentProduct.getName());
 
-        // Parse and format expiry date
+        // Quantity
+        quantityValue.setText(String.valueOf(currentProduct.getQuantity()));
+
+        // Category
+        if (currentProduct.getCategory() != null && !currentProduct.getCategory().isEmpty()) {
+            categoryLabel.setText(currentProduct.getCategory());
+        } else {
+            categoryLabel.setText(getString(R.string.uncategorized));
+        }
+
+        // Storage location
+        if (currentProduct.getStorageLocation() != null && !currentProduct.getStorageLocation().isEmpty()) {
+            locationValue.setText(currentProduct.getStorageLocation());
+            storageLabel.setText(currentProduct.getCategory() != null ? currentProduct.getCategory() : "");
+        } else {
+            locationValue.setText(getString(R.string.not_specified));
+            storageLabel.setText("");
+        }
+
+        // Expiry status
+        long daysUntilExpiry = calculateDaysUntilExpiry(currentProduct.getExpiryDate());
+        updateExpiryStatus(daysUntilExpiry);
+
+        // Items expiring this week (placeholder - would need to query database)
+        itemsExpiringText.setVisibility(View.GONE);
+    }
+
+    private long calculateDaysUntilExpiry(Date expiryDate) {
+        if (expiryDate == null) {
+            return 999;
+        }
+
         try {
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-            Date expiry = inputFormat.parse(expiryDate);
+            Date today = new Date();
 
-            // Display formatted date
-            String formattedDate = displayFormat.format(expiry);
-            expiryDateText.setText(formattedDate);
+            // Reset time portion for both dates
+            Date todayReset = resetTime(today);
+            Date expiryDateReset = resetTime(expiryDate);
 
-            // Calculate days left
-            Date now = new Date();
-            long timeDiff = expiry.getTime() - now.getTime();
-            long days = TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
-
-            // Update days left and status
-            if (days < 0) {
-                daysLeftText.setText("EXPIRED");
-                daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                statusText.setText("Expired");
-                statusText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-            } else if (days <= 3) {
-                daysLeftText.setText(days + " days left");
-                daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
-                statusText.setText("Expiring Soon!");
-                statusText.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
-            } else if (days <= 7) {
-                daysLeftText.setText(days + " days left");
-                daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_orange_light));
-                statusText.setText("Warning");
-                statusText.setTextColor(getResources().getColor(android.R.color.holo_orange_light));
-            } else {
-                daysLeftText.setText(days + " days left");
-                daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
-                statusText.setText("Fresh");
-                statusText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
-            }
-
+            long diffInMillis = expiryDateReset.getTime() - todayReset.getTime();
+            return TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            expiryDateText.setText("Unknown date");
-            daysLeftText.setText("Unknown");
-            statusText.setText("Unknown");
+            // Use Log instead of printStackTrace
+            android.util.Log.e("ProductDetail", "Error calculating days until expiry", e);
+            return 999;
         }
     }
 
-    private void editProduct() {
-        Toast.makeText(this, "Edit feature coming soon!", Toast.LENGTH_SHORT).show();
+    private Date resetTime(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 
-    private void confirmDelete() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete Product");
-        builder.setMessage("Delete " + productName + "?");
+    private void updateExpiryStatus(long daysUntilExpiry) {
+        int redColor = ContextCompat.getColor(this, android.R.color.holo_red_light);
+        int orangeColor = ContextCompat.getColor(this, android.R.color.holo_orange_light);
+        int greenColor = ContextCompat.getColor(this, android.R.color.holo_green_light);
 
-        builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                deleteProduct();
+        if (daysUntilExpiry < 0) {
+            expiryStatus.setText(getString(R.string.expired_days_ago, Math.abs(daysUntilExpiry)));
+            expiryStatus.setTextColor(redColor);
+        } else if (daysUntilExpiry == 0) {
+            // Check if you have the string resource, if not use a fallback
+            String expiresTodayText = "Expires today";
+            try {
+                expiresTodayText = getString(R.string.expires_today);
+            } catch (android.content.res.Resources.NotFoundException e) {
+                // Resource not found, use fallback text
             }
-        });
-
-        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private void deleteProduct() {
-        // Send result back to ProductListActivity
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("deleted_position", position);
-        setResult(RESULT_OK, resultIntent);
-
-        Toast.makeText(this, "Deleted: " + productName, Toast.LENGTH_SHORT).show();
-        finish();
+            expiryStatus.setText(expiresTodayText);
+            expiryStatus.setTextColor(orangeColor);
+        } else if (daysUntilExpiry == 1) {
+            expiryStatus.setText(getString(R.string.expires_tomorrow));
+            expiryStatus.setTextColor(orangeColor);
+        } else if (daysUntilExpiry <= 7) {
+            expiryStatus.setText(getString(R.string.expires_in_days, daysUntilExpiry));
+            expiryStatus.setTextColor(orangeColor);
+        } else {
+            expiryStatus.setText(getString(R.string.expires_in_days, daysUntilExpiry));
+            expiryStatus.setTextColor(greenColor);
+        }
     }
 }

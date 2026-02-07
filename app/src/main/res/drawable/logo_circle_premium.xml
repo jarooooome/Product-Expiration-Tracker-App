@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Outer Glow Effect -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#40FFFFFF" />
+            <size
+                android:width="130dp"
+                android:height="130dp" />
+        </shape>
+    </item>
+
+    <!-- Main Logo Circle -->
+    <item
+        android:top="5dp"
+        android:bottom="5dp"
+        android:left="5dp"
+        android:right="5dp">
+        <shape android:shape="oval">
+            <gradient
+                android:type="linear"
+                android:angle="135"
+                android:startColor="#5B9FED"
+                android:endColor="#9B7FED" />
+            <stroke
+                android:width="3dp"
+                android:color="#FFFFFF" />
+        </shape>
+    </item>
+</layer-list>

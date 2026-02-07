@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,19 +20,67 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * ENHANCED SPLASH SCREEN ACTIVITY
+ * Premium animated splash screen with orbital rings and glassmorphism
+ *
+ * NEW FEATURES:
+ * - Orbital ring rotations (clockwise & counter-clockwise)
+ * - Logo entrance animation with bounce
+ * - Checkmark badge pop-in when complete
+ * - Smooth cascading text animations
+ * - Enhanced progress loading
+ * - Pulse glow effects
+ *
+ * @version 2.0 Premium Edition
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private View dot1, dot2, dot3;
-    private TextView loadingText, appTitle, appSubtitle, versionText;
-    private Button skipButton;
-    private Handler handler;
-    private boolean isAnimationRunning = false;
-    private Animation fadeInAnimation;
+    // ========================================
+    // VIEW REFERENCES
+    // ========================================
 
-    // Add these constants for shared preferences
+    // Logo Components
+    private FrameLayout logoContainer;
+    private ImageView orbitalRingOuter;
+    private ImageView orbitalRingInner;
+    private View logoBackground;
+    private FrameLayout checkmarkBadge;
+
+    // Text Components
+    private TextView loadingText, appTitle, appSubtitle, versionText, tapToContinueText;
+
+    // Progress
+    private ProgressBar loadingProgress;
+
+    // Animations
+    private Animation orbitalRotation;
+    private Animation orbitalRotationReverse;
+    private Animation logoEntranceAnim;
+    private Animation pulseGlowAnim;
+    private Animation fadeInScaleAnim;
+    private Animation checkmarkPopInAnim;
+    private Animation tapToContinuePulseAnim;
+
+    // Handler
+    private Handler handler;
+
+    // State flags
+    private boolean isAnimationRunning = false;
+    private boolean isLoadingComplete = false;
+
+    // SharedPreferences constants
     private static final String PREFS_NAME = "AppPrefs";
-    private static final String PREF_FIRST_TIME = "is_first_time"; // Changed from setup_completed
+    private static final String PREF_FIRST_TIME = "is_first_time";
     private static final String PREF_SETUP_COMPLETED = "setup_completed";
+
+    // ========================================
+    // LIFECYCLE METHODS
+    // ========================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,332 +95,421 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Initialize everything
         initializeViews();
-        fadeInAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
-        fadeInAnimation.setDuration(1000);
-        handler = new Handler();
+        loadAnimations();
 
-        // Check immediately if user should see onboarding
+        handler = new Handler(Looper.getMainLooper());
+
+        // Set up click listener for entire screen
+        findViewById(R.id.main).setOnClickListener(v -> {
+            if (isLoadingComplete) {
+                proceedToMainApp();
+            }
+        });
+
+        // Check first time user
         checkFirstTimeUser();
 
-        // Start animations with a small delay
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startOneByOneDotAnimation();
-                startWelcomeAnimations();
-                startLoadingProcess();
-                setupSkipButton();
-            }
-        }, 100);
+        // Start the show!
+        handler.postDelayed(this::startEntranceSequence, 200);
+
+        // Initialize database
+        testDatabaseSetup();
     }
 
+    // ========================================
+    // INITIALIZATION METHODS
+    // ========================================
+
+    /**
+     * Initialize all view references
+     */
     private void initializeViews() {
         try {
-            dot1 = findViewById(R.id.dot1);
-            dot2 = findViewById(R.id.dot2);
-            dot3 = findViewById(R.id.dot3);
+            // Logo components
+            logoContainer = findViewById(R.id.logoContainer);
+            orbitalRingOuter = findViewById(R.id.orbitalRingOuter);
+            orbitalRingInner = findViewById(R.id.orbitalRingInner);
+            logoBackground = findViewById(R.id.logoBackground);
+            checkmarkBadge = findViewById(R.id.checkmarkBadge);
+
+            // Text components
             loadingText = findViewById(R.id.loadingText);
             appTitle = findViewById(R.id.appTitle);
             appSubtitle = findViewById(R.id.appSubtitle);
             versionText = findViewById(R.id.versionText);
-            skipButton = findViewById(R.id.skipButton);
+            tapToContinueText = findViewById(R.id.tapToContinueText);
 
-            // Set version text
-            if (versionText != null) {
-                versionText.setText("Version 1.0");
-            }
+            // Progress
+            loadingProgress = findViewById(R.id.loadingProgress);
 
-            // Reset dots to initial position
-            resetDots();
+            // Set initial visibility
+            logoContainer.setAlpha(0f);
+            appTitle.setAlpha(0f);
+            appSubtitle.setAlpha(0f);
+            checkmarkBadge.setVisibility(View.GONE);
+
         } catch (Exception e) {
-            Toast.makeText(this, "Error finding views: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error initializing views: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void checkFirstTimeUser() {
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean isFirstTime = preferences.getBoolean(PREF_FIRST_TIME, true); // Default to true (first time)
-
-        // If it's not the first time AND setup is completed, go directly to ProductList
-        if (!isFirstTime) {
-            boolean setupCompleted = preferences.getBoolean(PREF_SETUP_COMPLETED, false);
-            if (setupCompleted) {
-                // User has completed setup before, go directly to ProductList
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        goToProductList();
-                    }
-                }, 1000); // Short delay to show logo
-            }
-        }
-        // If it's first time, we'll show animations and then decide in proceedToMainApp()
-    }
-
-    private void resetDots() {
-        if (dot1 != null) {
-            dot1.setTranslationY(0);
-            dot1.setScaleX(1.0f);
-            dot1.setScaleY(1.0f);
-        }
-        if (dot2 != null) {
-            dot2.setTranslationY(0);
-            dot2.setScaleX(1.0f);
-            dot2.setScaleY(1.0f);
-        }
-        if (dot3 != null) {
-            dot3.setTranslationY(0);
-            dot3.setScaleX(1.0f);
-            dot3.setScaleY(1.0f);
+    /**
+     * Load all animation resources
+     */
+    private void loadAnimations() {
+        try {
+            orbitalRotation = AnimationUtils.loadAnimation(this, R.anim.orbital_rotation);
+            orbitalRotationReverse = AnimationUtils.loadAnimation(this, R.anim.orbital_rotation_reverse);
+            logoEntranceAnim = AnimationUtils.loadAnimation(this, R.anim.logo_entrance);
+            pulseGlowAnim = AnimationUtils.loadAnimation(this, R.anim.pulse_glow);
+            fadeInScaleAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_scale);
+            checkmarkPopInAnim = AnimationUtils.loadAnimation(this, R.anim.checkmark_pop_in);
+            tapToContinuePulseAnim = AnimationUtils.loadAnimation(this, R.anim.tap_to_continue_pulse);
+        } catch (Exception e) {
+            Toast.makeText(this, "Error loading animations: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void startOneByOneDotAnimation() {
+    // ========================================
+    // ANIMATION SEQUENCE
+    // ========================================
+
+    /**
+     * Master entrance animation sequence
+     * Orchestrates all animations in proper order
+     */
+    private void startEntranceSequence() {
         isAnimationRunning = true;
-        resetDots();
 
-        // Start the animation sequence
-        animateDotSequence();
+        // Step 1: Logo entrance (0ms)
+        animateLogoEntrance();
+
+        // Step 2: Start orbital rotations (500ms delay)
+        handler.postDelayed(this::startOrbitalAnimations, 500);
+
+        // Step 3: Title fade in (800ms delay)
+        handler.postDelayed(this::animateTitle, 800);
+
+        // Step 4: Subtitle fade in (1200ms delay)
+        handler.postDelayed(this::animateSubtitle, 1200);
+
+        // Step 5: Start loading process (1500ms delay)
+        handler.postDelayed(this::startLoadingProcess, 1500);
     }
 
-    private void animateDotSequence() {
-        if (!isAnimationRunning) return;
+    /**
+     * Animate logo container entrance with bounce
+     */
+    private void animateLogoEntrance() {
+        if (logoContainer != null && logoEntranceAnim != null) {
+            logoContainer.startAnimation(logoEntranceAnim);
 
-        // Reset all dots first
-        resetDots();
-
-        // VERY FAST WAVE but SLOW BALL MOVEMENT:
-        // All dots start with very short delays between them
-        jumpDot(dot1, 0, new Runnable() {
-            @Override
-            public void run() {
-                // Very short delay before repeating the wave
-                if (isAnimationRunning) {
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (isAnimationRunning) {
-                                animateDotSequence();
-                            }
-                        }
-                    }, 300);
-                }
-            }
-        });
-
-        // Dot2 starts with VERY SHORT delay after Dot1
-        jumpDot(dot2, 150, null);
-
-        // Dot3 starts with VERY SHORT delay after Dot2
-        jumpDot(dot3, 300, null);
-    }
-
-    private void jumpDot(final View dot, long startDelay, final Runnable onComplete) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // VERY SLOW ball movement
-                dot.animate()
-                        .translationY(-30f)
-                        .scaleY(1.4f)
-                        .scaleX(1.1f)
-                        .setDuration(600)  // VERY SLOW: 600ms for up movement
-                        .setInterpolator(new OvershootInterpolator(0.4f)) // Very smooth
-                        .withEndAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                // Short pause at the top
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // VERY SLOW ball movement down
-                                        dot.animate()
-                                                .translationY(0f)
-                                                .scaleY(1.0f)
-                                                .scaleX(1.0f)
-                                                .setDuration(600)  // VERY SLOW: 600ms for down movement
-                                                .setInterpolator(new OvershootInterpolator(0.4f))
-                                                .withEndAction(onComplete);
-                                    }
-                                }, 100); // Short pause at top
-                            }
-                        });
-            }
-        }, startDelay);
-    }
-
-    private void startWelcomeAnimations() {
-        if (appTitle != null) {
-            appTitle.startAnimation(fadeInAnimation);
-        }
-
-        if (appSubtitle != null) {
-            handler.postDelayed(new Runnable() {
+            // Start pulse glow after entrance completes
+            logoEntranceAnim.setAnimationListener(new Animation.AnimationListener() {
                 @Override
-                public void run() {
-                    appSubtitle.startAnimation(fadeInAnimation);
+                public void onAnimationStart(Animation animation) {
+                    logoContainer.setAlpha(1f);
                 }
-            }, 500);
-        }
 
-        if (skipButton != null) {
-            handler.postDelayed(new Runnable() {
                 @Override
-                public void run() {
-                    skipButton.setVisibility(View.VISIBLE);
-                    skipButton.startAnimation(fadeInAnimation);
+                public void onAnimationEnd(Animation animation) {
+                    if (logoBackground != null && pulseGlowAnim != null) {
+                        logoBackground.startAnimation(pulseGlowAnim);
+                    }
                 }
-            }, 2000);
-        }
-    }
 
-    private void startLoadingProcess() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (loadingText != null) {
-                    loadingText.setText("Initializing app...");
-                    loadingText.startAnimation(fadeInAnimation);
-                }
-            }
-        }, 1000);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (loadingText != null) {
-                    loadingText.setText("Loading product database...");
-                    loadingText.startAnimation(fadeInAnimation);
-                }
-            }
-        }, 2000);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (loadingText != null) {
-                    loadingText.setText("Checking expiry dates...");
-                    loadingText.startAnimation(fadeInAnimation);
-                }
-            }
-        }, 3000);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (loadingText != null) {
-                    loadingText.setText("Almost ready...");
-                    loadingText.startAnimation(fadeInAnimation);
-                }
-            }
-        }, 4000);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                proceedToMainApp();
-            }
-        }, 5000);
-    }
-
-    private void setupSkipButton() {
-        if (skipButton != null) {
-            skipButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    skipToMainApp();
-                }
+                public void onAnimationRepeat(Animation animation) {}
             });
         }
     }
 
-    private void proceedToMainApp() {
+    /**
+     * Start orbital ring rotations
+     */
+    private void startOrbitalAnimations() {
+        if (orbitalRingOuter != null && orbitalRotation != null) {
+            orbitalRingOuter.startAnimation(orbitalRotation);
+        }
+
+        if (orbitalRingInner != null && orbitalRotationReverse != null) {
+            orbitalRingInner.startAnimation(orbitalRotationReverse);
+        }
+    }
+
+    /**
+     * Animate app title
+     */
+    private void animateTitle() {
+        if (appTitle != null && fadeInScaleAnim != null) {
+            appTitle.setAlpha(1f);
+            appTitle.startAnimation(fadeInScaleAnim);
+        }
+    }
+
+    /**
+     * Animate subtitle
+     */
+    private void animateSubtitle() {
+        if (appSubtitle != null && fadeInScaleAnim != null) {
+            appSubtitle.setAlpha(1f);
+            Animation subtitleAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_scale);
+            appSubtitle.startAnimation(subtitleAnim);
+        }
+    }
+
+    // ========================================
+    // LOADING PROCESS
+    // ========================================
+
+    /**
+     * Orchestrate the loading progress sequence
+     */
+    private void startLoadingProcess() {
+        // Stage 1: Initializing (0ms)
+        updateProgress(10, getString(R.string.initializing_app));
+
+        // Stage 2: Loading database (1000ms)
+        handler.postDelayed(() ->
+                updateProgress(30, getString(R.string.loading_product_database)), 1000);
+
+        // Stage 3: Checking dates (2000ms)
+        handler.postDelayed(() ->
+                updateProgress(50, getString(R.string.checking_expiry_dates)), 2000);
+
+        // Stage 4: Almost ready (3000ms)
+        handler.postDelayed(() ->
+                updateProgress(70, getString(R.string.almost_ready)), 3000);
+
+        // Stage 5: Database complete (handled by testDatabaseSetup at 80%)
+
+        // Stage 6: Ready! (4500ms)
+        handler.postDelayed(() -> {
+            updateProgress(100, getString(R.string.ready));
+            showCompletionState();
+        }, 4500);
+    }
+
+    /**
+     * Update progress bar and loading text
+     */
+    private void updateProgress(int progress, String message) {
+        if (loadingProgress != null) {
+            loadingProgress.setProgress(progress);
+        }
+        if (loadingText != null && message != null) {
+            loadingText.setText(message);
+            // Subtle fade animation on text change
+            loadingText.setAlpha(0.5f);
+            loadingText.animate().alpha(0.9f).setDuration(300).start();
+        }
+    }
+
+    /**
+     * Update only progress (for database callback)
+     */
+    private void updateProgress(int progress) {
+        if (loadingProgress != null) {
+            loadingProgress.setProgress(progress);
+        }
+    }
+
+    // ========================================
+    // COMPLETION STATE
+    // ========================================
+
+    /**
+     * Show completion state with checkmark and tap to continue
+     */
+    private void showCompletionState() {
+        isLoadingComplete = true;
         isAnimationRunning = false;
+
+        // Show checkmark badge with pop animation
+        if (checkmarkBadge != null && checkmarkPopInAnim != null) {
+            checkmarkBadge.setVisibility(View.VISIBLE);
+            checkmarkBadge.startAnimation(checkmarkPopInAnim);
+        }
+
+        // Show tap to continue text with pulse
+        handler.postDelayed(() -> {
+            if (tapToContinueText != null && tapToContinuePulseAnim != null) {
+                tapToContinueText.setVisibility(View.VISIBLE);
+                tapToContinueText.startAnimation(tapToContinuePulseAnim);
+            }
+        }, 400);
+    }
+
+    // ========================================
+    // DATABASE SETUP
+    // ========================================
+
+    /**
+     * Initialize and test database
+     */
+    private void testDatabaseSetup() {
+        AppDatabase database = AppDatabase.getDatabase(this);
+
+        new Thread(() -> {
+            try {
+                List<Product> existingProducts = database.productDao().getAllProducts();
+                int initialCount = existingProducts.size();
+
+                if (initialCount == 0) {
+                    // Add test products
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+                    Product milk = new Product();
+                    milk.setName("Milk");
+                    milk.setExpiryDate(sdf.parse("2024-12-31"));
+
+                    Product eggs = new Product();
+                    eggs.setName("Eggs");
+                    eggs.setExpiryDate(sdf.parse("2024-12-15"));
+
+                    Product bread = new Product();
+                    bread.setName("Bread");
+                    bread.setExpiryDate(sdf.parse("2024-12-20"));
+
+                    database.productDao().insert(milk);
+                    database.productDao().insert(eggs);
+                    database.productDao().insert(bread);
+                }
+
+                // Update progress to 80%
+                runOnUiThread(() -> updateProgress(80));
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    if (loadingText != null) {
+                        loadingText.setText(getString(R.string.database_error_check_logs));
+                    }
+                    Toast.makeText(MainActivity.this,
+                            "Database error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    // ========================================
+    // NAVIGATION
+    // ========================================
+
+    /**
+     * Check if user is first time
+     */
+    private void checkFirstTimeUser() {
+        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        boolean isFirstTime = preferences.getBoolean(PREF_FIRST_TIME, true);
+
+        if (!isFirstTime) {
+            // Not first time - speed up to completion
+            handler.postDelayed(() -> {
+                updateProgress(100);
+                // Don't show tap to continue immediately for returning users
+            }, 1000);
+        }
+    }
+
+    /**
+     * Proceed to appropriate next screen
+     */
+    private void proceedToMainApp() {
+        if (!isLoadingComplete) {
+            return;
+        }
 
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         boolean isFirstTime = preferences.getBoolean(PREF_FIRST_TIME, true);
 
         if (isFirstTime) {
-            // First time user: go to Onboarding
             goToOnboarding();
         } else {
-            // Returning user: check if setup was completed
             boolean setupCompleted = preferences.getBoolean(PREF_SETUP_COMPLETED, false);
             if (setupCompleted) {
                 goToProductList();
             } else {
-                // User skipped setup before, go to SetupActivity
                 goToSetup();
             }
         }
     }
 
-    private void skipToMainApp() {
-        isAnimationRunning = false;
-
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
-
-        if (loadingText != null) {
-            loadingText.setText("Skipping...");
-        }
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                proceedToMainApp();
-            }
-        }, 300);
-    }
-
+    /**
+     * Navigate to onboarding
+     */
     private void goToOnboarding() {
         try {
-            Intent intent = new Intent(MainActivity.this, OnboardingActivity.class);
+            Intent intent = new Intent(MainActivity.this, OnboardingActivity_enhanced.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
         } catch (Exception e) {
             if (loadingText != null) {
-                loadingText.setText("Create OnboardingActivity first!");
+                loadingText.setText(getString(R.string.create_onboarding_first));
             }
-            Toast.makeText(this, "Please create OnboardingActivity", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.create_onboarding_first),
+                    Toast.LENGTH_LONG).show();
         }
     }
 
+    /**
+     * Navigate to home/product list
+     */
     private void goToProductList() {
         try {
-            Intent intent = new Intent(MainActivity.this, ProductListActivity.class);
+            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
         } catch (Exception e) {
             if (loadingText != null) {
-                loadingText.setText("Create ProductListActivity first!");
+                loadingText.setText(getString(R.string.create_home_first));
             }
-            Toast.makeText(this, "Please create ProductListActivity", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.create_home_first),
+                    Toast.LENGTH_LONG).show();
         }
     }
 
+    /**
+     * Navigate to setup
+     */
     private void goToSetup() {
         try {
-            Intent intent = new Intent(MainActivity.this, SetupActivity.class);
+            Intent intent = new Intent(MainActivity.this, SetupActivity_Enhanced.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
         } catch (Exception e) {
             if (loadingText != null) {
-                loadingText.setText("Create SetupActivity first!");
+                loadingText.setText(getString(R.string.create_setup_first));
             }
-            Toast.makeText(this, "Please create SetupActivity", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.create_setup_first),
+                    Toast.LENGTH_LONG).show();
         }
     }
+
+    // ========================================
+    // LIFECYCLE CLEANUP
+    // ========================================
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         isAnimationRunning = false;
+        isLoadingComplete = false;
+
+        // Clear all animations
+        if (orbitalRingOuter != null) orbitalRingOuter.clearAnimation();
+        if (orbitalRingInner != null) orbitalRingInner.clearAnimation();
+        if (logoBackground != null) logoBackground.clearAnimation();
+        if (logoContainer != null) logoContainer.clearAnimation();
+        if (appTitle != null) appTitle.clearAnimation();
+        if (appSubtitle != null) appSubtitle.clearAnimation();
+        if (tapToContinueText != null) tapToContinueText.clearAnimation();
 
         if (handler != null) {
             handler.removeCallbacksAndMessages(null);
@@ -386,16 +525,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (dot1 != null && dot2 != null && dot3 != null) {
-            if (!isAnimationRunning) {
-                isAnimationRunning = true;
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startOneByOneDotAnimation();
-                    }
-                }, 100);
-            }
-        }
+        // Animations are one-time on splash, no restart needed
     }
 }

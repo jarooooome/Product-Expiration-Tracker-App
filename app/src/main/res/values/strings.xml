@@ -1,3 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Product Expiration Tracker App</string>
+
+    <string name="app_name">Product Expiration Tracker</string>
+    <string name="customize_your_app">Customize Your App</string>
+    <string name="preview_theme">Preview how your theme will look</string>
+    <string name="your_name">Your Name (Optional)</string>
+    <string name="enter_your_name">Enter your name</string>
+    <string name="choose_color_theme">Choose Color Theme</string>
+    <string name="light_default">Light</string>
+    <string name="green">Green</string>
+    <string name="blue">Blue</string>
+    <string name="pink">Pink</string>
+    <string name="purple">Purple</string>
+    <string name="dark_theme">Dark</string>
+    <string name="notifications">Notifications</string>
+    <string name="enable_expiry_reminders">Enable expiry reminders</string>
+    <string name="debug_database">Debug Database</string>
+    <string name="finish_setup">Finish Setup</string>
+
+    <!-- NEW Enhanced strings -->
+    <string name="setup_step_progress">Step %1$d of 3</string>
+    <string name="live_preview">LIVE PREVIEW</string>
+    <string name="sample_product_for">Sample Product for %1$s</string>
+    <string name="expires_in_days_preview">Expires in %1$d days</string>
+    <string name="alert_timing">Alert Timing</string>
+    <string name="days_before_expiry">%1$d day before expiry</string>
+    <string name="days_plural_before_expiry">%1$d days before expiry</string>
+    <string name="settings_saved_success">✓ Settings saved successfully!</string>
+    <string name="setup_completed_success">✓ Setup completed!</string>
+    <string name="using_default_settings">Using default settings</string>
+
+    <string name="back_button">Back button</string>
+    <string name="add_product">Add Product</string>
+    <string name="camera_icon">Camera icon</string>
+    <string name="scan_barcode">Scan Barcode/QR Code</string>
+    <string name="product_name">Product Name</string>
+    <string name="brand">Brand</string>
+    <string name="category">Category</string>
+    <string name="quantity_need">Quantity/Need</string>
+    <string name="storage_location">Storage Location</string>
+    <string name="expiration_date">Expiration Date</string>
+    <string name="select_category">Select category</string>
+    <string name="category_desc">Select product category</string>
+    <string name="save">Save</string>
+
+    <string name="search">Search</string>
+    <string name="skip">SKIP</string>
+    <string name="get_started">Get Started</string>
+
+    <string name="milk">Milk</string>
+    <string name="all">All</string>
+    <string name="medicine">Medicine</string>
+    <string name="food">Food</string>
+    <string name="drinks">Drinks</string>
+    <string name="other">Other</string>
+    <string name="expires_dec_25">Expires: Dec 25, 2024</string>
+    <string name="five_days_left">5 days left</string>
+    <string name="expires_tomorrow">Expires: Tomorrow</string>
+
+    <!-- Settings strings -->
+    <string name="settings">Settings</string>
+    <string name="notification_preferences">Notification preferences</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="alert">Alert</string>
+    <string name="days_before_expiration">%1$d days before expiration</string>
+    <string name="theme">Theme</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="data_export">Data Export</string>
+    <string name="account_sync">Account Sync</string>
+    <string name="data_use">Data use</string>
+    <string name="help">Help</string>
+
+    <string name="search_button">Search button</string>
+    <string name="edit_button">Edit button</string>
+    <string name="product_photo">Product photo</string>
+    <string name="info_icon">Information icon</string>
+
+    <string name="back">←</string>
+    <string name="your_products">Your Products</string>
+    <string name="add_new_product">+ Add New</string>
+    <string name="total_products">Total: %1$d products</string>
+
+    <!-- Icon descriptions -->
+    <string name="share_icon">Share icon</string>
+    <string name="sync_icon">Sync icon</string>
+    <string name="download_icon">Download icon</string>
+    <string name="help_icon">Help icon</string>
+    <string name="product_icon">📦</string>
+
+    <string name="expires_date">Expires: %1$s</string>
+    <string name="product_details">Product Details</string>
+
+    <string name="sort_by">Sort by: </string>
+    <string name="expires_in_days">Expires in %1$d days</string>
+    <string name="quantity_label">Quantity:</string>
+    <string name="quantity_one">1</string>
+    <string name="category_dairy">Dairy</string>
+    <string name="location_label">Location:</string>
+    <string name="location_refrigerator">Refrigerator</string>
+    <string name="storage_dairy">Dairy</string>
+    <string name="items_expiring_this_week">3 items expiring this week</string>
+
+    <!-- MainActivity strings -->
+    <string name="et_logo">ET</string>
+    <string name="app_title">ExpiryTrack</string>
+    <string name="app_subtitle">Track. Save. Sustain.</string>
+    <string name="touch_screen_to_continue">Touch the screen to continue</string>
+    <string name="ready">Ready!</string>
+    <string name="version_1_0">Version 1.0</string>
+    <string name="initializing_app">Initializing app...</string>
+    <string name="loading_product_database">Loading product database...</string>
+    <string name="checking_expiry_dates">Checking expiry dates...</string>
+    <string name="almost_ready">Almost ready...</string>
+    <string name="create_onboarding_first">Create OnboardingActivity first!</string>
+    <string name="create_home_first">Create HomeActivity first!</string>
+    <string name="create_setup_first">Create SetupActivity first!</string>
+    <string name="database_error_check_logs">Database error - check logs</string>
+    <string name="database_initialized_with_products">Database initialized with %d products</string>
+    <string name="found_products_in_database">Found %d products in database</string>
+
+    <!-- SetupActivity strings -->
+    <string name="setup_completed">Setup completed!</string>
+    <string name="settings_saved">Settings saved to database!</string>
+    <string name="theme_selected">%1$s theme selected</string>
+    <string name="skip_setup">Skip &amp; Use Default</string>
+
+    <!-- OnboardingActivity strings -->
+    <string name="onboarding_title_1">Welcome to ExpiryTrack</string>
+    <string name="onboarding_desc_1">Never let your products expire again! Track all your items in one place.</string>
+    <string name="onboarding_title_2">Track Your Products</string>
+    <string name="onboarding_desc_2">Add products with expiry dates and get organized. Add manually the dates.</string>
+    <string name="onboarding_title_3">Get Smart Notifications</string>
+    <string name="onboarding_desc_3">We\'ll remind you before products expire. Never waste food or money again!</string>
+    <string name="onboarding_title_4">Customize Your Experience</string>
+    <string name="onboarding_desc_4">Choose your theme and notification preferences. Make it yours!</string>
+
+    <!-- HomeActivity strings -->
+    <string name="error_loading_products">Error loading products: %1$s</string>
+
+    <!-- Common strings -->
+    <string name="user">User</string>
+    <string name="no_date">No date</string>
+
+    <!-- AddProductActivity strings -->
+    <string name="product_name_required">Product name is required</string>
+    <string name="expiration_date_required">Expiration date is required</string>
+    <string name="invalid_quantity">Invalid quantity</string>
+    <string name="invalid_date_format">Invalid date format. Use YYYY-MM-DD</string>
+    <string name="product_added_successfully">Product added successfully!</string>
+    <string name="error_saving_product">Error saving product: %1$s</string>
+    <string name="error_generic">Error: %1$s</string>
+    <string name="barcode_scanner_coming_soon">Barcode scanner coming soon!</string>
+
+    <!-- ProductDetailActivity strings -->
+    <string name="error_product_not_found">Error: Product not found</string>
+    <string name="product_not_found">Product not found</string>
+    <string name="error_loading_product_details">Error loading product: %1$s</string>
+    <string name="search_coming_soon">Search functionality coming soon!</string>
+    <string name="edit_coming_soon">Edit functionality coming soon!</string>
+    <string name="uncategorized">Uncategorized</string>
+    <string name="not_specified">Not specified</string>
+    <string name="expired_days_ago">Expired %1$d days ago</string>
+    <string name="expires_today">Expires today</string>
+
+    <!-- SettingsActivity strings -->
+    <string name="notifications_enabled">Notifications enabled</string>
+    <string name="notifications_disabled">Notifications disabled</string>
+    <string name="alert_set_to_days">Alert set to %1$d days before expiration</string>
+    <string name="data_export_coming_soon">Data export coming soon!</string>
+    <string name="account_sync_coming_soon">Account sync coming soon!</string>
+    <string name="data_usage_coming_soon">Data usage settings coming soon!</string>
+    <string name="help_center_coming_soon">Help center coming soon!</string>
+
+    <string name="dark_theme_applied">Dark theme applied</string>
+    <string name="light_theme_applied">Light theme applied</string>
+
+    <!-- InventoryActivity strings -->
+    <string name="inventory">Inventory</string>
+
+    <!-- Onboarding tabs -->
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <!-- Setup Progress -->
+    <string name="setup_step_1_of_3">Step 1 of 3</string>
+    <string name="step_number_1">1️⃣</string>
+    <string name="step_number_2">2️⃣</string>
+    <string name="step_number_3">3️⃣</string>
+
+    <!-- Live Preview -->
+    <string name="live_preview_label">📦 LIVE PREVIEW</string>
+    <string name="sample_product_name">Sample Product for User</string>
+    <string name="sample_expiry_days">Expires in 3 days</string>
+
+    <!-- Alert Timing -->
+    <string name="alert_timing_label">Alert Timing</string>
+    <string name="default_alert_days">3 days before expiry</string>
+    <string name="min_alert_days">1 day</string>
+    <string name="max_alert_days">7 days</string>
 </resources>

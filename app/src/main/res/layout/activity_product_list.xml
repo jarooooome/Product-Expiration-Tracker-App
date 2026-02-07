@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#FFFFFF"
     tools:context=".ProductListActivity">
 
     <!-- Header with Back Button -->
@@ -21,9 +21,8 @@
             android:id="@+id/backButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="←"
+            android:text="@string/back"
             android:textSize="20sp"
-            android:backgroundTint="#4CAF50"
             android:textColor="#FFFFFF" />
 
         <!-- Title -->
@@ -32,10 +31,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="📦 Your Products"
+            android:text="@string/your_products"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="#333333"
             android:gravity="center"
             android:layout_marginStart="16dp" />
     </LinearLayout>
@@ -45,20 +43,83 @@
         android:id="@+id/addButton"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="➕ Add New Product"
+        android:text="@string/add_new_product"
         android:textSize="18sp"
-        android:backgroundTint="#4CAF50"
         android:textColor="#FFFFFF"
         android:layout_marginBottom="16dp" />
+
+    <!-- Category Filter Buttons -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:id="@+id/categoryFilterLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
+
+            <!-- All Products Button -->
+            <Button
+                android:id="@+id/categoryAllButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/all"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_primary" />
+
+            <!-- Food Button -->
+            <Button
+                android:id="@+id/categoryFoodButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/food"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_gray" />
+
+            <!-- Medicine Button -->
+            <Button
+                android:id="@+id/categoryMedicineButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/medicine"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_gray" />
+
+            <!-- Drinks Button -->
+            <Button
+                android:id="@+id/categoryDrinksButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/drinks"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_gray" />
+
+            <!-- Other Button -->
+            <Button
+                android:id="@+id/categoryOtherButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/other"
+                android:padding="12dp"
+                android:backgroundTint="@color/color_gray" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <!-- Product Count -->
     <TextView
         android:id="@+id/productCountText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Total: 0 products"
+        android:text="@string/total_products"
         android:textSize="16sp"
-        android:textColor="#666666"
         android:layout_marginBottom="8dp" />
 
     <!-- Product List -->
@@ -67,8 +128,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#F5F5F5"
-        android:divider="#E0E0E0"
         android:dividerHeight="1dp"
         android:padding="8dp" />
 

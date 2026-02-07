@@ -15,10 +15,10 @@
         android:id="@+id/productIcon"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:text="📦"
+        android:text="@string/product_icon"
         android:textSize="24sp"
         android:gravity="center"
-        android:background="#E8F5E9"
+        android:background="@color/light_green"
         android:layout_marginEnd="16dp" />
 
     <!-- Product Details -->
@@ -33,19 +33,19 @@
             android:id="@+id/productName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Milk"
+            android:text="@string/milk"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#333333" />
+            android:textColor="@color/dark_gray" />
 
         <!-- Expiry Date -->
         <TextView
             android:id="@+id/productExpiry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Expires: Dec 25, 2024"
+            android:text="@string/expires_dec_25"
             android:textSize="14sp"
-            android:textColor="#666666"
+            android:textColor="@color/medium_gray"
             android:layout_marginTop="4dp" />
 
         <!-- Days Left (Optional) -->
@@ -53,13 +53,13 @@
             android:id="@+id/productDaysLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5 days left"
+            android:text="@string/five_days_left"
             android:textSize="12sp"
-            android:textColor="#4CAF50"
-            android:background="#E8F5E9"
+            android:textColor="#1B5E20"
+            android:background="@color/light_green"
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"/>
     </LinearLayout>
 
     <!-- Status Indicator -->
@@ -67,7 +67,7 @@
         android:id="@+id/statusIndicator"
         android:layout_width="8dp"
         android:layout_height="match_parent"
-        android:background="#4CAF50"
+        android:background="@color/green"
         android:layout_marginStart="8dp" />
 
 </LinearLayout>
