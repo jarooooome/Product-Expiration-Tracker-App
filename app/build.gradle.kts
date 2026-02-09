@@ -52,6 +52,7 @@ dependencies {
 
     // CoordinatorLayout
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
+    implementation(libs.swiperefreshlayout)
 
     // Room Database
     val roomVersion = "2.6.1"

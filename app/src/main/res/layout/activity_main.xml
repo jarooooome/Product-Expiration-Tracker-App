@@ -1,23 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    ENHANCED SPLASH SCREEN LAYOUT
-    Premium design with orbital animations and glassmorphism
 
-    NEW FEATURES:
-    - Orbital rotating rings around logo
-    - Checkmark badge (shows when loading complete)
-    - Enhanced glassmorphism progress bar
-    - Better spacing and visual hierarchy
-    - Floating particle effect placeholders
-    - Premium gradient background
-
-    CHANGES FROM ORIGINAL:
-    1. Added orbital ring layers
-    2. Added checkmark badge container
-    3. Improved logo container structure
-    4. Enhanced progress bar styling
-    5. Better animations support
--->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"

@@ -272,7 +272,7 @@
 
                             <!-- All Category -->
                             <TextView
-                                android:id="@+id/categoryAll"
+                                android:id="@+id/categoryALL"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="8dp"
@@ -281,12 +281,11 @@
                                 android:focusable="true"
                                 android:paddingHorizontal="16dp"
                                 android:paddingVertical="8dp"
-                                android:selected="true"
-                                android:text="🔸 All"
+                                android:text="ALL"
                                 android:textColor="#FFFFFF"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                tools:ignore="TouchTargetSizeCheck" />
+                                tools:ignore="TouchTargetSizeCheck"/>
 
                             <!-- Food Category -->
                             <TextView
@@ -325,14 +324,15 @@
                                 android:id="@+id/categoryBeauty"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="💄 Beauty"
-                                android:textSize="14sp"
-                                android:textColor="#FFFFFF"
                                 android:background="@drawable/category_chip_background"
+                                android:clickable="true"
+                                android:focusable="true"
                                 android:paddingHorizontal="16dp"
                                 android:paddingVertical="8dp"
-                                android:clickable="true"
-                                android:focusable="true" />
+                                android:text="💄 Beauty"
+                                android:textColor="#FFFFFF"
+                                android:textSize="14sp"
+                                tools:ignore="TouchTargetSizeCheck" />
 
                         </LinearLayout>
 

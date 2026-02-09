@@ -10,15 +10,13 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
-    private ArrayList<Product> productList;
+    private final ArrayList<Product> productList;
     private OnItemClickListener listener;
 
     public interface OnItemClickListener {
@@ -37,7 +35,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Use your custom layout instead of android.R.layout.simple_list_item_1
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_product, parent, false);
         return new ViewHolder(view);
@@ -49,11 +46,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         // Set product data
         holder.productName.setText(product.getName());
-        holder.productExpiry.setText("Expires: " + product.getFormattedExpiryDate());
+        holder.productExpiry.setText(holder.itemView.getContext().getString(R.string.expires_format, product.getFormattedExpiryDate()));
 
         // Get first emoji/icon from product name
-        if (product.getName().length() > 0) {
-            String firstChar = product.getName().substring(0, 2); // Get first 2 chars (emoji)
+        if (!product.getName().isEmpty()) {
+            String firstChar = product.getName().substring(0, Math.min(product.getName().length(), 2));
             holder.productIcon.setText(firstChar);
         }
 
@@ -64,47 +61,47 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         // Set days left text and color
         if (daysLeft < 0) {
-            holder.productDaysLeft.setText("EXPIRED");
+            holder.productDaysLeft.setText(R.string.expired);
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_dark));
             holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_light));
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_dark));
         } else if (daysLeft <= 3) {
-            holder.productDaysLeft.setText(daysLeft + " days left");
+            holder.productDaysLeft.setText(holder.itemView.getContext().getString(R.string.days_left, daysLeft));
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_dark));
             holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_light));
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_dark));
         } else if (daysLeft <= 7) {
-            holder.productDaysLeft.setText(daysLeft + " days left");
+            holder.productDaysLeft.setText(holder.itemView.getContext().getString(R.string.days_left, daysLeft));
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_light));
             holder.productDaysLeft.setBackgroundColor(0xFFFBE9E7);
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_light));
         } else {
-            holder.productDaysLeft.setText(daysLeft + " days left");
+            holder.productDaysLeft.setText(holder.itemView.getContext().getString(R.string.days_left, daysLeft));
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_dark));
             holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_light));
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_dark));
         }
 
-        // Set click listener on the entire item
-        holder.itemLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listener != null) {
-                    listener.onItemClick(position);
+        // Set click listener on the entire item - FIXED: Use getAdapterPosition()
+        holder.itemLayout.setOnClickListener(v -> {
+            if (listener != null) {
+                int adapterPosition = holder.getAdapterPosition();
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(adapterPosition);
                 }
             }
         });
 
-        // Set long click listener
-        holder.itemLayout.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (listener != null) {
-                    listener.onItemLongClick(position);
+        // Set long click listener - FIXED: Use getAdapterPosition()
+        holder.itemLayout.setOnLongClickListener(v -> {
+            if (listener != null) {
+                int adapterPosition = holder.getAdapterPosition();
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    listener.onItemLongClick(adapterPosition);
                     return true;
                 }
-                return false;
             }
+            return false;
         });
     }
 

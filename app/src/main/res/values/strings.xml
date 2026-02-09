@@ -163,7 +163,6 @@
     <string name="uncategorized">Uncategorized</string>
     <string name="not_specified">Not specified</string>
     <string name="expired_days_ago">Expired %1$d days ago</string>
-    <string name="expires_today">Expires today</string>
 
     <!-- SettingsActivity strings -->
     <string name="notifications_enabled">Notifications enabled</string>
@@ -200,4 +199,76 @@
     <string name="default_alert_days">3 days before expiry</string>
     <string name="min_alert_days">1 day</string>
     <string name="max_alert_days">7 days</string>
+
+    <!-- Add these to your existing strings.xml file -->
+
+    <!-- Enhanced Inventory Strings -->
+    <string name="search_products">Search products…</string>
+    <string name="clear_search">Clear Search</string>
+    <string name="toggle_view">Toggle View Mode</string>
+    <string name="sort_products">Sort Products</string>
+    <string name="grid_view">Grid View</string>
+    <string name="list_view">List View</string>
+
+    <!-- Statistics Dashboard -->
+    <string name="overview_label">📊 Overview</string>
+    <string name="total_label">Total</string>
+    <string name="expired_label">Expired</string>
+    <string name="soon_label">Soon</string>
+    <string name="fresh_label">Fresh</string>
+
+    <!-- Filter Chips -->
+    <string name="filter_all">All</string>
+    <string name="filter_expired_count">Expired (%1$d)</string>
+    <string name="filter_expiring_soon_count">Expiring Soon (%1$d)</string>
+    <string name="filter_fresh_count">Fresh (%1$d)</string>
+
+    <!-- Empty States -->
+    <string name="no_products_title">No Products Yet</string>
+    <string name="no_products_message">Start tracking your products\nby adding your first item!</string>
+    <string name="add_first_product">Add Your First Product</string>
+    <string name="no_results_title">No Results Found</string>
+    <string name="no_results_message">Try adjusting your search or filters</string>
+
+    <!-- Delete Dialog -->
+    <string name="delete_product_title">Delete Product</string>
+    <string name="delete_product_message">Are you sure you want to delete \"%1$s\"?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Success/Error Messages -->
+    <string name="product_deleted">\"%1$s\" deleted</string>
+    <string name="error_deleting_product">Error deleting product: %1$s</string>
+
+    <!-- Sort Menu Items -->
+    <string name="sort_expiry_soonest">Expiry Date (Soonest First)</string>
+    <string name="sort_expiry_latest">Expiry Date (Latest First)</string>
+    <string name="sort_name_az">Name (A to Z)</string>
+    <string name="sort_name_za">Name (Z to A)</string>
+    <string name="sort_quantity_high">Quantity (High to Low)</string>
+    <string name="sort_quantity_low">Quantity (Low to High)</string>
+
+    <!-- FAB -->
+    <string name="add_product_fab">Add Product</string>
+
+    <!-- Content Descriptions -->
+    <string name="search_icon_desc">Search Icon</string>
+    <string name="clear_search_desc">Clear Search</string>
+    <string name="sort_icon_desc">Sort Products</string>
+    <string name="view_toggle_desc">Toggle View Mode</string>
+
+    <!-- For ProductAdapter -->
+    <string name="expires_format">Expires: %s</string>
+    <string name="days_left">%d days left</string>
+    <string name="expired">EXPIRED</string>
+    <string name="expires_today">Expires today</string>
+
+    <!-- Additional strings you might need for ProductGridAdapter -->
+    <string name="status_fresh">FRESH</string>
+    <string name="status_expiring_soon">EXPIRING SOON</string>
+    <string name="status_tomorrow">TOMORROW</string>
+    <string name="status_expired">EXPIRED</string>
+    <string name="expired_days_ago_format">%d days ago</string>
+    <string name="expires_today_message">Expires today!</string>
+    <string name="one_day_left">1 day left</string>
 </resources>

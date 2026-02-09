@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Warning/Expiring Soon status gradient (Orange) -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- card_gradient_warning.xml - Orange gradient for expiring soon products -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
     <gradient
-        android:startColor="#f59e0b"
-        android:centerColor="#ea580c"
-        android:endColor="#c2410c"
-        android:angle="135" />
-    <corners android:radius="20dp" />
+        android:angle="135"
+        android:endColor="#FFF3E0"
+        android:startColor="#FFE0B2"
+        android:type="linear" />
 </shape>

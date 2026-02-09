@@ -1,6 +1,7 @@
 package com.example.productexpirationtrackerapp;
 
 import android.app.Application;
+import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -12,10 +13,10 @@ public class ProductViewModel extends AndroidViewModel {
     private LiveData<List<Product>> allProducts;
     private MutableLiveData<List<Product>> searchResults;
 
-    public ProductViewModel(Application application) {
+    public ProductViewModel(@NonNull Application application) {
         super(application);
         productRepository = new ProductRepository(application);
-        allProducts = productRepository.getAllProducts();
+        allProducts = productRepository.getAllProducts(); // Now returns LiveData
         searchResults = new MutableLiveData<>();
     }
 
@@ -47,7 +48,7 @@ public class ProductViewModel extends AndroidViewModel {
         productRepository.findProductById(productId, searchResults);
     }
 
-    // NEW: Add category filtering method
+    // This method is correct - it returns LiveData
     public LiveData<List<Product>> getProductsByCategory(String category) {
         return productRepository.getProductsByCategory(category);
     }

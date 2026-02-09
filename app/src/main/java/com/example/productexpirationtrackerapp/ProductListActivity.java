@@ -1,500 +1,588 @@
 package com.example.productexpirationtrackerapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationBarView;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Enhanced Product List Activity with modern features:
+ * - Real-time search
+ * - Advanced filtering (category, expiry status)
+ * - Pull-to-refresh
+ * - Grid/List view toggle
+ * - Statistics dashboard
+ * - Swipe to delete
+ * - Sort options
+ * - Empty state
+ * - Smooth animations
+ */
 public class ProductListActivity extends AppCompatActivity {
 
-    private static final String TAG = "ProductListDebug";
-
     // UI Components
-    private TextView titleTextView;
-    private Button backButton, addButton;
-    private TextView productCountText;
-    private ListView productListView;
-    private View rootView;
+    private EditText searchEditText;
+    private ImageButton searchClearButton;
+    private ImageButton sortButton;
+    private ImageButton viewToggleButton;
+    private ChipGroup filterChipGroup;
+    private Chip chipAll, chipExpired, chipExpiringSoon, chipFresh;
+    private RecyclerView productsRecyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private FloatingActionButton fabAdd;
+    private BottomNavigationView bottomNavigation;
 
-    // NEW: Category filter buttons
-    private Button categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
+    // Statistics Cards
+    private CardView statsCard;
+    private TextView totalProductsText;
+    private TextView expiredCountText;
+    private TextView expiringSoonCountText;
+    private TextView freshCountText;
 
-    // Data
-    private ArrayList<Product> productList;
-    private ProductListAdapter adapter;
-    private SharedPreferences preferences;
-    private UserRepository userRepository;
-    private ProductViewModel productViewModel;
+    // Empty State
+    private LinearLayout emptyStateLayout;
+    private TextView emptyStateTitle;
+    private TextView emptyStateMessage;
+    private Button emptyStateActionButton;
 
-    // NEW: Current category tracking
-    private String currentCategory = "All"; // Default category
+    // Data & Adapter
+    private AppDatabase database;
+    private ProductGridAdapter productAdapter;
+    private List<Product> allProducts = new ArrayList<>();
+    private List<Product> filteredProducts = new ArrayList<>();
+
+    // Filter State
+    private String currentCategory = "All";
+    private String currentExpiryFilter = "All";
+    private String currentSearchQuery = "";
+    private String currentSortOption = "Expiry Date (Soonest)";
+    private boolean isGridView = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_product_list);
 
-        Log.d(TAG, "ProductListActivity onCreate started");
+        initializeViews();
+        setupDatabase();
+        setupRecyclerView();
+        setupSearchBar();
+        setupFilterChips();
+        setupButtons();
+        setupSwipeRefresh();
+        setupBottomNavigation();
 
-        try {
-            setContentView(R.layout.activity_product_list);
-            Log.d(TAG, "Simple layout set successfully");
-        } catch (Exception e) {
-            Log.e(TAG, "Error setting content view: " + e.getMessage());
-            Toast.makeText(this, "Layout error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            finish();
-            return;
+        loadProducts();
+    }
+
+    private void initializeViews() {
+        // Search Bar
+        searchEditText = findViewById(R.id.searchEditText);
+        searchClearButton = findViewById(R.id.searchClearButton);
+        sortButton = findViewById(R.id.sortButton);
+        viewToggleButton = findViewById(R.id.viewToggleButton);
+
+        // Filter Chips
+        filterChipGroup = findViewById(R.id.filterChipGroup);
+        chipAll = findViewById(R.id.chipAll);
+        chipExpired = findViewById(R.id.chipExpired);
+        chipExpiringSoon = findViewById(R.id.chipExpiringSoon);
+        chipFresh = findViewById(R.id.chipFresh);
+
+        // RecyclerView & Refresh
+        productsRecyclerView = findViewById(R.id.productsRecyclerView);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+
+        // Statistics
+        statsCard = findViewById(R.id.statsCard);
+        totalProductsText = findViewById(R.id.totalProductsText);
+        expiredCountText = findViewById(R.id.expiredCountText);
+        expiringSoonCountText = findViewById(R.id.expiringSoonCountText);
+        freshCountText = findViewById(R.id.freshCountText);
+
+        // Empty State
+        emptyStateLayout = findViewById(R.id.emptyStateLayout);
+        emptyStateTitle = findViewById(R.id.emptyStateTitle);
+        emptyStateMessage = findViewById(R.id.emptyStateMessage);
+        emptyStateActionButton = findViewById(R.id.emptyStateActionButton);
+
+        // FAB & Navigation
+        fabAdd = findViewById(R.id.fabAdd);
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+    }
+
+    private void setupDatabase() {
+        database = AppDatabase.getDatabase(this);
+    }
+
+    private void setupRecyclerView() {
+        // Grid Layout with 2 columns
+        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+        productsRecyclerView.setLayoutManager(layoutManager);
+
+        // Initialize adapter
+        productAdapter = new ProductGridAdapter(this, filteredProducts, this::openProductDetail);
+        productsRecyclerView.setAdapter(productAdapter);
+
+        // Setup swipe to delete
+        setupSwipeToDelete();
+    }
+
+    private void setupSwipeToDelete() {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getBindingAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) return;
+
+                Product product = filteredProducts.get(position);
+
+                // Show confirmation dialog
+                new AlertDialog.Builder(ProductListActivity.this)
+                        .setTitle(getString(R.string.delete_product_title))
+                        .setMessage(getString(R.string.delete_product_message, product.getName()))
+                        .setPositiveButton(getString(R.string.delete), (dialog, which) -> deleteProduct(product, position))
+                        .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+                            // Restore the item
+                            productAdapter.notifyItemChanged(position);
+                        })
+                        .setOnCancelListener(dialog -> {
+                            // Restore the item if dialog is dismissed
+                            productAdapter.notifyItemChanged(position);
+                        })
+                        .show();
+            }
+        });
+
+        itemTouchHelper.attachToRecyclerView(productsRecyclerView);
+    }
+
+    private void setupSearchBar() {
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString().trim();
+                searchClearButton.setVisibility(currentSearchQuery.isEmpty() ? View.GONE : View.VISIBLE);
+                applyFilters();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        searchClearButton.setOnClickListener(v -> {
+            searchEditText.setText("");
+            currentSearchQuery = "";
+            applyFilters();
+        });
+    }
+
+    private void setupFilterChips() {
+        chipAll.setOnClickListener(v -> {
+            currentExpiryFilter = "All";
+            updateChipSelection(chipAll);
+            applyFilters();
+        });
+
+        chipExpired.setOnClickListener(v -> {
+            currentExpiryFilter = "Expired";
+            updateChipSelection(chipExpired);
+            applyFilters();
+        });
+
+        chipExpiringSoon.setOnClickListener(v -> {
+            currentExpiryFilter = "Expiring Soon";
+            updateChipSelection(chipExpiringSoon);
+            applyFilters();
+        });
+
+        chipFresh.setOnClickListener(v -> {
+            currentExpiryFilter = "Fresh";
+            updateChipSelection(chipFresh);
+            applyFilters();
+        });
+    }
+
+    private void updateChipSelection(Chip selectedChip) {
+        chipAll.setChecked(false);
+        chipExpired.setChecked(false);
+        chipExpiringSoon.setChecked(false);
+        chipFresh.setChecked(false);
+        selectedChip.setChecked(true);
+    }
+
+    private void setupButtons() {
+        // Sort Button
+        sortButton.setOnClickListener(v -> showSortMenu());
+
+        // View Toggle Button
+        viewToggleButton.setOnClickListener(v -> toggleViewMode());
+
+        // FAB Add Button
+        fabAdd.setOnClickListener(v -> {
+            Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
+            startActivity(intent);
+        });
+
+        // Empty State Action Button
+        emptyStateActionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    private void showSortMenu() {
+        PopupMenu popupMenu = new PopupMenu(this, sortButton);
+        popupMenu.inflate(R.menu.sort_menu);
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.sort_expiry_soonest) {
+                currentSortOption = "Expiry Date (Soonest)";
+                sortProducts();
+                return true;
+            } else if (itemId == R.id.sort_expiry_latest) {
+                currentSortOption = "Expiry Date (Latest)";
+                sortProducts();
+                return true;
+            } else if (itemId == R.id.sort_name_az) {
+                currentSortOption = "Name (A-Z)";
+                sortProducts();
+                return true;
+            } else if (itemId == R.id.sort_name_za) {
+                currentSortOption = "Name (Z-A)";
+                sortProducts();
+                return true;
+            } else if (itemId == R.id.sort_quantity_high) {
+                currentSortOption = "Quantity (High to Low)";
+                sortProducts();
+                return true;
+            } else if (itemId == R.id.sort_quantity_low) {
+                currentSortOption = "Quantity (Low to High)";
+                sortProducts();
+                return true;
+            }
+
+            return false;
+        });
+
+        popupMenu.show();
+    }
+
+    private void toggleViewMode() {
+        isGridView = !isGridView;
+
+        GridLayoutManager layoutManager = (GridLayoutManager) productsRecyclerView.getLayoutManager();
+        if (layoutManager != null) {
+            layoutManager.setSpanCount(isGridView ? 2 : 1);
         }
 
-        // Initialize repositories
-        userRepository = new UserRepository(getApplication());
+        // Update icon - using built-in icons since custom ones might not exist
+        viewToggleButton.setImageResource(
+                isGridView ? android.R.drawable.ic_menu_view : android.R.drawable.ic_menu_agenda
+        );
 
-        // Initialize ViewModel
-        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+        Toast.makeText(this,
+                isGridView ? getString(R.string.grid_view) : getString(R.string.list_view),
+                Toast.LENGTH_SHORT).show();
+    }
 
-        // Get preferences
-        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-        Log.d(TAG, "Preferences loaded");
+    private void setupSwipeRefresh() {
+        swipeRefreshLayout.setColorSchemeResources(
+                android.R.color.holo_green_light,
+                android.R.color.holo_blue_light,
+                android.R.color.holo_orange_light
+        );
 
-        // Get root view for theme application
-        rootView = getWindow().getDecorView().getRootView();
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            loadProducts();
 
-        // Initialize ALL UI components
-        initializeViews();
+            // Stop refreshing after 1.5 seconds
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                swipeRefreshLayout.setRefreshing(false);
+            }, 1500);
+        });
+    }
 
-        // NEW: Initialize category buttons
-        initializeCategoryButtons();
+    private void setupBottomNavigation() {
+        bottomNavigation.setSelectedItemId(R.id.nav_inventory);
 
-        // Apply theme from database
-        applyThemeFromDatabase();
+        bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
 
-        // Setup product list (load from database)
-        setupProductList();
+                if (itemId == R.id.nav_home) {
+                    startActivity(new Intent(ProductListActivity.this, HomeActivity.class));
+                    finish();
+                    return true;
+                } else if (itemId == R.id.nav_inventory) {
+                    return true;
+                } else if (itemId == R.id.nav_settings) {
+                    startActivity(new Intent(ProductListActivity.this, SettingsActivity.class));
+                    finish();
+                    return true;
+                }
 
-        // Setup button click listeners
-        setupClickListeners();
+                return false;
+            }
+        });
+    }
 
-        // NEW: Load all products by default
-        loadAllProducts();
+    private void loadProducts() {
+        new Thread(() -> {
+            try {
+                allProducts = database.productDao().getAllProducts();
 
-        Log.d(TAG, "ProductListActivity setup complete");
+                runOnUiThread(() -> {
+                    applyFilters();
+                    updateStatistics();
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(this, getString(R.string.error_loading_products, e.getMessage()),
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    private void applyFilters() {
+        filteredProducts.clear();
+
+        for (Product product : allProducts) {
+            // Apply search filter
+            if (!currentSearchQuery.isEmpty()) {
+                String query = currentSearchQuery.toLowerCase();
+                String name = product.getName().toLowerCase();
+                String category = product.getCategory() != null ? product.getCategory().toLowerCase() : "";
+
+                if (!name.contains(query) && !category.contains(query)) {
+                    continue;
+                }
+            }
+
+            // Apply expiry status filter
+            if (!currentExpiryFilter.equals("All")) {
+                long daysUntilExpiry = calculateDaysUntilExpiry(product.getExpiryDate());
+
+                if (currentExpiryFilter.equals("Expired") && daysUntilExpiry >= 0) {
+                    continue;
+                } else if (currentExpiryFilter.equals("Expiring Soon") && (daysUntilExpiry < 0 || daysUntilExpiry > 7)) {
+                    continue;
+                } else if (currentExpiryFilter.equals("Fresh") && daysUntilExpiry <= 7) {
+                    continue;
+                }
+            }
+
+            filteredProducts.add(product);
+        }
+
+        sortProducts();
+        updateEmptyState();
+    }
+
+    private void sortProducts() {
+        switch (currentSortOption) {
+            case "Expiry Date (Soonest)":
+                filteredProducts.sort((p1, p2) -> {
+                    if (p1.getExpiryDate() == null) return 1;
+                    if (p2.getExpiryDate() == null) return -1;
+                    return p1.getExpiryDate().compareTo(p2.getExpiryDate());
+                });
+                break;
+
+            case "Expiry Date (Latest)":
+                filteredProducts.sort((p1, p2) -> {
+                    if (p1.getExpiryDate() == null) return 1;
+                    if (p2.getExpiryDate() == null) return -1;
+                    return p2.getExpiryDate().compareTo(p1.getExpiryDate());
+                });
+                break;
+
+            case "Name (A-Z)":
+                filteredProducts.sort((p1, p2) ->
+                        p1.getName().compareToIgnoreCase(p2.getName()));
+                break;
+
+            case "Name (Z-A)":
+                filteredProducts.sort((p1, p2) ->
+                        p2.getName().compareToIgnoreCase(p1.getName()));
+                break;
+
+            case "Quantity (High to Low)":
+                filteredProducts.sort((p1, p2) ->
+                        Integer.compare(p2.getQuantity(), p1.getQuantity()));
+                break;
+
+            case "Quantity (Low to High)":
+                filteredProducts.sort((p1, p2) ->
+                        Integer.compare(p1.getQuantity(), p2.getQuantity()));
+                break;
+        }
+
+        productAdapter.notifyDataSetChanged();
+    }
+
+    private void updateStatistics() {
+        int total = allProducts.size();
+        int expired = 0;
+        int expiringSoon = 0;
+        int fresh = 0;
+
+        for (Product product : allProducts) {
+            long daysUntilExpiry = calculateDaysUntilExpiry(product.getExpiryDate());
+
+            if (daysUntilExpiry < 0) {
+                expired++;
+            } else if (daysUntilExpiry <= 7) {
+                expiringSoon++;
+            } else {
+                fresh++;
+            }
+        }
+
+        totalProductsText.setText(String.valueOf(total));
+        expiredCountText.setText(String.valueOf(expired));
+        expiringSoonCountText.setText(String.valueOf(expiringSoon));
+        freshCountText.setText(String.valueOf(fresh));
+
+        // Update chip badges
+        chipExpired.setText(getString(R.string.filter_expired_count, expired));
+        chipExpiringSoon.setText(getString(R.string.filter_expiring_soon_count, expiringSoon));
+        chipFresh.setText(getString(R.string.filter_fresh_count, fresh));
+    }
+
+    private void updateEmptyState() {
+        if (filteredProducts.isEmpty()) {
+            emptyStateLayout.setVisibility(View.VISIBLE);
+            productsRecyclerView.setVisibility(View.GONE);
+            statsCard.setVisibility(View.GONE);
+
+            if (allProducts.isEmpty()) {
+                // No products at all
+                emptyStateTitle.setText(getString(R.string.no_products_title));
+                emptyStateMessage.setText(getString(R.string.no_products_message));
+                emptyStateActionButton.setVisibility(View.VISIBLE);
+            } else {
+                // Products exist but filtered out
+                emptyStateTitle.setText(getString(R.string.no_results_title));
+                emptyStateMessage.setText(getString(R.string.no_results_message));
+                emptyStateActionButton.setVisibility(View.GONE);
+            }
+        } else {
+            emptyStateLayout.setVisibility(View.GONE);
+            productsRecyclerView.setVisibility(View.VISIBLE);
+            statsCard.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void deleteProduct(Product product, int position) {
+        new Thread(() -> {
+            try {
+                database.productDao().delete(product);
+
+                runOnUiThread(() -> {
+                    // Remove from both lists
+                    allProducts.remove(product);
+                    filteredProducts.remove(position);
+
+                    productAdapter.notifyItemRemoved(position);
+                    updateStatistics();
+                    updateEmptyState();
+
+                    Toast.makeText(this, getString(R.string.product_deleted, product.getName()),
+                            Toast.LENGTH_SHORT).show();
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(this, getString(R.string.error_deleting_product, e.getMessage()),
+                            Toast.LENGTH_SHORT).show();
+                    productAdapter.notifyItemChanged(position);
+                });
+            }
+        }).start();
+    }
+
+    private void openProductDetail(Product product) {
+        Intent intent = new Intent(this, ProductDetailActivity.class);
+        intent.putExtra("PRODUCT_ID", product.getId());
+        startActivity(intent);
+    }
+
+    private long calculateDaysUntilExpiry(Date expiryDate) {
+        if (expiryDate == null) {
+            return 999;
+        }
+
+        try {
+            Calendar expiryCal = Calendar.getInstance();
+            expiryCal.setTime(expiryDate);
+            expiryCal.set(Calendar.HOUR_OF_DAY, 0);
+            expiryCal.set(Calendar.MINUTE, 0);
+            expiryCal.set(Calendar.SECOND, 0);
+            expiryCal.set(Calendar.MILLISECOND, 0);
+
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+
+            long diffInMillis = expiryCal.getTimeInMillis() - today.getTimeInMillis();
+            return TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS);
+
+        } catch (Exception e) {
+            return 999;
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Update user name if changed
-        String userName = preferences.getString("user_name", "User");
-        if (titleTextView != null) {
-            titleTextView.setText("📦 " + userName + "'s Products");
-        }
-
-        // Reapply theme
-        applyThemeFromDatabase();
-
-        Log.d(TAG, "onResume called, title updated and theme reapplied");
-    }
-
-    private void loadProductsFromDatabase() {
-        Log.d(TAG, "Loading products from database");
-
-        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
-            @Override
-            public void onChanged(List<Product> products) {
-                Log.d(TAG, "Products loaded from database: " + products.size());
-
-                // Clear current list
-                productList.clear();
-
-                if (products == null || products.isEmpty()) {
-                    Log.d(TAG, "No products in database");
-                    updateProductCount();
-                    return;
-                }
-
-                // Add all products to list
-                productList.addAll(products);
-
-                // Update adapter
-                adapter.updateData(products);
-                updateProductCount();
-
-                Log.d(TAG, "Product list updated with " + productList.size() + " products");
-            }
-        });
-    }
-
-    private void applyThemeFromDatabase() {
-        // Get user from database to get theme
-        User user = userRepository.getUserSync();
-
-        if (user != null) {
-            String theme = user.getColorTheme();
-            Log.d(TAG, "Applying theme from database: " + theme);
-
-            // Apply theme using ThemeUtils
-            ThemeUtils.applyTheme(this, theme);
-
-            // Apply additional custom theme colors
-            applyCustomThemeColors(theme);
-        } else {
-            // Fallback to SharedPreferences
-            String theme = preferences.getString("color_theme", "white");
-            Log.d(TAG, "No user in DB, applying theme from SharedPreferences: " + theme);
-
-            ThemeUtils.applyTheme(this, theme);
-            applyCustomThemeColors(theme);
-        }
-    }
-
-    private void applyCustomThemeColors(String theme) {
-        int primaryColor;
-        int textColor;
-        int backgroundColor;
-
-        // Get colors based on theme
-        switch (theme) {
-            case "green":
-                primaryColor = getResources().getColor(R.color.color_primary_green);
-                textColor = getResources().getColor(R.color.color_text_green);
-                backgroundColor = getResources().getColor(R.color.color_background_green);
-                break;
-            case "blue":
-                primaryColor = getResources().getColor(R.color.color_primary_blue);
-                textColor = getResources().getColor(R.color.color_text_blue);
-                backgroundColor = getResources().getColor(R.color.color_background_blue);
-                break;
-            case "pink":
-                primaryColor = getResources().getColor(R.color.color_primary_pink);
-                textColor = getResources().getColor(R.color.color_text_pink);
-                backgroundColor = getResources().getColor(R.color.color_background_pink);
-                break;
-            case "purple":
-                primaryColor = getResources().getColor(R.color.color_primary_purple);
-                textColor = getResources().getColor(R.color.color_text_purple);
-                backgroundColor = getResources().getColor(R.color.color_background_purple);
-                break;
-            case "black":
-                primaryColor = getResources().getColor(R.color.color_primary_black);
-                textColor = getResources().getColor(R.color.color_text_black);
-                backgroundColor = getResources().getColor(R.color.color_background_black);
-                break;
-            case "white":
-            default:
-                primaryColor = getResources().getColor(R.color.color_primary_white);
-                textColor = getResources().getColor(R.color.color_text_white);
-                backgroundColor = getResources().getColor(R.color.color_background_white);
-                break;
-        }
-
-        // Apply colors to views if they exist
-        if (titleTextView != null) {
-            titleTextView.setTextColor(textColor);
-        }
-
-        if (productCountText != null) {
-            productCountText.setTextColor(textColor);
-        }
-
-        // Apply button background colors
-        if (backButton != null) {
-            backButton.setBackgroundColor(primaryColor);
-        }
-
-        if (addButton != null) {
-            addButton.setBackgroundColor(primaryColor);
-        }
-
-        // Apply background to root view
-        if (rootView != null) {
-            rootView.setBackgroundColor(backgroundColor);
-        }
-
-        // Apply background to ListView
-        if (productListView != null) {
-            productListView.setBackgroundColor(backgroundColor);
-        }
-    }
-
-    private void initializeViews() {
-        Log.d(TAG, "Starting initializeViews for simple layout");
-
-        try {
-            // Initialize views
-            titleTextView = findViewById(R.id.titleTextView);
-            backButton = findViewById(R.id.backButton);
-            addButton = findViewById(R.id.addButton);
-            productCountText = findViewById(R.id.productCountText);
-            productListView = findViewById(R.id.productListView);
-
-            Log.d(TAG, "Simple views found successfully");
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error in initializeViews: " + e.getMessage());
-            Toast.makeText(this, "View error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    // NEW: Initialize category buttons
-    private void initializeCategoryButtons() {
-        categoryAllButton = findViewById(R.id.categoryAllButton);
-        categoryFoodButton = findViewById(R.id.categoryFoodButton);
-        categoryMedicineButton = findViewById(R.id.categoryMedicineButton);
-        categoryDrinksButton = findViewById(R.id.categoryDrinksButton);
-        categoryOtherButton = findViewById(R.id.categoryOtherButton);
-    }
-
-    private void setupProductList() {
-        Log.d(TAG, "Setting up product list from database");
-
-        // Initialize product list
-        productList = new ArrayList<>();
-
-        // Create custom adapter
-        adapter = new ProductListAdapter(this, productList);
-
-        // Set adapter to ListView
-        if (productListView != null) {
-            productListView.setAdapter(adapter);
-            Log.d(TAG, "Adapter set to ListView");
-        }
-
-        // Set user's name in title
-        String userName = preferences.getString("user_name", "User");
-        if (titleTextView != null) {
-            titleTextView.setText("📦 " + userName + "'s Products");
-            Log.d(TAG, "Title set to: " + titleTextView.getText());
-        }
-    }
-
-    private void setupClickListeners() {
-        Log.d(TAG, "Setting up click listeners");
-
-        // Back button - go to MainActivity
-        if (backButton != null) {
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Back button clicked");
-                    Intent intent = new Intent(ProductListActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    finish();
-                }
-            });
-        }
-
-        // Add button - open AddProductActivity
-        if (addButton != null) {
-            addButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Add button clicked - opening AddProductActivity");
-                    Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
-                    startActivityForResult(intent, 200); // Use different request code
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                }
-            });
-        }
-
-        // NEW: Category button click listeners
-        if (categoryAllButton != null) {
-            categoryAllButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "All";
-                    setActiveCategoryButton(categoryAllButton);
-                    loadAllProducts();
-                }
-            });
-        }
-
-        if (categoryFoodButton != null) {
-            categoryFoodButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Food";
-                    setActiveCategoryButton(categoryFoodButton);
-                    loadProductsByCategory("Food");
-                }
-            });
-        }
-
-        if (categoryMedicineButton != null) {
-            categoryMedicineButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Medicine";
-                    setActiveCategoryButton(categoryMedicineButton);
-                    loadProductsByCategory("Medicine");
-                }
-            });
-        }
-
-        if (categoryDrinksButton != null) {
-            categoryDrinksButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Drinks";
-                    setActiveCategoryButton(categoryDrinksButton);
-                    loadProductsByCategory("Drinks");
-                }
-            });
-        }
-
-        if (categoryOtherButton != null) {
-            categoryOtherButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Other";
-                    setActiveCategoryButton(categoryOtherButton);
-                    loadProductsByCategory("Other");
-                }
-            });
-        }
-
-        // List item click - OPEN PRODUCT DETAILS
-        if (productListView != null) {
-            productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (position < productList.size()) {
-                        Product product = productList.get(position);
-
-                        Log.d(TAG, "Opening product details: " + product.getName());
-
-                        // Open ProductDetailActivity
-                        Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
-                        intent.putExtra("product_id", product.getId());
-                        intent.putExtra("product_name", product.getName());
-
-                        // Convert date to string for passing
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                        intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
-
-                        startActivityForResult(intent, 100);
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    }
-                }
-            });
-        }
-
-        // List item long click - delete product
-        if (productListView != null) {
-            productListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (position < productList.size()) {
-                        Product product = productList.get(position);
-
-                        // Delete from database
-                        productViewModel.delete(product);
-
-                        Toast.makeText(ProductListActivity.this,
-                                "Removed: " + product.getName(),
-                                Toast.LENGTH_SHORT).show();
-
-                        Log.d(TAG, "Item long clicked and removed from database: " + product.getName());
-                    }
-                    return true;
-                }
-            });
-        }
-    }
-
-    // NEW: Set active category button
-    private void setActiveCategoryButton(Button activeButton) {
-        // Reset all buttons to gray
-        categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-        categoryFoodButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-        categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-        categoryDrinksButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-        categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-
-        // Set active button to blue
-        activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2196F3));
-    }
-
-    // NEW: Load all products
-    private void loadAllProducts() {
-        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
-            @Override
-            public void onChanged(List<Product> products) {
-                updateProductList(products);
-            }
-        });
-    }
-
-    // NEW: Load products by category
-    private void loadProductsByCategory(String category) {
-        productViewModel.getProductsByCategory(category).observe(this, new Observer<List<Product>>() {
-            @Override
-            public void onChanged(List<Product> products) {
-                updateProductList(products);
-            }
-        });
-    }
-
-    // NEW: Update product list with data
-    private void updateProductList(List<Product> products) {
-        if (products != null) {
-            productList.clear();
-            productList.addAll(products);
-            adapter.updateData(products);
-            updateProductCount();
-
-            Log.d(TAG, "Updated product list with " + products.size() + " products (Category: " + currentCategory + ")");
-        }
-    }
-
-    // Handle result from ProductDetailActivity (for deletion) and AddProductActivity
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == 200 && resultCode == RESULT_OK) {
-            // Product was added successfully from AddProductActivity
-            Toast.makeText(this, "Product added!", Toast.LENGTH_SHORT).show();
-            // The list will automatically update due to LiveData observation
-        }
-
-        if (requestCode == 100 && resultCode == RESULT_OK) {
-            if (data != null && data.hasExtra("deleted_product_id")) {
-                int productId = data.getIntExtra("deleted_product_id", -1);
-
-                if (productId != -1) {
-                    productViewModel.deleteById(productId);
-                    Toast.makeText(ProductListActivity.this,
-                            "Product deleted",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
-
-    private void updateProductCount() {
-        if (productCountText != null) {
-            if (productList.isEmpty()) {
-                productCountText.setText("No products added yet");
-            } else {
-                productCountText.setText("Total: " + productList.size() + " product" +
-                        (productList.size() == 1 ? "" : "s") + " (" + currentCategory + ")");
-            }
-            Log.d(TAG, "Updated product count: " + productList.size());
-        }
+        loadProducts();
     }
 }

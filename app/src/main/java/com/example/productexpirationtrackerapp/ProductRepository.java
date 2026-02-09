@@ -8,59 +8,75 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ProductRepository {
-
-    private ProductDao productDao;
-    private LiveData<List<Product>> allProducts;
-    private ExecutorService executorService;
+    private final ProductDao productDao;
+    private final LiveData<List<Product>> allProductsLiveData;
+    private final ExecutorService executorService;
 
     public ProductRepository(Application application) {
         AppDatabase database = AppDatabase.getDatabase(application);
         productDao = database.productDao();
-        allProducts = productDao.getAllProductsLiveData();
+        allProductsLiveData = productDao.getAllProductsLiveData();
         executorService = Executors.newSingleThreadExecutor();
     }
 
+    // LiveData version for ViewModel
     public LiveData<List<Product>> getAllProducts() {
-        return allProducts;
+        return allProductsLiveData;
+    }
+
+    // Non-LiveData version for synchronous operations
+    public List<Product> getAllProductsSync() {
+        return productDao.getAllProducts();
+    }
+
+    public LiveData<List<Product>> getProductsByCategory(String category) {
+        return productDao.getProductsByCategoryLiveData(category);
+    }
+
+    public List<Product> getProductsByCategorySync(String category) {
+        return productDao.getProductsByCategory(category);
     }
 
     public void insert(Product product) {
-        executorService.execute(() -> {
-            productDao.insert(product);
-        });
+        executorService.execute(() -> productDao.insert(product));
     }
 
     public void update(Product product) {
-        executorService.execute(() -> {
-            productDao.update(product);
-        });
+        executorService.execute(() -> productDao.update(product));
     }
 
     public void delete(Product product) {
-        executorService.execute(() -> {
-            productDao.delete(product);
-        });
+        executorService.execute(() -> productDao.delete(product));
     }
 
-    public void deleteById(int productId) {
-        executorService.execute(() -> {
-            productDao.deleteById(productId);
-        });
+    public void deleteAll() {
+        executorService.execute(() -> productDao.deleteAll());
     }
 
-    public void findProductById(int productId, MutableLiveData<List<Product>> searchResults) {
+    public Product getProductById(int id) {
+        return productDao.getProductById(id);
+    }
+
+    // Fix this method - you need to pass a MutableLiveData to update
+    public void findProductById(int id, MutableLiveData<List<Product>> searchResults) {
         executorService.execute(() -> {
-            Product product = productDao.getProductById(productId);
+            Product product = productDao.getProductById(id);
             if (product != null) {
-                searchResults.postValue(List.of(product));
+                List<Product> resultList = new java.util.ArrayList<>();
+                resultList.add(product);
+                searchResults.postValue(resultList);
             } else {
-                searchResults.postValue(List.of());
+                searchResults.postValue(new java.util.ArrayList<>());
             }
         });
     }
 
-    // NEW: Add category filtering method
-    public LiveData<List<Product>> getProductsByCategory(String category) {
-        return productDao.getProductsByCategory(category);
+    public void deleteById(int id) {
+        executorService.execute(() -> {
+            Product product = productDao.getProductById(id);
+            if (product != null) {
+                productDao.delete(product);
+            }
+        });
     }
 }

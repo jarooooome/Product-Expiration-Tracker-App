@@ -24,20 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * ENHANCED SPLASH SCREEN ACTIVITY
- * Premium animated splash screen with orbital rings and glassmorphism
- *
- * NEW FEATURES:
- * - Orbital ring rotations (clockwise & counter-clockwise)
- * - Logo entrance animation with bounce
- * - Checkmark badge pop-in when complete
- * - Smooth cascading text animations
- * - Enhanced progress loading
- * - Pulse glow effects
- *
- * @version 2.0 Premium Edition
- */
+
 public class MainActivity extends AppCompatActivity {
 
     // ========================================
@@ -101,11 +88,10 @@ public class MainActivity extends AppCompatActivity {
 
         handler = new Handler(Looper.getMainLooper());
 
-        // Set up click listener for entire screen
+        // Set up click listener for entire screen - FIXED: Allow tapping anytime
         findViewById(R.id.main).setOnClickListener(v -> {
-            if (isLoadingComplete) {
-                proceedToMainApp();
-            }
+            // Remove the isLoadingComplete check
+            proceedToMainApp();
         });
 
         // Check first time user

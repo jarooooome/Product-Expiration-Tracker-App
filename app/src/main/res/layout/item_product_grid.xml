@@ -1,29 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/productCard"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="8dp"
+    android:layout_margin="4dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?attr/selectableItemBackground">
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp">
 
-    <!-- Gradient Background Container -->
+    <!-- Card Background with Gradient -->
     <FrameLayout
         android:id="@+id/cardBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/card_gradient_fresh">
-
-        <!-- Glass Overlay -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/glass_overlay"
-            android:alpha="0.15" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -31,54 +24,58 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Top Section: Status Badge + Quantity -->
+            <!-- Top Row: Status Badge & Quantity Badge -->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp">
 
-                <!-- Status Badge (Left) -->
+                <!-- Status Badge -->
                 <LinearLayout
                     android:id="@+id/statusBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
                     android:background="@drawable/badge_fresh"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp"
-                    android:orientation="horizontal"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp">
 
                     <TextView
                         android:id="@+id/statusText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Fresh"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF" />
+                        android:text="FRESH"
+                        android:textColor="#FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
 
                 </LinearLayout>
 
-                <!-- Quantity Badge (Right) -->
+                <!-- Quantity Badge (Top Right) -->
                 <LinearLayout
                     android:id="@+id/quantityBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:background="@drawable/glass_circle_badge"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="6dp"
-                    android:gravity="center">
+                    android:background="@drawable/badge_quantity"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:visibility="gone">
 
                     <TextView
                         android:id="@+id/quantityText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="×1"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF" />
+                        android:text="×3"
+                        android:textColor="#333333"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
 
                 </LinearLayout>
 
@@ -87,34 +84,26 @@
             <!-- Product Icon/Image -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="80dp"
                 android:layout_marginBottom="12dp">
 
-                <!-- Background Circle -->
-                <View
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/glass_circle_with_border" />
-
-                <!-- Product Icon (Emoji or Image) -->
-                <TextView
-                    android:id="@+id/productIcon"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_gravity="center"
-                    android:text="📦"
-                    android:textSize="42sp"
-                    android:gravity="center" />
-
-                <!-- OR use ImageView for actual photos -->
+                <!-- Photo (if available) -->
                 <ImageView
                     android:id="@+id/productImage"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
                     android:visibility="gone"
-                    android:scaleType="centerCrop" />
+                    tools:src="@drawable/ic_product_placeholder" />
+
+                <!-- Emoji Icon (default) -->
+                <TextView
+                    android:id="@+id/productIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="📦"
+                    android:textSize="48sp" />
 
             </FrameLayout>
 
@@ -123,81 +112,59 @@
                 android:id="@+id/productName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Product Name"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:gravity="center"
-                android:maxLines="2"
+                android:layout_marginBottom="4dp"
                 android:ellipsize="end"
-                android:layout_marginBottom="8dp"
-                android:shadowColor="#40000000"
-                android:shadowDx="0"
-                android:shadowDy="2"
-                android:shadowRadius="4" />
+                android:maxLines="2"
+                android:minHeight="40dp"
+                android:text="Product Name"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <!-- Category (Optional) -->
             <TextView
                 android:id="@+id/categoryText"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/badge_category"
+                android:paddingStart="8dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="2dp"
                 android:text="Dairy"
-                android:textSize="12sp"
-                android:textColor="#E0FFFFFF"
-                android:gravity="center"
-                android:layout_marginBottom="12dp"
+                android:textColor="#666666"
+                android:textSize="11sp"
                 android:visibility="gone" />
 
             <!-- Divider -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#40FFFFFF"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:alpha="0.2"
+                android:background="#333333" />
 
-            <!-- Bottom Section: Expiry Info -->
-            <LinearLayout
+            <!-- Expiry Days Left -->
+            <TextView
+                android:id="@+id/expiryDaysText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
+                android:layout_marginBottom="2dp"
+                android:text="5 days left"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-                <!-- Expiry Icon + Text -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="⏰"
-                        android:textSize="14sp"
-                        android:layout_marginEnd="6dp" />
-
-                    <TextView
-                        android:id="@+id/expiryDaysText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="3 days left"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF" />
-
-                </LinearLayout>
-
-                <!-- Expiry Date -->
-                <TextView
-                    android:id="@+id/expiryDateText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Expires: Dec 25, 2024"
-                    android:textSize="11sp"
-                    android:textColor="#C0FFFFFF"
-                    android:layout_marginTop="4dp" />
-
-            </LinearLayout>
+            <!-- Expiry Date -->
+            <TextView
+                android:id="@+id/expiryDateText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Expires: Dec 25, 2024"
+                android:textColor="#666666"
+                android:textSize="12sp" />
 
         </LinearLayout>
 

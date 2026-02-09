@@ -1,11 +1,11 @@
 package com.example.productexpirationtrackerapp;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
-
 import java.util.List;
 
 @Dao
@@ -19,8 +19,12 @@ public interface ProductDao {
     @Delete
     void delete(Product product);
 
+    // Keep both versions
     @Query("SELECT * FROM products ORDER BY expiryDate ASC")
     List<Product> getAllProducts();
+
+    @Query("SELECT * FROM products ORDER BY expiryDate ASC")
+    LiveData<List<Product>> getAllProductsLiveData(); // Add this
 
     @Query("SELECT * FROM products WHERE id = :productId")
     Product getProductById(int productId);
@@ -30,6 +34,9 @@ public interface ProductDao {
 
     @Query("SELECT * FROM products WHERE category = :category ORDER BY expiryDate ASC")
     List<Product> getProductsByCategory(String category);
+
+    @Query("SELECT * FROM products WHERE category = :category ORDER BY expiryDate ASC")
+    LiveData<List<Product>> getProductsByCategoryLiveData(String category); // Add this
 
     @Query("DELETE FROM products")
     void deleteAll();

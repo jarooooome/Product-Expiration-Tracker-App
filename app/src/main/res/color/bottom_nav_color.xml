@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- bottom_nav_color.xml - Color selector for bottom navigation -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Navigation icon colors -->
-    <item android:state_checked="true" android:color="@color/white" />
-    <item android:state_checked="false" android:color="#80FFFFFF" />
+    <item android:color="@color/color_primary" android:state_checked="true" />
+    <item android:color="#999999" />
 </selector>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fresh/Good status gradient (Green) -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- card_gradient_fresh.xml - Green gradient for fresh products -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
     <gradient
-        android:startColor="#10b981"
-        android:centerColor="#059669"
-        android:endColor="#047857"
-        android:angle="135" />
-    <corners android:radius="20dp" />
+        android:angle="135"
+        android:endColor="#E8F5E9"
+        android:startColor="#C8E6C9"
+        android:type="linear" />
 </shape>

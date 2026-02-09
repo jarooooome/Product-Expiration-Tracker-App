@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- sort_menu.xml - Menu for sorting products -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/sort_expiry_soonest"
+        android:title="Expiry Date (Soonest First)" />
+    <item
+        android:id="@+id/sort_expiry_latest"
+        android:title="Expiry Date (Latest First)" />
+    <item
+        android:id="@+id/sort_name_az"
+        android:title="Name (A to Z)" />
+    <item
+        android:id="@+id/sort_name_za"
+        android:title="Name (Z to A)" />
+    <item
+        android:id="@+id/sort_quantity_high"
+        android:title="Quantity (High to Low)" />
+    <item
+        android:id="@+id/sort_quantity_low"
+        android:title="Quantity (Low to High)" />
+</menu>

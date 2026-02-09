@@ -1,4 +1,5 @@
 package com.example.productexpirationtrackerapp;
+
 import androidx.annotation.NonNull;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
@@ -8,7 +9,8 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import android.content.Context;
 
-@Database(entities = {Product.class}, version = 2, exportSchema = false)
+// Add User.class to the entities list
+@Database(entities = {Product.class, User.class}, version = 3, exportSchema = false)
 @TypeConverters({DateConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
     public abstract ProductDao productDao();
@@ -27,6 +29,23 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("ALTER TABLE products ADD COLUMN photoPath TEXT");
         }
     };
+
+    // Add migration from version 2 to 3 to create users table
+    private static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            // Create users table if it doesn't exist
+            database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `users` (" +
+                            "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "`username` TEXT, " +
+                            "`email` TEXT, " +
+                            "`password` TEXT" +
+                            ")"
+            );
+        }
+    };
+
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
@@ -35,7 +54,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     context.getApplicationContext(),
                                     AppDatabase.class,
                                     "product_database")
-                            .addMigrations(MIGRATION_1_2)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3) // Add both migrations
+                            .fallbackToDestructiveMigration() // Optional: helps during development
                             .build();
                 }
             }
