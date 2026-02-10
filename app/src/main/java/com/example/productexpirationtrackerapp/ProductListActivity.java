@@ -11,9 +11,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.Color;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,13 +29,20 @@ public class ProductListActivity extends AppCompatActivity {
 
     // UI Components
     private TextView titleTextView;
-    private Button backButton, addButton;
+    private ImageView addButton;
     private TextView productCountText;
     private ListView productListView;
     private View rootView;
+    private LinearLayout bottomNavigation;
+    private LinearLayout headerLayout; // ADDED THIS LINE
 
-    // NEW: Category filter buttons
+    // Category filter buttons
     private Button categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
+
+    // Bottom Navigation
+    private LinearLayout navProfile, navProducts, navSettings;
+    private ImageView navProfileIcon, navProductsIcon, navSettingsIcon;
+    private TextView navProfileText, navProductsText, navSettingsText;
 
     // Data
     private ArrayList<Product> productList;
@@ -41,8 +51,8 @@ public class ProductListActivity extends AppCompatActivity {
     private UserRepository userRepository;
     private ProductViewModel productViewModel;
 
-    // NEW: Current category tracking
-    private String currentCategory = "All"; // Default category
+    // Current category tracking
+    private String currentCategory = "All";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +62,7 @@ public class ProductListActivity extends AppCompatActivity {
 
         try {
             setContentView(R.layout.activity_product_list);
-            Log.d(TAG, "Simple layout set successfully");
+            Log.d(TAG, "Layout set successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error setting content view: " + e.getMessage());
             Toast.makeText(this, "Layout error: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -76,8 +86,11 @@ public class ProductListActivity extends AppCompatActivity {
         // Initialize ALL UI components
         initializeViews();
 
-        // NEW: Initialize category buttons
+        // Initialize category buttons
         initializeCategoryButtons();
+
+        // Initialize bottom navigation
+        initializeBottomNavigation();
 
         // Apply theme from database
         applyThemeFromDatabase();
@@ -88,7 +101,7 @@ public class ProductListActivity extends AppCompatActivity {
         // Setup button click listeners
         setupClickListeners();
 
-        // NEW: Load all products by default
+        // Load all products by default
         loadAllProducts();
 
         Log.d(TAG, "ProductListActivity setup complete");
@@ -107,35 +120,6 @@ public class ProductListActivity extends AppCompatActivity {
         applyThemeFromDatabase();
 
         Log.d(TAG, "onResume called, title updated and theme reapplied");
-    }
-
-    private void loadProductsFromDatabase() {
-        Log.d(TAG, "Loading products from database");
-
-        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
-            @Override
-            public void onChanged(List<Product> products) {
-                Log.d(TAG, "Products loaded from database: " + products.size());
-
-                // Clear current list
-                productList.clear();
-
-                if (products == null || products.isEmpty()) {
-                    Log.d(TAG, "No products in database");
-                    updateProductCount();
-                    return;
-                }
-
-                // Add all products to list
-                productList.addAll(products);
-
-                // Update adapter
-                adapter.updateData(products);
-                updateProductCount();
-
-                Log.d(TAG, "Product list updated with " + productList.size() + " products");
-            }
-        });
     }
 
     private void applyThemeFromDatabase() {
@@ -165,6 +149,7 @@ public class ProductListActivity extends AppCompatActivity {
         int primaryColor;
         int textColor;
         int backgroundColor;
+        int fabBackgroundColor = 0; // ADD THIS
 
         // Get colors based on theme
         switch (theme) {
@@ -172,34 +157,45 @@ public class ProductListActivity extends AppCompatActivity {
                 primaryColor = getResources().getColor(R.color.color_primary_green);
                 textColor = getResources().getColor(R.color.color_text_green);
                 backgroundColor = getResources().getColor(R.color.color_background_green);
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_green); // ADD THIS
                 break;
             case "blue":
                 primaryColor = getResources().getColor(R.color.color_primary_blue);
                 textColor = getResources().getColor(R.color.color_text_blue);
                 backgroundColor = getResources().getColor(R.color.color_background_blue);
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_blue); // ADD THIS
                 break;
             case "pink":
                 primaryColor = getResources().getColor(R.color.color_primary_pink);
                 textColor = getResources().getColor(R.color.color_text_pink);
                 backgroundColor = getResources().getColor(R.color.color_background_pink);
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_pink); // ADD THIS
                 break;
             case "purple":
                 primaryColor = getResources().getColor(R.color.color_primary_purple);
                 textColor = getResources().getColor(R.color.color_text_purple);
                 backgroundColor = getResources().getColor(R.color.color_background_purple);
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_purple); // ADD THIS
                 break;
             case "black":
                 primaryColor = getResources().getColor(R.color.color_primary_black);
                 textColor = getResources().getColor(R.color.color_text_black);
                 backgroundColor = getResources().getColor(R.color.color_background_black);
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_black); // ADD THIS
                 break;
             case "white":
             default:
                 primaryColor = getResources().getColor(R.color.color_primary_white);
                 textColor = getResources().getColor(R.color.color_text_white);
                 backgroundColor = getResources().getColor(R.color.color_background_white);
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_white); // ADD THIS
                 break;
         }
+
+        // DEBUG LOGGING - ADD THIS
+        Log.d(TAG, "Theme: " + theme);
+        Log.d(TAG, "Background Color: " + String.format("#%08X", backgroundColor));
+        Log.d(TAG, "FAB Background Color: " + String.format("#%08X", fabBackgroundColor));
 
         // Apply colors to views if they exist
         if (titleTextView != null) {
@@ -208,15 +204,6 @@ public class ProductListActivity extends AppCompatActivity {
 
         if (productCountText != null) {
             productCountText.setTextColor(textColor);
-        }
-
-        // Apply button background colors
-        if (backButton != null) {
-            backButton.setBackgroundColor(primaryColor);
-        }
-
-        if (addButton != null) {
-            addButton.setBackgroundColor(primaryColor);
         }
 
         // Apply background to root view
@@ -228,20 +215,77 @@ public class ProductListActivity extends AppCompatActivity {
         if (productListView != null) {
             productListView.setBackgroundColor(backgroundColor);
         }
+
+        // Apply header background color - SAME AS FAB
+        if (headerLayout != null) {
+            headerLayout.setBackgroundColor(fabBackgroundColor); // USE FAB COLOR
+            Log.d(TAG, "Set header to FAB color: " + String.format("#%08X", fabBackgroundColor));
+        }
+
+        // Apply FAB and bottom navigation colors
+        applyFABAndBottomNavColors();
+    }
+
+    private void applyFABAndBottomNavColors() {
+        SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+
+        int fabBackgroundColor = prefs.getInt("fab_background_color",
+                getResources().getColor(R.color.color_fab_white));
+        int fabIconColor = prefs.getInt("fab_icon_color",
+                getResources().getColor(R.color.color_fab_icon_white));
+
+        // Apply FAB colors
+        if (addButton != null) {
+            addButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fabBackgroundColor));
+            addButton.setImageTintList(android.content.res.ColorStateList.valueOf(fabIconColor));
+        }
+
+        // Apply bottom navigation background color - SAME AS FAB
+        if (bottomNavigation != null) {
+            bottomNavigation.setBackgroundColor(fabBackgroundColor);
+        }
+
+        // Apply header background color - SAME AS FAB
+        if (headerLayout != null) {
+            headerLayout.setBackgroundColor(fabBackgroundColor);
+        }
+
+        // Make all navigation icons/text WHITE for contrast
+        int whiteColor = Color.WHITE;
+
+        if (navProfileIcon != null) {
+            navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        }
+        if (navProfileText != null) {
+            navProfileText.setTextColor(whiteColor);
+        }
+        if (navProductsIcon != null) {
+            navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        }
+        if (navProductsText != null) {
+            navProductsText.setTextColor(whiteColor);
+        }
+        if (navSettingsIcon != null) {
+            navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        }
+        if (navSettingsText != null) {
+            navSettingsText.setTextColor(whiteColor);
+        }
     }
 
     private void initializeViews() {
-        Log.d(TAG, "Starting initializeViews for simple layout");
+        Log.d(TAG, "Starting initializeViews");
 
         try {
             // Initialize views
             titleTextView = findViewById(R.id.titleTextView);
-            backButton = findViewById(R.id.backButton);
             addButton = findViewById(R.id.addButton);
             productCountText = findViewById(R.id.productCountText);
             productListView = findViewById(R.id.productListView);
+            bottomNavigation = findViewById(R.id.bottomNavigation);
+            headerLayout = findViewById(R.id.headerLayout); // ADDED THIS LINE
 
-            Log.d(TAG, "Simple views found successfully");
+            Log.d(TAG, "Views found successfully");
 
         } catch (Exception e) {
             Log.e(TAG, "Error in initializeViews: " + e.getMessage());
@@ -249,13 +293,29 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
-    // NEW: Initialize category buttons
     private void initializeCategoryButtons() {
         categoryAllButton = findViewById(R.id.categoryAllButton);
         categoryFoodButton = findViewById(R.id.categoryFoodButton);
         categoryMedicineButton = findViewById(R.id.categoryMedicineButton);
         categoryDrinksButton = findViewById(R.id.categoryDrinksButton);
         categoryOtherButton = findViewById(R.id.categoryOtherButton);
+    }
+
+    private void initializeBottomNavigation() {
+        // Initialize bottom navigation views
+        navProfile = findViewById(R.id.navProfile);
+        navProducts = findViewById(R.id.navProducts);
+        navSettings = findViewById(R.id.navSettings);
+
+        navProfileIcon = findViewById(R.id.navProfileIcon);
+        navProductsIcon = findViewById(R.id.navProductsIcon);
+        navSettingsIcon = findViewById(R.id.navSettingsIcon);
+
+        navProfileText = findViewById(R.id.navProfileText);
+        navProductsText = findViewById(R.id.navProductsText);
+        navSettingsText = findViewById(R.id.navSettingsText);
+
+        Log.d(TAG, "Bottom navigation initialized");
     }
 
     private void setupProductList() {
@@ -284,34 +344,20 @@ public class ProductListActivity extends AppCompatActivity {
     private void setupClickListeners() {
         Log.d(TAG, "Setting up click listeners");
 
-        // Back button - go to MainActivity
-        if (backButton != null) {
-            backButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Back button clicked");
-                    Intent intent = new Intent(ProductListActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    finish();
-                }
-            });
-        }
-
-        // Add button - open AddProductActivity
+        // Add button (FAB) - open AddProductActivity
         if (addButton != null) {
             addButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "Add button clicked - opening AddProductActivity");
                     Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
-                    startActivityForResult(intent, 200); // Use different request code
+                    startActivityForResult(intent, 200);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
             });
         }
 
-        // NEW: Category button click listeners
+        // Category button click listeners
         if (categoryAllButton != null) {
             categoryAllButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -367,6 +413,48 @@ public class ProductListActivity extends AppCompatActivity {
             });
         }
 
+        // Bottom Navigation Click Listeners
+        if (navProfile != null) {
+            navProfile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "Profile navigation clicked");
+                    // Navigate to MainActivity (Profile)
+                    Intent intent = new Intent(ProductListActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    finish();
+                }
+            });
+        }
+
+        if (navProducts != null) {
+            navProducts.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "Products navigation clicked - already on this screen");
+                    // Already on products screen - do nothing or scroll to top
+                    if (productListView != null) {
+                        productListView.smoothScrollToPosition(0);
+                    }
+                }
+            });
+        }
+
+        if (navSettings != null) {
+            navSettings.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "Settings navigation clicked");
+                    // Navigate to SettingsActivity
+                    Intent intent = new Intent(ProductListActivity.this, SettingsActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    finish();
+                }
+            });
+        }
+
         // List item click - OPEN PRODUCT DETAILS
         if (productListView != null) {
             productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -416,20 +504,24 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
-    // NEW: Set active category button
     private void setActiveCategoryButton(Button activeButton) {
-        // Reset all buttons to gray
-        categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-        categoryFoodButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-        categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-        categoryDrinksButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
-        categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+        // Reset all buttons to semi-transparent white
+        categoryAllButton.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
+        categoryFoodButton.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
+        categoryMedicineButton.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
+        categoryDrinksButton.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
+        categoryOtherButton.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
 
-        // Set active button to blue
-        activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2196F3));
+        // Set active button to solid white
+        activeButton.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0xFFFFFFFF));
     }
 
-    // NEW: Load all products
     private void loadAllProducts() {
         productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
             @Override
@@ -439,7 +531,6 @@ public class ProductListActivity extends AppCompatActivity {
         });
     }
 
-    // NEW: Load products by category
     private void loadProductsByCategory(String category) {
         productViewModel.getProductsByCategory(category).observe(this, new Observer<List<Product>>() {
             @Override
@@ -449,7 +540,6 @@ public class ProductListActivity extends AppCompatActivity {
         });
     }
 
-    // NEW: Update product list with data
     private void updateProductList(List<Product> products) {
         if (products != null) {
             productList.clear();
@@ -461,7 +551,6 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
-    // Handle result from ProductDetailActivity (for deletion) and AddProductActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -489,7 +578,7 @@ public class ProductListActivity extends AppCompatActivity {
     private void updateProductCount() {
         if (productCountText != null) {
             if (productList.isEmpty()) {
-                productCountText.setText("No products added yet");
+                productCountText.setText("No products in " + currentCategory);
             } else {
                 productCountText.setText("Total: " + productList.size() + " product" +
                         (productList.size() == 1 ? "" : "s") + " (" + currentCategory + ")");

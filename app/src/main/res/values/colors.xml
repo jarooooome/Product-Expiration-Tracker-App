@@ -47,4 +47,42 @@
     <color name="color_text_black">#FFFFFF</color>
     <color name="color_accent_black">#FF9800</color>
     <color name="color_background_black">#303030</color>
+
+
+
+    <!-- Green Theme -->
+    <color name="color_fab_green">#4CAF50</color>
+    <color name="color_fab_icon_green">#FFFFFF</color>
+    <color name="color_nav_background_green">#FFFFFF</color>
+    <color name="color_nav_inactive_green">#757575</color>
+
+    <!-- Blue Theme -->
+    <color name="color_fab_blue">#2196F3</color>
+    <color name="color_fab_icon_blue">#FFFFFF</color>
+    <color name="color_nav_background_blue">#FFFFFF</color>
+    <color name="color_nav_inactive_blue">#757575</color>
+
+    <!-- Pink Theme -->
+    <color name="color_fab_pink">#E91E63</color>
+    <color name="color_fab_icon_pink">#FFFFFF</color>
+    <color name="color_nav_background_pink">#FFFFFF</color>
+    <color name="color_nav_inactive_pink">#757575</color>
+
+    <!-- Purple Theme -->
+    <color name="color_fab_purple">#9C27B0</color>
+    <color name="color_fab_icon_purple">#FFFFFF</color>
+    <color name="color_nav_background_purple">#FFFFFF</color>
+    <color name="color_nav_inactive_purple">#757575</color>
+
+    <!-- Black Theme -->
+    <color name="color_fab_black">#212121</color>
+    <color name="color_fab_icon_black">#FFFFFF</color>
+    <color name="color_nav_background_black">#F5F5F5</color>
+    <color name="color_nav_inactive_black">#757575</color>
+
+    <!-- White Theme -->
+    <color name="color_fab_white">#6200EE</color>
+    <color name="color_fab_icon_white">#FFFFFF</color>
+    <color name="color_nav_background_white">#FFFFFF</color>
+    <color name="color_nav_inactive_white">#757575</color>
 </resources>
