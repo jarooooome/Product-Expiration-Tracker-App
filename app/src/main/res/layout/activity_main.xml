@@ -5,19 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Background ImageView - fitCenter scales to fit width or height, no empty space -->
+    <!-- Background ImageView -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/splash_bg"
         android:scaleType="centerCrop"
         android:contentDescription="Background" />
 
-    <!-- White overlay for text readability -->
+    <!-- White overlay -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#4DFFFFFF" />
+        android:background="#ffffff" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,26 +30,93 @@
             android:layout_height="0dp"
             android:layout_weight="3" />
 
+        <!-- Logo Container with ET Logo and Waves -->
         <FrameLayout
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:id="@+id/logoContainer"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="32dp">
+            android:layout_marginBottom="32dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-            <View
+            <!-- Circular Waves Container -->
+            <FrameLayout
+                android:id="@+id/waveContainer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/dark_glass_circle_bg" />
+                android:layout_gravity="center"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-            <TextView
-                android:id="@+id/logoText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="ET"
-                android:textSize="48sp"
-                android:textStyle="bold"
-                android:textColor="#333333"
-                android:gravity="center" />
+                <!-- Wave 4 (outermost) -->
+                <View
+                    android:id="@+id/wave4"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circle_wave"
+                    android:scaleX="0.2"
+                    android:scaleY="0.2"
+                    android:alpha="0.3" />
+
+                <!-- Wave 3 -->
+                <View
+                    android:id="@+id/wave3"
+                    android:layout_width="130dp"
+                    android:layout_height="130dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circle_wave"
+                    android:scaleX="0.2"
+                    android:scaleY="0.2"
+                    android:alpha="0.4" />
+
+                <!-- Wave 2 -->
+                <View
+                    android:id="@+id/wave2"
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circle_wave"
+                    android:scaleX="0.2"
+                    android:scaleY="0.2"
+                    android:alpha="0.5" />
+
+                <!-- Wave 1 (innermost) -->
+                <View
+                    android:id="@+id/wave1"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circle_wave"
+                    android:scaleX="0.2"
+                    android:scaleY="0.2"
+                    android:alpha="0.6" />
+
+                <!-- ET Logo -->
+                <FrameLayout
+                    android:id="@+id/logoCenter"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/et_logo_background"
+                    android:elevation="8dp">
+
+                    <!-- Logo Text -->
+                    <TextView
+                        android:id="@+id/logoText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="ET"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:gravity="center"
+                        android:fontFamily="sans-serif-medium" />
+
+                </FrameLayout>
+
+            </FrameLayout>
 
         </FrameLayout>
 
@@ -94,6 +160,7 @@
             android:layout_height="0dp"
             android:layout_weight="2" />
 
+        <!-- Progress bar -->
         <FrameLayout
             android:layout_width="180dp"
             android:layout_height="wrap_content"
@@ -127,6 +194,48 @@
             android:layout_marginTop="2dp"
             android:layout_gravity="center_horizontal" />
 
+        <!-- Icons -->
+        <LinearLayout
+            android:id="@+id/iconsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <ImageView
+                android:id="@+id/icon1"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_check"
+                android:layout_marginHorizontal="8dp"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/icon2"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_inventory"
+                android:layout_marginHorizontal="8dp"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/icon3"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_notification"
+                android:layout_marginHorizontal="8dp"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/icon4"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chart"
+                android:layout_marginHorizontal="8dp"
+                android:visibility="invisible" />
+        </LinearLayout>
+
         <Space
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -148,7 +257,6 @@
                 android:gravity="center"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Skip Button with Green background (#4CAF50) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/skipButton"
                 android:layout_width="wrap_content"
