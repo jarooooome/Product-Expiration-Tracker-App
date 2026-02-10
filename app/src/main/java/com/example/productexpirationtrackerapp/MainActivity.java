@@ -6,10 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,7 +23,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private TextView loadingText, appTitle, appSubtitle, versionText;
-    private Button skipButton;
     private View progressFill;
     private Handler handler;
     private Animation fadeInAnimation;
@@ -69,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
             startWelcomeAnimations();
             startLogoWaveAnimation(); // Start wave animation
             startRealLoadingProcess();
-            setupSkipButton();
         }, 100);
     }
 
@@ -287,7 +283,6 @@ public class MainActivity extends AppCompatActivity {
         appTitle = findViewById(R.id.appTitle);
         appSubtitle = findViewById(R.id.appSubtitle);
         versionText = findViewById(R.id.versionText);
-        skipButton = findViewById(R.id.skipButton);
         progressFill = findViewById(R.id.progressFill);
 
         // Wave views
@@ -322,11 +317,6 @@ public class MainActivity extends AppCompatActivity {
             appSubtitle.setVisibility(View.VISIBLE);
         }, 500);
 
-        handler.postDelayed(() -> {
-            skipButton.startAnimation(fadeInAnimation);
-            skipButton.setVisibility(View.VISIBLE);
-        }, 2000);
-
         handler.postDelayed(this::startIconWaveAnimation, 1500);
     }
 
@@ -354,26 +344,6 @@ public class MainActivity extends AppCompatActivity {
             });
             anim.start();
         }, delay);
-    }
-
-    private void setupSkipButton() {
-        skipButton.setOnClickListener(v -> skipToMainApp());
-    }
-
-    private void skipToMainApp() {
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
-        if (iconHandler != null) {
-            iconHandler.removeCallbacksAndMessages(null);
-        }
-        if (progressAnimator != null && progressAnimator.isRunning()) {
-            progressAnimator.cancel();
-        }
-
-        isLoadingComplete = true;
-        updateProgress(100, "Skipping setup...");
-        handler.postDelayed(this::navigateBasedOnUserStatus, 300);
     }
 
     private void goToOnboarding() {

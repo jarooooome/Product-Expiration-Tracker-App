@@ -132,7 +132,7 @@
                 android:id="@+id/appTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ExpiryTrack"
+                android:text="Expiry Track"
                 android:textSize="36sp"
                 android:textStyle="bold"
                 android:textColor="#333333"
@@ -256,19 +256,6 @@
                 android:textColor="#666666"
                 android:gravity="center"
                 android:layout_marginBottom="16dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/skipButton"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:text="SKIP"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:paddingHorizontal="32dp"
-                android:visibility="invisible"
-                app:backgroundTint="#4CAF50"
-                app:cornerRadius="24dp"
-                android:textColor="#FFFFFF" />
 
         </LinearLayout>
 
