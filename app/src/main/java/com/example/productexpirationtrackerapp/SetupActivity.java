@@ -1,6 +1,7 @@
 package com.example.productexpirationtrackerapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -28,6 +29,7 @@ public class SetupActivity extends AppCompatActivity {
     private UserRepository userRepository;
 
     // Theme preview views
+    private CardView headerCard;  // CHANGED: Now referencing CardView instead of LinearLayout
     private LinearLayout headerLayout;
     private TextView titleTextView;
     private TextView subtitleTextView;
@@ -60,6 +62,7 @@ public class SetupActivity extends AppCompatActivity {
         mainLayout = findViewById(R.id.mainLayout);
 
         // Initialize theme preview views
+        headerCard = findViewById(R.id.headerCard);  // NEW: Reference to CardView
         headerLayout = findViewById(R.id.headerLayout);
         titleTextView = findViewById(R.id.titleTextView);
         subtitleTextView = findViewById(R.id.subtitleTextView);
@@ -67,13 +70,8 @@ public class SetupActivity extends AppCompatActivity {
         // Load saved preferences
         loadSavedPreferences();
 
-        // Set up theme change listener for real-time preview
-        themeGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                applyThemePreview(getSelectedTheme());
-            }
-        });
+        // FIX: Set up radio button selection (since RadioGroup doesn't work with wrapped RadioButtons)
+        setupRadioButtonSelection();
 
         // Apply initial theme preview
         applyThemePreview(getSelectedTheme());
@@ -101,6 +99,42 @@ public class SetupActivity extends AppCompatActivity {
         super.onResume();
         // Apply theme when activity resumes
         ThemeUtils.applyTheme(this);
+    }
+
+    // FIX: Add this method to handle radio button single selection
+    private void setupRadioButtonSelection() {
+        // Get all radio buttons
+        RadioButton[] radioButtons = {
+                findViewById(R.id.themeWhite),
+                findViewById(R.id.themeGreen),
+                findViewById(R.id.themeBlue),
+                findViewById(R.id.themePink),
+                findViewById(R.id.themePurple),
+                findViewById(R.id.themeBlack)
+        };
+
+        // Set click listener for each radio button
+        for (final RadioButton currentRb : radioButtons) {
+            if (currentRb != null) {
+                currentRb.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Uncheck all radio buttons except the clicked one
+                        for (RadioButton rb : radioButtons) {
+                            if (rb != null && rb != currentRb) {
+                                rb.setChecked(false);
+                            }
+                        }
+
+                        // Make sure the clicked one is checked
+                        currentRb.setChecked(true);
+
+                        // Trigger theme preview
+                        applyThemePreview(getSelectedTheme());
+                    }
+                });
+            }
+        }
     }
 
     private void loadSavedPreferences() {
@@ -167,19 +201,25 @@ public class SetupActivity extends AppCompatActivity {
     }
 
     private String getSelectedTheme() {
-        int selectedId = themeGroup.getCheckedRadioButtonId();
+        // FIX: Check each radio button directly since RadioGroup won't work with wrapped RadioButtons
+        RadioButton themeWhite = findViewById(R.id.themeWhite);
+        RadioButton themeGreen = findViewById(R.id.themeGreen);
+        RadioButton themeBlue = findViewById(R.id.themeBlue);
+        RadioButton themePink = findViewById(R.id.themePink);
+        RadioButton themePurple = findViewById(R.id.themePurple);
+        RadioButton themeBlack = findViewById(R.id.themeBlack);
 
-        if (selectedId == R.id.themeWhite) {
+        if (themeWhite != null && themeWhite.isChecked()) {
             return "white";
-        } else if (selectedId == R.id.themeGreen) {
+        } else if (themeGreen != null && themeGreen.isChecked()) {
             return "green";
-        } else if (selectedId == R.id.themeBlue) {
+        } else if (themeBlue != null && themeBlue.isChecked()) {
             return "blue";
-        } else if (selectedId == R.id.themePink) {
+        } else if (themePink != null && themePink.isChecked()) {
             return "pink";
-        } else if (selectedId == R.id.themePurple) {
+        } else if (themePurple != null && themePurple.isChecked()) {
             return "purple";
-        } else if (selectedId == R.id.themeBlack) {
+        } else if (themeBlack != null && themeBlack.isChecked()) {
             return "black";
         }
 
@@ -223,6 +263,15 @@ public class SetupActivity extends AppCompatActivity {
                 lightColor = getResources().getColor(R.color.color_primary_light_black);
                 textColor = getResources().getColor(R.color.color_text_black);
                 backgroundColor = getResources().getColor(R.color.color_background_black);
+
+                // Safety check: Ensure text is light enough for dark background
+                float[] hsv = new float[3];
+                Color.colorToHSV(textColor, hsv);
+                float brightness = hsv[2];
+
+                if (brightness < 0.5f) {
+                    textColor = Color.LTGRAY;
+                }
                 break;
             case "white":
             default:
@@ -233,10 +282,19 @@ public class SetupActivity extends AppCompatActivity {
                 break;
         }
 
-        // Apply colors to preview elements
-        if (headerLayout != null) {
-            headerLayout.setBackgroundColor(lightColor);
+        // CHANGED: Apply colors to CardView instead of inner LinearLayout
+        if (headerCard != null) {
+            headerCard.setCardBackgroundColor(lightColor);
         }
+
+        // ADDED: Apply colors to ALL CardViews for complete theme consistency
+        CardView nameCard = findViewById(R.id.nameCard);
+        CardView themeCard = findViewById(R.id.themeCard);
+        CardView notificationCard = findViewById(R.id.notificationCard);
+
+        if (nameCard != null) nameCard.setCardBackgroundColor(lightColor);
+        if (themeCard != null) themeCard.setCardBackgroundColor(lightColor);
+        if (notificationCard != null) notificationCard.setCardBackgroundColor(lightColor);
 
         if (titleTextView != null) {
             titleTextView.setTextColor(textColor);
@@ -273,6 +331,29 @@ public class SetupActivity extends AppCompatActivity {
         for (RadioButton rb : radioButtons) {
             if (rb != null) {
                 rb.setTextColor(textColor);
+            }
+        }
+
+        // Get all option layout containers
+        LinearLayout[] optionLayouts = {
+                findViewById(R.id.optionWhiteLayout),
+                findViewById(R.id.optionGreenLayout),
+                findViewById(R.id.optionBlueLayout),
+                findViewById(R.id.optionPinkLayout),
+                findViewById(R.id.optionPurpleLayout),
+                findViewById(R.id.optionBlackLayout)
+        };
+
+        // Update the LinearLayout backgrounds based on theme
+        for (LinearLayout layout : optionLayouts) {
+            if (layout != null) {
+                if (theme.equals("black")) {
+                    // For black theme, use a dark background
+                    layout.setBackgroundColor(Color.parseColor("#2D2D2D")); // Dark gray
+                } else {
+                    // For light themes, use the original drawable
+                    layout.setBackgroundResource(R.drawable.theme_option_background);
+                }
             }
         }
 
