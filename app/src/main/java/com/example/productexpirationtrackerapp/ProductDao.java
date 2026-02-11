@@ -23,7 +23,7 @@ public interface ProductDao {
     @Query("DELETE FROM products WHERE id = :productId")
     void deleteById(int productId);
 
-    // UPDATE THIS METHOD to return LiveData
+    // ADD THIS METHOD - it's missing from your current file
     @Query("SELECT * FROM products ORDER BY expiryDate ASC")
     LiveData<List<Product>> getAllProductsLiveData();
 
@@ -40,7 +40,6 @@ public interface ProductDao {
     @Query("SELECT * FROM products WHERE expiryDate BETWEEN :startDate AND :endDate")
     List<Product> getProductsExpiringBetween(Date startDate, Date endDate);
 
-    // NEW: Add category filtering query
     @Query("SELECT * FROM products WHERE category = :category ORDER BY expiryDate ASC")
     LiveData<List<Product>> getProductsByCategory(String category);
 }

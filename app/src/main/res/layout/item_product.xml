@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/productItemLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -53,13 +54,14 @@
             android:id="@+id/productDaysLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5 days left"
-            android:textSize="12sp"
-            android:textColor="#4CAF50"
+            android:layout_marginTop="8dp"
             android:background="#E8F5E9"
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
-            android:layout_marginTop="8dp" />
+            android:text="5 days left"
+            android:textColor="#4CAF50"
+            android:textSize="12sp"
+            tools:ignore="TextContrastCheck" />
     </LinearLayout>
 
     <!-- Status Indicator -->

@@ -8,4 +8,9 @@
         <item>Drinks</item>
         <item>Other</item>
     </string-array>
+
+    <string name="expires_format">Expires: %s</string>
+    <string name="expired">EXPIRED</string>
+    <string name="days_left">%d days left</string>
+
 </resources>
