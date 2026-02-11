@@ -5,6 +5,7 @@
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F5F5F5"
     tools:context=".ProductListActivity">
 
     <!-- Main Content -->
@@ -12,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_above="@+id/bottomNavigation"> <!-- Changed from @id to @+id -->
+        android:layout_above="@+id/bottomNavigation">
 
         <!-- Header -->
         <LinearLayout
@@ -25,19 +26,41 @@
             android:paddingBottom="16dp"
             android:elevation="4dp">
 
-            <!-- Title -->
-            <TextView
-                android:id="@+id/titleTextView"
+            <!-- Title Row with View Toggle -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="📦 Your Products"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:layout_marginTop="24dp"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginBottom="12dp">
 
-            <!-- Category Filter Buttons -->
+                <TextView
+                    android:id="@+id/titleTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="📦 Your Products"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF" />
+
+                <!-- View Toggle Button (Grid/List) -->
+                <ImageView
+                    android:id="@+id/viewToggleButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="Toggle View"
+                    android:focusable="true"
+                    android:padding="4dp"
+                    android:src="@android:drawable/ic_menu_view"
+                    app:tint="#FFFFFF"
+                    tools:ignore="TouchTargetSizeCheck" />
+            </LinearLayout>
+
+            <!-- Category Filter Chips -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -55,7 +78,7 @@
                         android:layout_height="36dp"
                         android:text="All"
                         android:textSize="14sp"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#333333"
                         android:paddingHorizontal="16dp"
                         android:layout_marginEnd="8dp"
                         android:backgroundTint="#FFFFFF"
@@ -122,17 +145,49 @@
             android:padding="16dp"
             android:paddingBottom="8dp" />
 
-        <!-- Product List -->
-        <ListView
-            android:id="@+id/productListView"
+        <!-- RecyclerView for Grid/List (replaces ListView) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/productRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:divider="#E0E0E0"
-            android:dividerHeight="1dp"
-            android:paddingHorizontal="8dp"
             android:clipToPadding="false"
+            android:padding="8dp"
             android:paddingBottom="16dp" />
+
+        <!-- Empty State -->
+        <LinearLayout
+            android:id="@+id/emptyStateLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@android:drawable/ic_menu_view"
+                android:alpha="0.2"
+                app:tint="#757575" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No products yet"
+                android:textSize="18sp"
+                android:textColor="#999999"
+                android:layout_marginTop="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tap the + button to add your first product"
+                android:textSize="14sp"
+                android:textColor="#CCCCCC"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Bottom Navigation Bar -->
@@ -236,20 +291,15 @@
     </LinearLayout>
 
     <!-- Floating Action Button (Add Product) -->
-    <ImageView
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addButton"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_above="@id/bottomNavigation"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:src="@android:drawable/ic_input_add"
         android:contentDescription="Add Product"
-        android:background="@drawable/fab_background"
-        android:elevation="6dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="16dp"
         app:tint="#FFFFFF" />
 </RelativeLayout>
