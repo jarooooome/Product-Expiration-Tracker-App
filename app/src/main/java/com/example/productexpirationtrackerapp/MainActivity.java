@@ -1,5 +1,6 @@
 package com.example.productexpirationtrackerapp;
 
+import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,8 +8,7 @@ import android.os.Handler;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,19 +18,31 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
-    private View dot1, dot2, dot3;
     private TextView loadingText, appTitle, appSubtitle, versionText;
-    private Button skipButton;
+    private View progressFill;
     private Handler handler;
-    private boolean isAnimationRunning = false;
     private Animation fadeInAnimation;
+    private ValueAnimator progressAnimator;
 
-    // Add these constants for shared preferences
+    private ImageView icon1, icon2, icon3, icon4;
+    private Handler iconHandler = new Handler();
+
+    // Wave views for circular animation
+    private View wave1, wave2, wave3, wave4;
+    private View logoCenter;
+
+    private int currentProgress = 0;
+    private boolean isLoadingComplete = false;
+
     private static final String PREFS_NAME = "AppPrefs";
-    private static final String PREF_FIRST_TIME = "is_first_time"; // Changed from setup_completed
+    private static final String PREF_FIRST_TIME = "is_first_time";
     private static final String PREF_SETUP_COMPLETED = "setup_completed";
+
+    private AppDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,352 +62,331 @@ public class MainActivity extends AppCompatActivity {
         fadeInAnimation.setDuration(1000);
         handler = new Handler();
 
-        // Check immediately if user should see onboarding
-        checkFirstTimeUser();
-
-        // Start animations with a small delay
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startOneByOneDotAnimation();
-                startWelcomeAnimations();
-                startLoadingProcess();
-                setupSkipButton();
-            }
+        handler.postDelayed(() -> {
+            startWelcomeAnimations();
+            startLogoWaveAnimation(); // Start wave animation
+            startRealLoadingProcess();
         }, 100);
     }
 
-    private void initializeViews() {
-        try {
-            dot1 = findViewById(R.id.dot1);
-            dot2 = findViewById(R.id.dot2);
-            dot3 = findViewById(R.id.dot3);
-            loadingText = findViewById(R.id.loadingText);
-            appTitle = findViewById(R.id.appTitle);
-            appSubtitle = findViewById(R.id.appSubtitle);
-            versionText = findViewById(R.id.versionText);
-            skipButton = findViewById(R.id.skipButton);
+    private void startLogoWaveAnimation() {
+        // Remove clipChildren setting code since it's already in XML
+        // Just start the animations
 
-            // Set version text
-            if (versionText != null) {
-                versionText.setText("Version 1.0");
-            }
+        // Animate wave1 - REDUCED RADIUS (smaller max scale)
+        animateWaveWithValueAnimator(wave1, 0.2f, 1.0f, 0.6f, 0f, 0);
+        // Animate wave2 - REDUCED RADIUS (smaller max scale)
+        animateWaveWithValueAnimator(wave2, 0.2f, 1.1f, 0.5f, 0f, 500);
+        // Animate wave3 - REDUCED RADIUS (smaller max scale)
+        animateWaveWithValueAnimator(wave3, 0.2f, 1.2f, 0.4f, 0f, 1000);
+        // Animate wave4 - REDUCED RADIUS (smaller max scale)
+        animateWaveWithValueAnimator(wave4, 0.2f, 1.3f, 0.3f, 0f, 1500);
 
-            // Reset dots to initial position
-            resetDots();
-        } catch (Exception e) {
-            Toast.makeText(this, "Error finding views: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        // Add a subtle pulse animation to the ET logo using ValueAnimator
+        startLogoPulseAnimation();
     }
 
-    private void checkFirstTimeUser() {
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean isFirstTime = preferences.getBoolean(PREF_FIRST_TIME, true); // Default to true (first time)
+    private void animateWaveWithValueAnimator(View wave, float startScale, float endScale,
+                                              float startAlpha, float endAlpha, long startDelay) {
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(3000);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setRepeatMode(ValueAnimator.RESTART);
+        animator.setStartDelay(startDelay);
+        animator.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
 
-        // If it's not the first time AND setup is completed, go directly to ProductList
-        if (!isFirstTime) {
-            boolean setupCompleted = preferences.getBoolean(PREF_SETUP_COMPLETED, false);
-            if (setupCompleted) {
-                // User has completed setup before, go directly to ProductList
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        goToProductList();
-                    }
-                }, 1000); // Short delay to show logo
-            }
-        }
-        // If it's first time, we'll show animations and then decide in proceedToMainApp()
-    }
+        animator.addUpdateListener(animation -> {
+            float fraction = animation.getAnimatedFraction();
 
-    private void resetDots() {
-        if (dot1 != null) {
-            dot1.setTranslationY(0);
-            dot1.setScaleX(1.0f);
-            dot1.setScaleY(1.0f);
-        }
-        if (dot2 != null) {
-            dot2.setTranslationY(0);
-            dot2.setScaleX(1.0f);
-            dot2.setScaleY(1.0f);
-        }
-        if (dot3 != null) {
-            dot3.setTranslationY(0);
-            dot3.setScaleX(1.0f);
-            dot3.setScaleY(1.0f);
-        }
-    }
+            // Calculate current scale
+            float currentScale = startScale + (endScale - startScale) * fraction;
+            wave.setScaleX(currentScale);
+            wave.setScaleY(currentScale);
 
-    private void startOneByOneDotAnimation() {
-        isAnimationRunning = true;
-        resetDots();
-
-        // Start the animation sequence
-        animateDotSequence();
-    }
-
-    private void animateDotSequence() {
-        if (!isAnimationRunning) return;
-
-        // Reset all dots first
-        resetDots();
-
-        // VERY FAST WAVE but SLOW BALL MOVEMENT:
-        // All dots start with very short delays between them
-        jumpDot(dot1, 0, new Runnable() {
-            @Override
-            public void run() {
-                // Very short delay before repeating the wave
-                if (isAnimationRunning) {
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (isAnimationRunning) {
-                                animateDotSequence();
-                            }
-                        }
-                    }, 300);
-                }
-            }
+            // Calculate current alpha
+            float currentAlpha = startAlpha + (endAlpha - startAlpha) * fraction;
+            wave.setAlpha(currentAlpha);
         });
 
-        // Dot2 starts with VERY SHORT delay after Dot1
-        jumpDot(dot2, 150, null);
-
-        // Dot3 starts with VERY SHORT delay after Dot2
-        jumpDot(dot3, 300, null);
+        animator.start();
     }
 
-    private void jumpDot(final View dot, long startDelay, final Runnable onComplete) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // VERY SLOW ball movement
-                dot.animate()
-                        .translationY(-30f)
-                        .scaleY(1.4f)
-                        .scaleX(1.1f)
-                        .setDuration(600)  // VERY SLOW: 600ms for up movement
-                        .setInterpolator(new OvershootInterpolator(0.4f)) // Very smooth
-                        .withEndAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                // Short pause at the top
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // VERY SLOW ball movement down
-                                        dot.animate()
-                                                .translationY(0f)
-                                                .scaleY(1.0f)
-                                                .scaleX(1.0f)
-                                                .setDuration(600)  // VERY SLOW: 600ms for down movement
-                                                .setInterpolator(new OvershootInterpolator(0.4f))
-                                                .withEndAction(onComplete);
-                                    }
-                                }, 100); // Short pause at top
-                            }
-                        });
-            }
-        }, startDelay);
+    private void startLogoPulseAnimation() {
+        ValueAnimator pulseAnimator = ValueAnimator.ofFloat(1f, 1.05f, 1f);
+        pulseAnimator.setDuration(1500);
+        pulseAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        pulseAnimator.setRepeatMode(ValueAnimator.RESTART);
+        pulseAnimator.addUpdateListener(animation -> {
+            float value = (float) animation.getAnimatedValue();
+            logoCenter.setScaleX(value);
+            logoCenter.setScaleY(value);
+        });
+        pulseAnimator.start();
+    }
+
+    private void startRealLoadingProcess() {
+        updateProgress(0, "Welcome to ExpiryTrack...");
+
+        handler.postDelayed(() -> updateProgress(5, "Loading application framework..."), 300);
+        handler.postDelayed(() -> updateProgress(10, "Initializing core modules..."), 800);
+        handler.postDelayed(() -> updateProgress(15, "Setting up user interface..."), 1300);
+
+        handler.postDelayed(() -> {
+            updateProgress(20, "Preparing database system...");
+            checkDatabaseAndUpdateProgress();
+        }, 1800);
+    }
+
+    private void checkDatabaseAndUpdateProgress() {
+        updateProgress(25, "Establishing database connection...");
+        database = AppDatabase.getDatabase(this);
+
+        handler.postDelayed(() -> {
+            updateProgress(30, "Verifying database integrity...");
+
+            new Thread(() -> {
+                try {
+                    Thread.sleep(800);
+                    runOnUiThread(() -> updateProgress(35, "Connected to local database..."));
+
+                    Thread.sleep(600);
+                    runOnUiThread(() -> updateProgress(40, "Scanning existing products..."));
+
+                    List<Product> existingProducts = database.productDao().getAllProducts();
+                    int initialCount = existingProducts.size();
+
+                    runOnUiThread(() ->
+                            updateProgress(45, "Found " + initialCount + " product(s)..."));
+
+                    Thread.sleep(500);
+
+                    if (initialCount == 0) {
+                        runOnUiThread(() ->
+                                updateProgress(50, "Database empty, creating sample data..."));
+                        Thread.sleep(800);
+
+                        runOnUiThread(() -> updateProgress(55, "Adding food items..."));
+                        database.productDao().insert(new Product("Milk", "2024-12-31"));
+                        Thread.sleep(300);
+
+                        runOnUiThread(() -> updateProgress(60, "Adding dairy products..."));
+                        database.productDao().insert(new Product("Eggs", "2024-12-15"));
+                        Thread.sleep(300);
+
+                        runOnUiThread(() -> updateProgress(65, "Adding pantry items..."));
+                        database.productDao().insert(new Product("Bread", "2024-12-20"));
+                        Thread.sleep(300);
+
+                        int count = database.productDao().getAllProducts().size();
+                        runOnUiThread(() ->
+                                updateProgress(70, "Database ready with " + count + " sample items"));
+                    } else {
+                        runOnUiThread(() ->
+                                updateProgress(70, "Database loaded successfully"));
+                    }
+
+                    runOnUiThread(this::checkUserPreferencesAndUpdateProgress);
+
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this, "Database error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        updateProgress(70, "Database warning - using fallback mode");
+                        checkUserPreferencesAndUpdateProgress();
+                    });
+                }
+            }).start();
+
+        }, 500);
+    }
+
+    private void checkUserPreferencesAndUpdateProgress() {
+        updateProgress(75, "Loading user configuration...");
+
+        handler.postDelayed(() -> {
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            boolean isFirstTime = prefs.getBoolean(PREF_FIRST_TIME, true);
+            boolean setupCompleted = prefs.getBoolean(PREF_SETUP_COMPLETED, false);
+
+            String status = isFirstTime
+                    ? "First-time user detected"
+                    : setupCompleted
+                    ? "Welcome back! Loading your data..."
+                    : "Setup incomplete - configuration needed";
+
+            updateProgress(85, status);
+            handler.postDelayed(this::loadThemeAndFinalize, 800);
+        }, 500);
+    }
+
+    private void loadThemeAndFinalize() {
+        updateProgress(87, "Applying visual theme...");
+
+        handler.postDelayed(() -> {
+            updateProgress(90, "Theme selected");
+            handler.postDelayed(() -> {
+                updateProgress(94, "Preparing systems...");
+                handler.postDelayed(() -> {
+                    updateProgress(100, "Ready! Launching application...");
+                    isLoadingComplete = true;
+                    handler.postDelayed(this::navigateBasedOnUserStatus, 800);
+                }, 800);
+            }, 800);
+        }, 500);
+    }
+
+    private void navigateBasedOnUserStatus() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        boolean isFirstTime = prefs.getBoolean(PREF_FIRST_TIME, true);
+        boolean setupCompleted = prefs.getBoolean(PREF_SETUP_COMPLETED, false);
+
+        if (isFirstTime) goToOnboarding();
+        else if (setupCompleted) goToProductList();
+        else goToSetup();
+    }
+
+    private void updateProgress(int progress, String status) {
+        currentProgress = progress;
+        runOnUiThread(() -> {
+            loadingText.setText(status);
+
+            // Wait for layout to be measured
+            progressFill.post(() -> {
+                View track = findViewById(R.id.progressTrack);
+                if (track != null && track.getWidth() > 0) {
+                    int maxWidth = track.getWidth();
+                    int newWidth = (int) (maxWidth * (progress / 100f));
+                    int currentWidth = progressFill.getLayoutParams().width;
+
+                    if (progressAnimator != null && progressAnimator.isRunning()) {
+                        progressAnimator.cancel();
+                    }
+
+                    progressAnimator = ValueAnimator.ofInt(currentWidth, newWidth);
+                    progressAnimator.setDuration(300);
+                    progressAnimator.addUpdateListener(a -> {
+                        progressFill.getLayoutParams().width = (int) a.getAnimatedValue();
+                        progressFill.requestLayout();
+                    });
+                    progressAnimator.start();
+                } else {
+                    // If track not measured yet, try again
+                    if (progress < 100) {
+                        handler.postDelayed(() -> updateProgress(progress, status), 50);
+                    }
+                }
+            });
+        });
+    }
+
+    private void initializeViews() {
+        loadingText = findViewById(R.id.loadingText);
+        appTitle = findViewById(R.id.appTitle);
+        appSubtitle = findViewById(R.id.appSubtitle);
+        versionText = findViewById(R.id.versionText);
+        progressFill = findViewById(R.id.progressFill);
+
+        // Wave views
+        wave1 = findViewById(R.id.wave1);
+        wave2 = findViewById(R.id.wave2);
+        wave3 = findViewById(R.id.wave3);
+        wave4 = findViewById(R.id.wave4);
+        logoCenter = findViewById(R.id.logoCenter);
+
+        icon1 = findViewById(R.id.icon1);
+        icon2 = findViewById(R.id.icon2);
+        icon3 = findViewById(R.id.icon3);
+        icon4 = findViewById(R.id.icon4);
+
+        // Set version text
+        if (versionText != null) {
+            versionText.setText("Version 1.0");
+        }
+
+        // Initialize progress bar
+        progressFill.getLayoutParams().width = 0;
+        progressFill.requestLayout();
     }
 
     private void startWelcomeAnimations() {
-        if (appTitle != null) {
-            appTitle.startAnimation(fadeInAnimation);
-        }
+        // Use fade animation for title
+        appTitle.startAnimation(fadeInAnimation);
+        appTitle.setVisibility(View.VISIBLE);
 
-        if (appSubtitle != null) {
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    appSubtitle.startAnimation(fadeInAnimation);
-                }
-            }, 500);
-        }
+        handler.postDelayed(() -> {
+            appSubtitle.startAnimation(fadeInAnimation);
+            appSubtitle.setVisibility(View.VISIBLE);
+        }, 500);
 
-        if (skipButton != null) {
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    skipButton.setVisibility(View.VISIBLE);
-                    skipButton.startAnimation(fadeInAnimation);
-                }
-            }, 2000);
-        }
+        handler.postDelayed(this::startIconWaveAnimation, 1500);
     }
 
-    private void startLoadingProcess() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (loadingText != null) {
-                    loadingText.setText("Initializing app...");
-                    loadingText.startAnimation(fadeInAnimation);
-                }
-            }
-        }, 1000);
+    private void startIconWaveAnimation() {
+        icon1.setVisibility(View.VISIBLE);
+        icon2.setVisibility(View.VISIBLE);
+        icon3.setVisibility(View.VISIBLE);
+        icon4.setVisibility(View.VISIBLE);
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (loadingText != null) {
-                    loadingText.setText("Loading product database...");
-                    loadingText.startAnimation(fadeInAnimation);
-                }
-            }
-        }, 2000);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (loadingText != null) {
-                    loadingText.setText("Checking expiry dates...");
-                    loadingText.startAnimation(fadeInAnimation);
-                }
-            }
-        }, 3000);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (loadingText != null) {
-                    loadingText.setText("Almost ready...");
-                    loadingText.startAnimation(fadeInAnimation);
-                }
-            }
-        }, 4000);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                proceedToMainApp();
-            }
-        }, 5000);
+        animateIconWave(icon1, 0);
+        animateIconWave(icon2, 200);
+        animateIconWave(icon3, 400);
+        animateIconWave(icon4, 600);
     }
 
-    private void setupSkipButton() {
-        if (skipButton != null) {
-            skipButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    skipToMainApp();
-                }
+    private void animateIconWave(ImageView icon, long delay) {
+        iconHandler.postDelayed(() -> {
+            ValueAnimator anim = ValueAnimator.ofFloat(0f, -12f, 0f, 12f, 0f);
+            anim.setDuration(5000);
+            anim.setRepeatCount(ValueAnimator.INFINITE);
+            anim.setRepeatMode(ValueAnimator.RESTART);
+            anim.addUpdateListener(animation -> {
+                float value = (float) animation.getAnimatedValue();
+                icon.setTranslationY(value);
             });
-        }
-    }
-
-    private void proceedToMainApp() {
-        isAnimationRunning = false;
-
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean isFirstTime = preferences.getBoolean(PREF_FIRST_TIME, true);
-
-        if (isFirstTime) {
-            // First time user: go to Onboarding
-            goToOnboarding();
-        } else {
-            // Returning user: check if setup was completed
-            boolean setupCompleted = preferences.getBoolean(PREF_SETUP_COMPLETED, false);
-            if (setupCompleted) {
-                goToProductList();
-            } else {
-                // User skipped setup before, go to SetupActivity
-                goToSetup();
-            }
-        }
-    }
-
-    private void skipToMainApp() {
-        isAnimationRunning = false;
-
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
-
-        if (loadingText != null) {
-            loadingText.setText("Skipping...");
-        }
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                proceedToMainApp();
-            }
-        }, 300);
+            anim.start();
+        }, delay);
     }
 
     private void goToOnboarding() {
         try {
-            Intent intent = new Intent(MainActivity.this, OnboardingActivity.class);
+            Intent intent = new Intent(this, OnboardingActivity.class);
             startActivity(intent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
         } catch (Exception e) {
-            if (loadingText != null) {
-                loadingText.setText("Create OnboardingActivity first!");
-            }
-            Toast.makeText(this, "Please create OnboardingActivity", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Create OnboardingActivity first!", Toast.LENGTH_LONG).show();
         }
     }
 
     private void goToProductList() {
         try {
-            Intent intent = new Intent(MainActivity.this, ProductListActivity.class);
+            Intent intent = new Intent(this, ProductListActivity.class);
             startActivity(intent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
         } catch (Exception e) {
-            if (loadingText != null) {
-                loadingText.setText("Create ProductListActivity first!");
-            }
-            Toast.makeText(this, "Please create ProductListActivity", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Create ProductListActivity first!", Toast.LENGTH_LONG).show();
         }
     }
 
     private void goToSetup() {
         try {
-            Intent intent = new Intent(MainActivity.this, SetupActivity.class);
+            Intent intent = new Intent(this, SetupActivity.class);
             startActivity(intent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
         } catch (Exception e) {
-            if (loadingText != null) {
-                loadingText.setText("Create SetupActivity first!");
-            }
-            Toast.makeText(this, "Please create SetupActivity", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Create SetupActivity first!", Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        isAnimationRunning = false;
-
+        if (progressAnimator != null && progressAnimator.isRunning()) {
+            progressAnimator.cancel();
+        }
         if (handler != null) {
             handler.removeCallbacksAndMessages(null);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        isAnimationRunning = false;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (dot1 != null && dot2 != null && dot3 != null) {
-            if (!isAnimationRunning) {
-                isAnimationRunning = true;
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startOneByOneDotAnimation();
-                    }
-                }, 100);
-            }
+        if (iconHandler != null) {
+            iconHandler.removeCallbacksAndMessages(null);
         }
     }
 }

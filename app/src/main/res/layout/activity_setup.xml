@@ -1,155 +1,396 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@drawable/gradient_background"
     android:fillViewport="true">
 
     <LinearLayout
+        android:id="@+id/mainLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- Title -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Customize Your App"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:gravity="center"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="32dp" />
-
-        <!-- User Name -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Your Name (Optional)"
-            android:textSize="18sp"
-            android:textColor="#333333"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/userNameEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter your name"
-            android:padding="16dp"
-            android:background="@drawable/edittext_background"
-            android:layout_marginBottom="32dp" />
-
-        <!-- Color Theme Selection -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Choose Color Theme"
-            android:textSize="18sp"
-            android:textColor="#333333"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Theme Selection using RadioGroup -->
-        <RadioGroup
-            android:id="@+id/themeGroup"
+        <!-- Theme Preview Header with Card Style -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/headerCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:orientation="vertical">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp">
 
-            <!-- White/Light Theme (DEFAULT) -->
-            <RadioButton
-                android:id="@+id/themeWhite"
+            <LinearLayout
+                android:id="@+id/headerLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="Light (Default)"
-                android:textSize="16sp"
-                android:textColor="#333333"
-                android:paddingVertical="12dp" />
+                android:orientation="vertical"
+                android:padding="24dp">
 
-            <!-- Green Theme -->
-            <RadioButton
-                android:id="@+id/themeGreen"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Green"
-                android:textSize="16sp"
-                android:textColor="#333333"
-                android:paddingVertical="12dp" />
+                <!-- Icon -->
+                <ImageView
+                    android:id="@+id/headerIcon"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_palette"
+                    android:layout_marginBottom="16dp"
+                    app:tint="#4CAF50" />
 
-            <!-- Blue Theme -->
-            <RadioButton
-                android:id="@+id/themeBlue"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Blue"
-                android:textSize="16sp"
-                android:textColor="#333333"
-                android:paddingVertical="12dp" />
+                <TextView
+                    android:id="@+id/titleTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Customize Your App"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="#1A1A1A"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif-medium" />
 
-            <!-- Pink Theme -->
-            <RadioButton
-                android:id="@+id/themePink"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Pink"
-                android:textSize="16sp"
-                android:textColor="#333333"
-                android:paddingVertical="12dp" />
+                <TextView
+                    android:id="@+id/subtitleTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Preview how your theme will look"
+                    android:textSize="16sp"
+                    android:textColor="#757575"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif-light" />
 
-            <!-- Purple Theme -->
-            <RadioButton
-                android:id="@+id/themePurple"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Purple"
-                android:textSize="16sp"
-                android:textColor="#333333"
-                android:paddingVertical="12dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-            <!-- Black/Dark Theme -->
-            <RadioButton
-                android:id="@+id/themeBlack"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Dark"
-                android:textSize="16sp"
-                android:textColor="#333333"
-                android:paddingVertical="12dp" />
-
-        </RadioGroup>
-
-        <!-- Notifications -->
-        <TextView
+        <!-- User Name Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/nameCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Notifications"
-            android:textSize="18sp"
-            android:textColor="#333333"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
-        <LinearLayout
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/userNameLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Your Name (Optional)"
+                    android:textSize="16sp"
+                    android:textColor="#424242"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <EditText
+                    android:id="@+id/userNameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter your name"
+                    android:padding="16dp"
+                    android:background="@drawable/edittext_background"
+                    android:textSize="16sp"
+                    android:textColor="#1A1A1A"
+                    android:textColorHint="#9E9E9E"
+                    android:inputType="textPersonName"
+                    android:maxLines="1" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Color Theme Selection Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/themeCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="32dp">
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
-            <TextView
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Enable expiry reminders"
-                android:textSize="16sp"
-                android:textColor="#666666" />
+                android:orientation="vertical"
+                android:padding="20dp">
 
-            <Switch
-                android:id="@+id/notificationSwitch"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/themeLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Choose Color Theme"
+                    android:textSize="16sp"
+                    android:textColor="#424242"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <!-- Theme Selection using RadioGroup -->
+                <RadioGroup
+                    android:id="@+id/themeGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- White/Light Theme (DEFAULT) -->
+                    <LinearLayout
+                        android:id="@+id/optionWhiteLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/theme_option_background"
+                        android:padding="12dp"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/color_circle"
+                            android:backgroundTint="#FFFFFF"
+                            android:layout_marginEnd="12dp" />
+
+                        <RadioButton
+                            android:id="@+id/themeWhite"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:checked="true"
+                            android:text="Light (Default)"
+                            android:textSize="16sp"
+                            android:textColor="#333333"
+                            android:paddingVertical="8dp" />
+                    </LinearLayout>
+
+                    <!-- Green Theme -->
+                    <LinearLayout
+                        android:id="@+id/optionGreenLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/theme_option_background"
+                        android:padding="12dp"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/color_circle"
+                            android:backgroundTint="#4CAF50"
+                            android:layout_marginEnd="12dp" />
+
+                        <RadioButton
+                            android:id="@+id/themeGreen"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Green"
+                            android:textSize="16sp"
+                            android:textColor="#333333"
+                            android:paddingVertical="8dp" />
+                    </LinearLayout>
+
+                    <!-- Blue Theme -->
+                    <LinearLayout
+                        android:id="@+id/optionBlueLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/theme_option_background"
+                        android:padding="12dp"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/color_circle"
+                            android:backgroundTint="#2196F3"
+                            android:layout_marginEnd="12dp" />
+
+                        <RadioButton
+                            android:id="@+id/themeBlue"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Blue"
+                            android:textSize="16sp"
+                            android:textColor="#333333"
+                            android:paddingVertical="8dp" />
+                    </LinearLayout>
+
+                    <!-- Pink Theme -->
+                    <LinearLayout
+                        android:id="@+id/optionPinkLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/theme_option_background"
+                        android:padding="12dp"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/color_circle"
+                            android:backgroundTint="#E91E63"
+                            android:layout_marginEnd="12dp" />
+
+                        <RadioButton
+                            android:id="@+id/themePink"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Pink"
+                            android:textSize="16sp"
+                            android:textColor="#333333"
+                            android:paddingVertical="8dp" />
+                    </LinearLayout>
+
+                    <!-- Purple Theme -->
+                    <LinearLayout
+                        android:id="@+id/optionPurpleLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/theme_option_background"
+                        android:padding="12dp"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/color_circle"
+                            android:backgroundTint="#9C27B0"
+                            android:layout_marginEnd="12dp" />
+
+                        <RadioButton
+                            android:id="@+id/themePurple"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Purple"
+                            android:textSize="16sp"
+                            android:textColor="#333333"
+                            android:paddingVertical="8dp" />
+                    </LinearLayout>
+
+                    <!-- Black/Dark Theme -->
+                    <LinearLayout
+                        android:id="@+id/optionBlackLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/theme_option_background"
+                        android:padding="12dp"
+                        android:gravity="center_vertical">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/color_circle"
+                            android:backgroundTint="#212121"
+                            android:layout_marginEnd="12dp" />
+
+                        <RadioButton
+                            android:id="@+id/themeBlack"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Dark"
+                            android:textSize="16sp"
+                            android:textColor="#333333"
+                            android:paddingVertical="8dp" />
+                    </LinearLayout>
+
+                </RadioGroup>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Notifications Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/notificationCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/notificationLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Notifications"
+                    android:textSize="16sp"
+                    android:textColor="#424242"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <LinearLayout
+                    android:id="@+id/notificationLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_notifications"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#757575" />
+
+                    <TextView
+                        android:id="@+id/notificationText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Enable expiry reminders"
+                        android:textSize="16sp"
+                        android:textColor="#666666" />
+
+                    <Switch
+                        android:id="@+id/notificationSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:thumbTint="#4CAF50"
+                        android:trackTint="#C8E6C9" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Debug Database Button -->
+        <Button
+            android:id="@+id/debugDbButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔧 Debug Database"
+            android:textColor="#757575"
+            android:background="@drawable/debug_button_background"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp"
+            android:padding="12dp"
+            android:textAllCaps="false" />
 
         <!-- Finish Button -->
         <Button
@@ -159,9 +400,13 @@
             android:text="Finish Setup"
             android:textSize="18sp"
             android:textColor="#FFFFFF"
-            android:background="#4CAF50"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="32dp" />
+            android:background="@drawable/finish_button_background"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="32dp"
+            android:elevation="4dp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-medium" />
 
     </LinearLayout>
 </ScrollView>
