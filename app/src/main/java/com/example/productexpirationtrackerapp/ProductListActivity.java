@@ -12,7 +12,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.Color;
+import android.widget.HorizontalScrollView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,7 +31,11 @@ public class ProductListActivity extends AppCompatActivity {
     private static final String TAG = "ProductListDebug";
 
     // UI Components
-    private TextView titleTextView;
+    private ImageView logoImageView;
+    private TextView appNameTextView;
+    private TextView hiUserTextView;
+    private TextView welcomeDescriptionTextView;
+    private TextView categoryLabelTextView;
     private ImageView addButton;
     private TextView productCountText;
     private ListView productListView;
@@ -39,11 +43,12 @@ public class ProductListActivity extends AppCompatActivity {
     private LinearLayout bottomNavigation;
     private LinearLayout headerLayout;
     private EditText searchEditText;
-    private ImageView searchIcon;
+    private TextView searchEmoji;
     private ImageView clearSearchButton;
+    private HorizontalScrollView categoryScrollView;
 
-    // Category filter buttons
-    private Button categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
+    // Category filter buttons - CHANGED FROM Button TO TextView
+    private TextView categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
 
     // Bottom Navigation
     private LinearLayout navProfile, navProducts, navSettings;
@@ -52,7 +57,7 @@ public class ProductListActivity extends AppCompatActivity {
 
     // Data
     private ArrayList<Product> productList;
-    private ArrayList<Product> allProducts; // For search filtering
+    private ArrayList<Product> allProducts;
     private ProductListAdapter adapter;
     private SharedPreferences preferences;
     private UserRepository userRepository;
@@ -115,22 +120,30 @@ public class ProductListActivity extends AppCompatActivity {
         // Load all products by default
         loadAllProducts();
 
+        // Update category counts
+        updateCategoryCounts();
+
         Log.d(TAG, "ProductListActivity setup complete");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Update user name if changed
-        String userName = preferences.getString("user_name", "User");
-        if (titleTextView != null) {
-            titleTextView.setText("📦 " + userName + "'s Products");
-        }
-
         // Reapply theme
         applyThemeFromDatabase();
 
-        Log.d(TAG, "onResume called, title updated and theme reapplied");
+        // Update welcome text with user name
+        updateWelcomeText();
+
+        Log.d(TAG, "onResume called, theme reapplied and welcome text updated");
+    }
+
+    private void updateWelcomeText() {
+        if (hiUserTextView != null) {
+            String userName = preferences.getString("user_name", "User");
+            hiUserTextView.setText("Hi, " + userName + "! \uD83D\uDC4B");
+            Log.d(TAG, "Welcome text updated for user: " + userName);
+        }
     }
 
     private void applyThemeFromDatabase() {
@@ -206,11 +219,31 @@ public class ProductListActivity extends AppCompatActivity {
         // DEBUG LOGGING
         Log.d(TAG, "Theme: " + theme);
         Log.d(TAG, "Background Color: " + String.format("#%08X", backgroundColor));
-        Log.d(TAG, "FAB Background Color: " + String.format("#%08X", fabBackgroundColor));
+        Log.d(TAG, "FAB Color: " + String.format("#%08X", fabBackgroundColor));
+
+        // Save FAB color to preferences for later use
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("fab_background_color", fabBackgroundColor);
+        editor.apply();
 
         // Apply colors to views if they exist
-        if (titleTextView != null) {
-            titleTextView.setTextColor(Color.WHITE);
+        if (appNameTextView != null) {
+            appNameTextView.setTextColor(fabBackgroundColor);
+        }
+
+        // Apply FAB color to big "Hi, User!" text
+        if (hiUserTextView != null) {
+            hiUserTextView.setTextColor(fabBackgroundColor);
+        }
+
+        // Apply FAB color to small description text
+        if (welcomeDescriptionTextView != null) {
+            welcomeDescriptionTextView.setTextColor(fabBackgroundColor);
+        }
+
+        // Apply FAB color to category label
+        if (categoryLabelTextView != null) {
+            categoryLabelTextView.setTextColor(fabBackgroundColor);
         }
 
         if (productCountText != null) {
@@ -227,10 +260,10 @@ public class ProductListActivity extends AppCompatActivity {
             productListView.setBackgroundColor(backgroundColor);
         }
 
-        // Apply header background color - SAME AS FAB
+        // Header background color matches body color
         if (headerLayout != null) {
-            headerLayout.setBackgroundColor(fabBackgroundColor);
-            Log.d(TAG, "Set header to FAB color: " + String.format("#%08X", fabBackgroundColor));
+            headerLayout.setBackgroundColor(backgroundColor);
+            Log.d(TAG, "Set header to body color: " + String.format("#%08X", backgroundColor));
         }
 
         // Apply search bar styling
@@ -239,8 +272,49 @@ public class ProductListActivity extends AppCompatActivity {
             searchEditText.setHintTextColor(Color.parseColor("#999999"));
         }
 
+        // Set category button colors to match FAB
+        setCategoryButtonColors(fabBackgroundColor);
+
+        // Set active category button (default to "All")
+        if (categoryAllButton != null) {
+            setActiveCategoryButton(categoryAllButton, fabBackgroundColor);
+        }
+
         // Apply FAB and bottom navigation colors
         applyFABAndBottomNavColors();
+    }
+
+    private void setCategoryButtonColors(int fabColor) {
+        // All buttons start with lighter FAB color
+        float[] hsv = new float[3];
+        Color.colorToHSV(fabColor, hsv);
+        hsv[2] = 0.8f; // Reduce brightness to 80% for lighter version
+        int lighterFabColor = Color.HSVToColor(hsv);
+
+        if (categoryAllButton != null) {
+            categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            categoryAllButton.setTextColor(Color.WHITE);
+        }
+
+        if (categoryFoodButton != null) {
+            categoryFoodButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            categoryFoodButton.setTextColor(Color.WHITE);
+        }
+
+        if (categoryMedicineButton != null) {
+            categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            categoryMedicineButton.setTextColor(Color.WHITE);
+        }
+
+        if (categoryDrinksButton != null) {
+            categoryDrinksButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            categoryDrinksButton.setTextColor(Color.WHITE);
+        }
+
+        if (categoryOtherButton != null) {
+            categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            categoryOtherButton.setTextColor(Color.WHITE);
+        }
     }
 
     private void applyFABAndBottomNavColors() {
@@ -260,11 +334,6 @@ public class ProductListActivity extends AppCompatActivity {
         // Apply bottom navigation background color - SAME AS FAB
         if (bottomNavigation != null) {
             bottomNavigation.setBackgroundColor(fabBackgroundColor);
-        }
-
-        // Apply header background color - SAME AS FAB
-        if (headerLayout != null) {
-            headerLayout.setBackgroundColor(fabBackgroundColor);
         }
 
         // Make all navigation icons/text WHITE for contrast
@@ -289,12 +358,17 @@ public class ProductListActivity extends AppCompatActivity {
             navSettingsText.setTextColor(whiteColor);
         }
 
-        // Search icons
-        if (searchIcon != null) {
-            searchIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        // Search emoji - set to white for contrast on search bar
+        if (searchEmoji != null) {
+            searchEmoji.setTextColor(whiteColor);
         }
         if (clearSearchButton != null) {
             clearSearchButton.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        }
+
+        // Logo - keep original colors
+        if (logoImageView != null) {
+            logoImageView.setImageTintList(null);
         }
     }
 
@@ -303,15 +377,20 @@ public class ProductListActivity extends AppCompatActivity {
 
         try {
             // Initialize views
-            titleTextView = findViewById(R.id.titleTextView);
+            logoImageView = findViewById(R.id.logoImageView);
+            appNameTextView = findViewById(R.id.appNameTextView);
+            hiUserTextView = findViewById(R.id.hiUserTextView);
+            welcomeDescriptionTextView = findViewById(R.id.welcomeDescriptionTextView);
+            categoryLabelTextView = findViewById(R.id.categoryLabelTextView);
             addButton = findViewById(R.id.addButton);
             productCountText = findViewById(R.id.productCountText);
             productListView = findViewById(R.id.productListView);
             bottomNavigation = findViewById(R.id.bottomNavigation);
             headerLayout = findViewById(R.id.headerLayout);
             searchEditText = findViewById(R.id.searchEditText);
-            searchIcon = findViewById(R.id.searchIcon);
+            searchEmoji = findViewById(R.id.searchEmoji);
             clearSearchButton = findViewById(R.id.clearSearchButton);
+            categoryScrollView = findViewById(R.id.categoryScrollView);
 
             Log.d(TAG, "Views found successfully");
 
@@ -327,6 +406,8 @@ public class ProductListActivity extends AppCompatActivity {
         categoryMedicineButton = findViewById(R.id.categoryMedicineButton);
         categoryDrinksButton = findViewById(R.id.categoryDrinksButton);
         categoryOtherButton = findViewById(R.id.categoryOtherButton);
+
+        Log.d(TAG, "Category buttons initialized as TextViews");
     }
 
     private void initializeBottomNavigation() {
@@ -384,7 +465,6 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
-    // ✅ FIXED: Added null checks for product name and category
     private void filterProducts(String query) {
         if (allProducts == null || allProducts.isEmpty()) {
             return;
@@ -400,13 +480,10 @@ public class ProductListActivity extends AppCompatActivity {
         ArrayList<Product> filteredList = new ArrayList<>();
 
         for (Product product : allProducts) {
-            // ✅ FIX 1: Null check for product name
             String productName = product.getName();
             if (productName != null && productName.toLowerCase().contains(lowerCaseQuery)) {
                 filteredList.add(product);
-            }
-            // ✅ FIX 2: Null check for category
-            else {
+            } else {
                 String category = product.getCategory();
                 if (category != null && category.toLowerCase().contains(lowerCaseQuery)) {
                     filteredList.add(product);
@@ -434,13 +511,6 @@ public class ProductListActivity extends AppCompatActivity {
             productListView.setAdapter(adapter);
             Log.d(TAG, "Adapter set to ListView");
         }
-
-        // Set user's name in title
-        String userName = preferences.getString("user_name", "User");
-        if (titleTextView != null) {
-            titleTextView.setText("📦 " + userName + "'s Products");
-            Log.d(TAG, "Title set to: " + titleTextView.getText());
-        }
     }
 
     private void setupClickListeners() {
@@ -459,13 +529,14 @@ public class ProductListActivity extends AppCompatActivity {
             });
         }
 
-        // Category button click listeners
+        // Category button click listeners - CHANGED FROM Button TO TextView
         if (categoryAllButton != null) {
             categoryAllButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     currentCategory = "All";
-                    setActiveCategoryButton(categoryAllButton);
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryAllButton, fabColor);
                     loadAllProducts();
                 }
             });
@@ -476,7 +547,8 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     currentCategory = "Food";
-                    setActiveCategoryButton(categoryFoodButton);
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryFoodButton, fabColor);
                     loadProductsByCategory("Food");
                 }
             });
@@ -487,7 +559,8 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     currentCategory = "Medicine";
-                    setActiveCategoryButton(categoryMedicineButton);
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryMedicineButton, fabColor);
                     loadProductsByCategory("Medicine");
                 }
             });
@@ -498,7 +571,8 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     currentCategory = "Drinks";
-                    setActiveCategoryButton(categoryDrinksButton);
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryDrinksButton, fabColor);
                     loadProductsByCategory("Drinks");
                 }
             });
@@ -509,7 +583,8 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     currentCategory = "Other";
-                    setActiveCategoryButton(categoryOtherButton);
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryOtherButton, fabColor);
                     loadProductsByCategory("Other");
                 }
             });
@@ -521,7 +596,6 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "Profile navigation clicked");
-                    // Navigate to MainActivity (Profile)
                     Intent intent = new Intent(ProductListActivity.this, MainActivity.class);
                     startActivity(intent);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -535,7 +609,6 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "Products navigation clicked - already on this screen");
-                    // Already on products screen - do nothing or scroll to top
                     if (productListView != null) {
                         productListView.smoothScrollToPosition(0);
                     }
@@ -548,7 +621,6 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "Settings navigation clicked");
-                    // Navigate to SettingsActivity
                     Intent intent = new Intent(ProductListActivity.this, SettingsActivity.class);
                     startActivity(intent);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -567,12 +639,10 @@ public class ProductListActivity extends AppCompatActivity {
 
                         Log.d(TAG, "Opening product details: " + product.getName());
 
-                        // Open ProductDetailActivity
                         Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
                         intent.putExtra("product_id", product.getId());
                         intent.putExtra("product_name", product.getName());
 
-                        // Convert date to string for passing
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                         intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
 
@@ -591,7 +661,6 @@ public class ProductListActivity extends AppCompatActivity {
                     if (position < productList.size()) {
                         Product product = productList.get(position);
 
-                        // Delete from database
                         productViewModel.delete(product);
 
                         Toast.makeText(ProductListActivity.this,
@@ -606,22 +675,98 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
-    private void setActiveCategoryButton(Button activeButton) {
-        // Reset all buttons to semi-transparent white
-        categoryAllButton.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
-        categoryFoodButton.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
-        categoryMedicineButton.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
-        categoryDrinksButton.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
-        categoryOtherButton.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(0x80FFFFFF));
+    // FIXED: Changed parameter from Button to TextView
+    private void setActiveCategoryButton(TextView activeButton, int fabColor) {
+        // Reset all buttons to lighter FAB color
+        float[] hsv = new float[3];
+        Color.colorToHSV(fabColor, hsv);
+        hsv[2] = 0.8f;
+        int lighterFabColor = Color.HSVToColor(hsv);
 
-        // Set active button to solid white
-        activeButton.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(0xFFFFFFFF));
+        if (categoryAllButton != null) {
+            categoryAllButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryFoodButton != null) {
+            categoryFoodButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryMedicineButton != null) {
+            categoryMedicineButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryDrinksButton != null) {
+            categoryDrinksButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryOtherButton != null) {
+            categoryOtherButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+
+        // Set active button to solid FAB color
+        if (activeButton != null) {
+            activeButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(fabColor));
+        }
+    }
+
+    private int getFabColorFromPreferences() {
+        SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        return prefs.getInt("fab_background_color",
+                getResources().getColor(R.color.color_fab_white));
+    }
+
+    private void updateCategoryCounts() {
+        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
+            @Override
+            public void onChanged(List<Product> products) {
+                if (products != null) {
+                    int allCount = products.size();
+                    int foodCount = 0;
+                    int medicineCount = 0;
+                    int drinksCount = 0;
+                    int otherCount = 0;
+
+                    for (Product product : products) {
+                        String category = product.getCategory();
+                        if (category != null) {
+                            switch (category) {
+                                case "Food":
+                                    foodCount++;
+                                    break;
+                                case "Medicine":
+                                    medicineCount++;
+                                    break;
+                                case "Drinks":
+                                    drinksCount++;
+                                    break;
+                                case "Other":
+                                    otherCount++;
+                                    break;
+                            }
+                        }
+                    }
+
+                    // Update button texts with counts
+                    if (categoryAllButton != null) {
+                        categoryAllButton.setText("All\n" + allCount + " items");
+                    }
+                    if (categoryFoodButton != null) {
+                        categoryFoodButton.setText("🍎\nFood\n" + foodCount + " items");
+                    }
+                    if (categoryMedicineButton != null) {
+                        categoryMedicineButton.setText("💊\nMedicine\n" + medicineCount + " items");
+                    }
+                    if (categoryDrinksButton != null) {
+                        categoryDrinksButton.setText("🥤\nDrinks\n" + drinksCount + " items");
+                    }
+                    if (categoryOtherButton != null) {
+                        categoryOtherButton.setText("📦\nOther\n" + otherCount + " items");
+                    }
+                }
+            }
+        });
     }
 
     private void loadAllProducts() {
@@ -632,7 +777,6 @@ public class ProductListActivity extends AppCompatActivity {
                     allProducts.clear();
                     allProducts.addAll(products);
 
-                    // Apply search filter if active
                     if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
                         filterProducts(currentSearchQuery);
                     } else {
@@ -651,7 +795,6 @@ public class ProductListActivity extends AppCompatActivity {
                     allProducts.clear();
                     allProducts.addAll(products);
 
-                    // Apply search filter if active
                     if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
                         filterProducts(currentSearchQuery);
                     } else {
@@ -678,9 +821,7 @@ public class ProductListActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 200 && resultCode == RESULT_OK) {
-            // Product was added successfully from AddProductActivity
             Toast.makeText(this, "Product added!", Toast.LENGTH_SHORT).show();
-            // The list will automatically update due to LiveData observation
         }
 
         if (requestCode == 100 && resultCode == RESULT_OK) {
