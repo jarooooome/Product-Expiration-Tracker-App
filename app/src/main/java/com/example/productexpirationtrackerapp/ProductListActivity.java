@@ -7,10 +7,13 @@ import androidx.lifecycle.ViewModelProvider;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -34,7 +37,10 @@ public class ProductListActivity extends AppCompatActivity {
     private ListView productListView;
     private View rootView;
     private LinearLayout bottomNavigation;
-    private LinearLayout headerLayout; // ADDED THIS LINE
+    private LinearLayout headerLayout;
+    private EditText searchEditText;
+    private ImageView searchIcon;
+    private ImageView clearSearchButton;
 
     // Category filter buttons
     private Button categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
@@ -46,6 +52,7 @@ public class ProductListActivity extends AppCompatActivity {
 
     // Data
     private ArrayList<Product> productList;
+    private ArrayList<Product> allProducts; // For search filtering
     private ProductListAdapter adapter;
     private SharedPreferences preferences;
     private UserRepository userRepository;
@@ -53,6 +60,7 @@ public class ProductListActivity extends AppCompatActivity {
 
     // Current category tracking
     private String currentCategory = "All";
+    private String currentSearchQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +99,9 @@ public class ProductListActivity extends AppCompatActivity {
 
         // Initialize bottom navigation
         initializeBottomNavigation();
+
+        // Setup search functionality
+        setupSearchFunctionality();
 
         // Apply theme from database
         applyThemeFromDatabase();
@@ -149,7 +160,7 @@ public class ProductListActivity extends AppCompatActivity {
         int primaryColor;
         int textColor;
         int backgroundColor;
-        int fabBackgroundColor = 0; // ADD THIS
+        int fabBackgroundColor = 0;
 
         // Get colors based on theme
         switch (theme) {
@@ -157,49 +168,49 @@ public class ProductListActivity extends AppCompatActivity {
                 primaryColor = getResources().getColor(R.color.color_primary_green);
                 textColor = getResources().getColor(R.color.color_text_green);
                 backgroundColor = getResources().getColor(R.color.color_background_green);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_green); // ADD THIS
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_green);
                 break;
             case "blue":
                 primaryColor = getResources().getColor(R.color.color_primary_blue);
                 textColor = getResources().getColor(R.color.color_text_blue);
                 backgroundColor = getResources().getColor(R.color.color_background_blue);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_blue); // ADD THIS
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_blue);
                 break;
             case "pink":
                 primaryColor = getResources().getColor(R.color.color_primary_pink);
                 textColor = getResources().getColor(R.color.color_text_pink);
                 backgroundColor = getResources().getColor(R.color.color_background_pink);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_pink); // ADD THIS
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_pink);
                 break;
             case "purple":
                 primaryColor = getResources().getColor(R.color.color_primary_purple);
                 textColor = getResources().getColor(R.color.color_text_purple);
                 backgroundColor = getResources().getColor(R.color.color_background_purple);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_purple); // ADD THIS
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_purple);
                 break;
             case "black":
                 primaryColor = getResources().getColor(R.color.color_primary_black);
                 textColor = getResources().getColor(R.color.color_text_black);
                 backgroundColor = getResources().getColor(R.color.color_background_black);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_black); // ADD THIS
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_black);
                 break;
             case "white":
             default:
                 primaryColor = getResources().getColor(R.color.color_primary_white);
                 textColor = getResources().getColor(R.color.color_text_white);
                 backgroundColor = getResources().getColor(R.color.color_background_white);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_white); // ADD THIS
+                fabBackgroundColor = getResources().getColor(R.color.color_fab_white);
                 break;
         }
 
-        // DEBUG LOGGING - ADD THIS
+        // DEBUG LOGGING
         Log.d(TAG, "Theme: " + theme);
         Log.d(TAG, "Background Color: " + String.format("#%08X", backgroundColor));
         Log.d(TAG, "FAB Background Color: " + String.format("#%08X", fabBackgroundColor));
 
         // Apply colors to views if they exist
         if (titleTextView != null) {
-            titleTextView.setTextColor(textColor);
+            titleTextView.setTextColor(Color.WHITE);
         }
 
         if (productCountText != null) {
@@ -218,8 +229,14 @@ public class ProductListActivity extends AppCompatActivity {
 
         // Apply header background color - SAME AS FAB
         if (headerLayout != null) {
-            headerLayout.setBackgroundColor(fabBackgroundColor); // USE FAB COLOR
+            headerLayout.setBackgroundColor(fabBackgroundColor);
             Log.d(TAG, "Set header to FAB color: " + String.format("#%08X", fabBackgroundColor));
+        }
+
+        // Apply search bar styling
+        if (searchEditText != null) {
+            searchEditText.setTextColor(textColor);
+            searchEditText.setHintTextColor(Color.parseColor("#999999"));
         }
 
         // Apply FAB and bottom navigation colors
@@ -271,6 +288,14 @@ public class ProductListActivity extends AppCompatActivity {
         if (navSettingsText != null) {
             navSettingsText.setTextColor(whiteColor);
         }
+
+        // Search icons
+        if (searchIcon != null) {
+            searchIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        }
+        if (clearSearchButton != null) {
+            clearSearchButton.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        }
     }
 
     private void initializeViews() {
@@ -283,7 +308,10 @@ public class ProductListActivity extends AppCompatActivity {
             productCountText = findViewById(R.id.productCountText);
             productListView = findViewById(R.id.productListView);
             bottomNavigation = findViewById(R.id.bottomNavigation);
-            headerLayout = findViewById(R.id.headerLayout); // ADDED THIS LINE
+            headerLayout = findViewById(R.id.headerLayout);
+            searchEditText = findViewById(R.id.searchEditText);
+            searchIcon = findViewById(R.id.searchIcon);
+            clearSearchButton = findViewById(R.id.clearSearchButton);
 
             Log.d(TAG, "Views found successfully");
 
@@ -318,11 +346,85 @@ public class ProductListActivity extends AppCompatActivity {
         Log.d(TAG, "Bottom navigation initialized");
     }
 
+    private void setupSearchFunctionality() {
+        if (searchEditText != null) {
+            searchEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    // Not needed
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    currentSearchQuery = s.toString();
+                    filterProducts(currentSearchQuery);
+
+                    // Show/hide clear button
+                    if (clearSearchButton != null) {
+                        clearSearchButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    // Not needed
+                }
+            });
+        }
+
+        if (clearSearchButton != null) {
+            clearSearchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    searchEditText.setText("");
+                    currentSearchQuery = "";
+                    clearSearchButton.setVisibility(View.GONE);
+                }
+            });
+        }
+    }
+
+    // ✅ FIXED: Added null checks for product name and category
+    private void filterProducts(String query) {
+        if (allProducts == null || allProducts.isEmpty()) {
+            return;
+        }
+
+        if (query == null || query.trim().isEmpty()) {
+            // Show all products in current category
+            updateProductList(allProducts);
+            return;
+        }
+
+        String lowerCaseQuery = query.toLowerCase().trim();
+        ArrayList<Product> filteredList = new ArrayList<>();
+
+        for (Product product : allProducts) {
+            // ✅ FIX 1: Null check for product name
+            String productName = product.getName();
+            if (productName != null && productName.toLowerCase().contains(lowerCaseQuery)) {
+                filteredList.add(product);
+            }
+            // ✅ FIX 2: Null check for category
+            else {
+                String category = product.getCategory();
+                if (category != null && category.toLowerCase().contains(lowerCaseQuery)) {
+                    filteredList.add(product);
+                }
+            }
+        }
+
+        updateProductList(filteredList);
+
+        Log.d(TAG, "Filtered " + filteredList.size() + " products from search: " + query);
+    }
+
     private void setupProductList() {
         Log.d(TAG, "Setting up product list from database");
 
         // Initialize product list
         productList = new ArrayList<>();
+        allProducts = new ArrayList<>();
 
         // Create custom adapter
         adapter = new ProductListAdapter(this, productList);
@@ -526,7 +628,17 @@ public class ProductListActivity extends AppCompatActivity {
         productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
             @Override
             public void onChanged(List<Product> products) {
-                updateProductList(products);
+                if (products != null) {
+                    allProducts.clear();
+                    allProducts.addAll(products);
+
+                    // Apply search filter if active
+                    if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
+                        filterProducts(currentSearchQuery);
+                    } else {
+                        updateProductList(products);
+                    }
+                }
             }
         });
     }
@@ -535,7 +647,17 @@ public class ProductListActivity extends AppCompatActivity {
         productViewModel.getProductsByCategory(category).observe(this, new Observer<List<Product>>() {
             @Override
             public void onChanged(List<Product> products) {
-                updateProductList(products);
+                if (products != null) {
+                    allProducts.clear();
+                    allProducts.addAll(products);
+
+                    // Apply search filter if active
+                    if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
+                        filterProducts(currentSearchQuery);
+                    } else {
+                        updateProductList(products);
+                    }
+                }
             }
         });
     }
@@ -577,11 +699,17 @@ public class ProductListActivity extends AppCompatActivity {
 
     private void updateProductCount() {
         if (productCountText != null) {
+            String searchInfo = "";
+            if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
+                searchInfo = " (searching: \"" + currentSearchQuery + "\")";
+            }
+
             if (productList.isEmpty()) {
-                productCountText.setText("No products in " + currentCategory);
+                productCountText.setText("No products found" + searchInfo);
             } else {
-                productCountText.setText("Total: " + productList.size() + " product" +
-                        (productList.size() == 1 ? "" : "s") + " (" + currentCategory + ")");
+                productCountText.setText(productList.size() + " product" +
+                        (productList.size() == 1 ? "" : "s") +
+                        " in " + currentCategory + searchInfo);
             }
             Log.d(TAG, "Updated product count: " + productList.size());
         }
