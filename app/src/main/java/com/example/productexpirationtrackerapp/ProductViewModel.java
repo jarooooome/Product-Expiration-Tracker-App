@@ -51,4 +51,8 @@ public class ProductViewModel extends AndroidViewModel {
     public LiveData<List<Product>> getProductsByCategory(String category) {
         return productRepository.getProductsByCategory(category);
     }
+
+    public void rescheduleAllNotifications() {
+        productRepository.rescheduleAllNotifications();
+    }
 }

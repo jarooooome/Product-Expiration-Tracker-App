@@ -1,12 +1,17 @@
 package com.example.productexpirationtrackerapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,6 +25,11 @@ import android.widget.Toast;
 import android.graphics.Color;
 import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
+import android.app.AlarmManager;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.Settings;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +39,7 @@ import java.util.Locale;
 public class ProductListActivity extends AppCompatActivity {
 
     private static final String TAG = "ProductListDebug";
+    private static final int NOTIFICATION_PERMISSION_CODE = 1001;
 
     // UI Components
     private TextView hiUserTextView;
@@ -129,6 +140,12 @@ public class ProductListActivity extends AppCompatActivity {
         // Setup button click listeners
         setupClickListeners();
 
+        // Request notification permission for Android 13+
+        requestNotificationPermission();
+
+        // Check exact alarm permission for Android 12+
+        checkExactAlarmPermission();
+
         // Load all products by default
         loadAllProducts();
 
@@ -148,6 +165,56 @@ public class ProductListActivity extends AppCompatActivity {
         updateWelcomeText();
 
         Log.d(TAG, "onResume called, theme reapplied and welcome text updated");
+    }
+
+    /**
+     * Request notification permission for Android 13+
+     */
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_PERMISSION_CODE);
+            }
+        }
+    }
+
+    /**
+     * Check if app has exact alarm permission for Android 12+
+     */
+    private void checkExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (!alarmManager.canScheduleExactAlarms()) {
+                // Show a dialog or snackbar to guide user to grant permission
+                Toast.makeText(this,
+                        "Please allow exact alarms for expiry notifications",
+                        Toast.LENGTH_LONG).show();
+
+                // Optional: Open system settings for the user to grant permission
+                // Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                // startActivity(intent);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Notification permission granted");
+                Toast.makeText(this, "You will receive expiry notifications", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.d(TAG, "Notification permission denied");
+                Toast.makeText(this,
+                        "Enable notifications to get expiry reminders",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void updateWelcomeText() {
@@ -881,6 +948,9 @@ public class ProductListActivity extends AppCompatActivity {
                 if (products != null) {
                     allProducts.clear();
                     allProducts.addAll(products);
+
+                    // Reschedule all notifications to ensure alarms are set
+                    productViewModel.rescheduleAllNotifications();
 
                     if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
                         filterProducts(currentSearchQuery);
