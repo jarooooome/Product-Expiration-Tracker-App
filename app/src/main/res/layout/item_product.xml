@@ -10,16 +10,15 @@
     android:padding="16dp"
     android:minHeight="72dp">
 
-    <!-- Product Icon -->
-    <TextView
-        android:id="@+id/productIcon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:text="📦"
-        android:textSize="24sp"
-        android:gravity="center"
-        android:background="#E8F5E9"
-        android:layout_marginEnd="16dp" />
+    <!-- Product Image - CHANGE THIS FROM TextView TO ImageView -->
+    <ImageView
+        android:id="@+id/productImage"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:scaleType="centerCrop"
+        android:background="#F5F5F5"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_default_product" /> <!-- Add a default image -->
 
     <!-- Product Details -->
     <LinearLayout
@@ -48,7 +47,7 @@
             android:textColor="#666666"
             android:layout_marginTop="4dp" />
 
-        <!-- Days Left (Optional) -->
+        <!-- Days Left -->
         <TextView
             android:id="@+id/productDaysLeft"
             android:layout_width="wrap_content"

@@ -3,6 +3,7 @@ package com.example.productexpirationtrackerapp;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,15 +12,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.Color;
 import android.widget.HorizontalScrollView;
+import android.widget.ScrollView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class ProductListActivity extends AppCompatActivity {
     private TextView categoryLabelTextView;
     private ImageView addButton;
     private TextView productCountText;
-    private ListView productListView;
+    private WrapContentRecyclerView productRecyclerView; // CHANGED: from RecyclerView to WrapContentRecyclerView
     private View rootView;
     private LinearLayout bottomNavigation;
     private LinearLayout headerLayout;
@@ -46,8 +46,9 @@ public class ProductListActivity extends AppCompatActivity {
     private TextView searchEmoji;
     private ImageView clearSearchButton;
     private HorizontalScrollView categoryScrollView;
+    private ScrollView scrollView;
 
-    // Category filter buttons - CHANGED FROM Button TO TextView
+    // Category filter buttons
     private TextView categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
 
     // Bottom Navigation
@@ -58,7 +59,7 @@ public class ProductListActivity extends AppCompatActivity {
     // Data
     private ArrayList<Product> productList;
     private ArrayList<Product> allProducts;
-    private ProductListAdapter adapter;
+    private ProductRecyclerAdapter adapter;
     private SharedPreferences preferences;
     private UserRepository userRepository;
     private ProductViewModel productViewModel;
@@ -255,9 +256,9 @@ public class ProductListActivity extends AppCompatActivity {
             rootView.setBackgroundColor(backgroundColor);
         }
 
-        // Apply background to ListView
-        if (productListView != null) {
-            productListView.setBackgroundColor(backgroundColor);
+        // Apply background to RecyclerView
+        if (productRecyclerView != null) {
+            productRecyclerView.setBackgroundColor(backgroundColor);
         }
 
         // Header background color matches body color
@@ -384,13 +385,14 @@ public class ProductListActivity extends AppCompatActivity {
             categoryLabelTextView = findViewById(R.id.categoryLabelTextView);
             addButton = findViewById(R.id.addButton);
             productCountText = findViewById(R.id.productCountText);
-            productListView = findViewById(R.id.productListView);
+            productRecyclerView = findViewById(R.id.productRecyclerView); // Now using WrapContentRecyclerView
             bottomNavigation = findViewById(R.id.bottomNavigation);
             headerLayout = findViewById(R.id.headerLayout);
             searchEditText = findViewById(R.id.searchEditText);
             searchEmoji = findViewById(R.id.searchEmoji);
             clearSearchButton = findViewById(R.id.clearSearchButton);
             categoryScrollView = findViewById(R.id.categoryScrollView);
+            scrollView = findViewById(R.id.scrollView);
 
             Log.d(TAG, "Views found successfully");
 
@@ -503,13 +505,22 @@ public class ProductListActivity extends AppCompatActivity {
         productList = new ArrayList<>();
         allProducts = new ArrayList<>();
 
-        // Create custom adapter
-        adapter = new ProductListAdapter(this, productList);
+        // Create RecyclerView adapter
+        adapter = new ProductRecyclerAdapter();
 
-        // Set adapter to ListView
-        if (productListView != null) {
-            productListView.setAdapter(adapter);
-            Log.d(TAG, "Adapter set to ListView");
+        // Set up WrapContentRecyclerView
+        if (productRecyclerView != null) {
+            // Simple LinearLayoutManager - no need to override canScrollVertically
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+
+            productRecyclerView.setLayoutManager(layoutManager);
+            productRecyclerView.setAdapter(adapter);
+
+            // Disable nested scrolling
+            productRecyclerView.setNestedScrollingEnabled(false);
+            productRecyclerView.setHasFixedSize(false); // Important for wrap_content
+
+            Log.d(TAG, "Adapter set to WrapContentRecyclerView");
         }
     }
 
@@ -529,7 +540,7 @@ public class ProductListActivity extends AppCompatActivity {
             });
         }
 
-        // Category button click listeners - CHANGED FROM Button TO TextView
+        // Category button click listeners
         if (categoryAllButton != null) {
             categoryAllButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -609,8 +620,9 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "Products navigation clicked - already on this screen");
-                    if (productListView != null) {
-                        productListView.smoothScrollToPosition(0);
+                    // Scroll the parent ScrollView to top
+                    if (scrollView != null) {
+                        scrollView.smoothScrollTo(0, 0);
                     }
                 }
             });
@@ -629,53 +641,40 @@ public class ProductListActivity extends AppCompatActivity {
             });
         }
 
-        // List item click - OPEN PRODUCT DETAILS
-        if (productListView != null) {
-            productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        // RecyclerView click listeners
+        if (adapter != null) {
+            adapter.setOnItemClickListener(new ProductRecyclerAdapter.OnItemClickListener() {
                 @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (position < productList.size()) {
-                        Product product = productList.get(position);
+                public void onItemClick(Product product) {
+                    Log.d(TAG, "Opening product details: " + product.getName());
 
-                        Log.d(TAG, "Opening product details: " + product.getName());
+                    Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
+                    intent.putExtra("product_id", product.getId());
+                    intent.putExtra("product_name", product.getName());
 
-                        Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
-                        intent.putExtra("product_id", product.getId());
-                        intent.putExtra("product_name", product.getName());
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
 
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                        intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
-
-                        startActivityForResult(intent, 100);
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    }
+                    startActivityForResult(intent, 100);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
             });
-        }
 
-        // List item long click - delete product
-        if (productListView != null) {
-            productListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            adapter.setOnItemLongClickListener(new ProductRecyclerAdapter.OnItemLongClickListener() {
                 @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (position < productList.size()) {
-                        Product product = productList.get(position);
+                public void onItemLongClick(Product product) {
+                    productViewModel.delete(product);
 
-                        productViewModel.delete(product);
+                    Toast.makeText(ProductListActivity.this,
+                            "Removed: " + product.getName(),
+                            Toast.LENGTH_SHORT).show();
 
-                        Toast.makeText(ProductListActivity.this,
-                                "Removed: " + product.getName(),
-                                Toast.LENGTH_SHORT).show();
-
-                        Log.d(TAG, "Item long clicked and removed from database: " + product.getName());
-                    }
-                    return true;
+                    Log.d(TAG, "Item long clicked and removed from database: " + product.getName());
                 }
             });
         }
     }
 
-    // FIXED: Changed parameter from Button to TextView
     private void setActiveCategoryButton(TextView activeButton, int fabColor) {
         // Reset all buttons to lighter FAB color
         float[] hsv = new float[3];
@@ -809,7 +808,7 @@ public class ProductListActivity extends AppCompatActivity {
         if (products != null) {
             productList.clear();
             productList.addAll(products);
-            adapter.updateData(products);
+            adapter.setProducts(products);
             updateProductCount();
 
             Log.d(TAG, "Updated product list with " + products.size() + " products (Category: " + currentCategory + ")");
