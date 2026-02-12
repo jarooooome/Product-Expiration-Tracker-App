@@ -104,7 +104,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- VIBRATION PATTERN CARD - NEW -->
+        <!-- Vibration Pattern Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -178,11 +178,11 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Alarm Precision Card -->
+        <!-- ========== NOTIFICATION TIME CARD - ADDED ========== -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="24dp"
             app:cardElevation="4dp"
             app:cardCornerRadius="12dp">
 
@@ -195,7 +195,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="🎯 Alarm Precision"
+                    android:text="⏰ Notification Time"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -203,42 +203,40 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Use exact alarms for precise timing (recommended)"
+                    android:text="What time should we notify you?"
                     android:textSize="14sp"
                     android:textColor="#666666"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Note: Android 12+ requires additional permission"
-                    android:textSize="12sp"
-                    android:textColor="#FF9800"
                     android:layout_marginBottom="16dp" />
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/notificationTimeText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:text="⏰ 9:00 AM"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="16dp" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Enable exact alarms"
-                        android:textSize="16sp" />
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/exactAlarmSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true" />
-
-                </LinearLayout>
+                <Button
+                    android:id="@+id/notificationTimeButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="Change Time"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="@color/color_primary_blue" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+        <!-- ========== END NOTIFICATION TIME CARD ========== -->
+
+        <!-- Alarm Precision Card - REMOVED (not needed with WorkManager) -->
+        <!--
+        <androidx.cardview.widget.CardView ... >
+            ...
+        </androidx.cardview.widget.CardView>
+        -->
 
         <!-- Buttons -->
         <LinearLayout

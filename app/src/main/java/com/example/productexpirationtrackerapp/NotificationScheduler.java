@@ -23,7 +23,7 @@ public class NotificationScheduler {
     private static final String TAG = "NOTIF_DEBUG";
 
     // TEST MODE FLAG - Set to false for production!
-    private static final boolean TEST_MODE = true; // Set to false for production
+    private static final boolean TEST_MODE = false; // CHANGED TO FALSE FOR PRODUCTION
 
     public NotificationScheduler(Context context) {
         this.context = context;
@@ -40,6 +40,22 @@ public class NotificationScheduler {
     private int getPreferredReminderDays() {
         SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
         return prefs.getInt("reminder_days", 3);
+    }
+
+    /**
+     * Get user's preferred notification hour from SharedPreferences
+     */
+    private int getNotificationHour() {
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        return prefs.getInt("notification_hour", 9); // Default: 9 AM
+    }
+
+    /**
+     * Get user's preferred notification minute from SharedPreferences
+     */
+    private int getNotificationMinute() {
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        return prefs.getInt("notification_minute", 0); // Default: 0
     }
 
     /**
@@ -73,11 +89,16 @@ public class NotificationScheduler {
                 // NORMAL MODE: Calculate notification time based on expiry date
                 notificationCalendar.setTime(expiryDate);
                 notificationCalendar.add(Calendar.DAY_OF_YEAR, -daysBefore);
-                notificationCalendar.set(Calendar.HOUR_OF_DAY, 9);
-                notificationCalendar.set(Calendar.MINUTE, 0);
+
+                // ✅ USE USER'S SELECTED TIME FROM SETTINGS
+                notificationCalendar.set(Calendar.HOUR_OF_DAY, getNotificationHour());
+                notificationCalendar.set(Calendar.MINUTE, getNotificationMinute());
                 notificationCalendar.set(Calendar.SECOND, 0);
                 notificationCalendar.set(Calendar.MILLISECOND, 0);
+
                 Log.d(TAG, "Scheduled time: " + notificationCalendar.getTime());
+                Log.d(TAG, "Notification time: " + String.format("%02d:%02d",
+                        getNotificationHour(), getNotificationMinute()));
             }
 
             // Calculate delay
@@ -154,6 +175,8 @@ public class NotificationScheduler {
         } else {
             int reminderDays = getPreferredReminderDays();
             Log.d(TAG, "📅 User preferred reminder days: " + reminderDays);
+            Log.d(TAG, "⏰ User preferred notification time: " +
+                    String.format("%02d:%02d", getNotificationHour(), getNotificationMinute()));
 
             if (reminderDays > 0) {
                 scheduleExpiryNotification(product, reminderDays);
