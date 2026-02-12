@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fillViewport="true"
     android:padding="20dp">
 
@@ -100,6 +100,80 @@
                         android:textColor="#999999"
                         android:gravity="right" />
                 </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- VIBRATION PATTERN CARD - NEW -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardElevation="4dp"
+            app:cardCornerRadius="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📳 Vibration Pattern"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <RadioGroup
+                    android:id="@+id/vibrationRadioGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/vibration_default"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Default (recommended)"
+                        android:textSize="16sp"
+                        android:checked="true"
+                        android:paddingVertical="8dp" />
+
+                    <RadioButton
+                        android:id="@+id/vibration_short"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Short pulse"
+                        android:textSize="16sp"
+                        android:paddingVertical="8dp" />
+
+                    <RadioButton
+                        android:id="@+id/vibration_long"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Long pulse"
+                        android:textSize="16sp"
+                        android:paddingVertical="8dp" />
+
+                    <RadioButton
+                        android:id="@+id/vibration_none"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No vibration"
+                        android:textSize="16sp"
+                        android:paddingVertical="8dp" />
+
+                </RadioGroup>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Choose how your device vibrates when you receive expiry notifications"
+                    android:textSize="12sp"
+                    android:textColor="#666666"
+                    android:layout_marginTop="12dp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
