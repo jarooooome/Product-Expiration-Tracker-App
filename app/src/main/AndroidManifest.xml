@@ -59,6 +59,11 @@
             android:theme="@style/Theme.ProductExpirationTrackerApp"
             android:exported="false" />
 
+        <activity
+            android:name=".SettingsActivity"
+            android:theme="@style/Theme.ProductExpirationTrackerApp"
+            android:exported="false" />
+
         <!-- Receivers -->
         <receiver
             android:name=".ExpiryAlarmReceiver"

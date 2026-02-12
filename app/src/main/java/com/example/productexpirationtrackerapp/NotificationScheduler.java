@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ public class NotificationScheduler {
     private AlarmManager alarmManager;
     private static final String TAG = "NOTIF_DEBUG";
 
+
     // TEST MODE FLAG - Set to true to test notifications in 1 minute
     private static final boolean TEST_MODE = true; // CHANGE TO false AFTER TESTING!
 
@@ -28,6 +30,22 @@ public class NotificationScheduler {
         Log.d(TAG, "Android version: " + Build.VERSION.SDK_INT);
         Log.d(TAG, "Can schedule exact alarms: " + hasExactAlarmPermission());
         Log.d(TAG, "TEST MODE: " + (TEST_MODE ? "ENABLED - 1 minute notifications" : "DISABLED"));
+    }
+
+    /**
+     * Get user's preferred reminder days from SharedPreferences
+     */
+    private int getPreferredReminderDays() {
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        return prefs.getInt("reminder_days", 3); // Default: 3 days
+    }
+
+    /**
+     * Check if user enabled exact alarms from SharedPreferences
+     */
+    private boolean isExactAlarmEnabled() {
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        return prefs.getBoolean("exact_alarm_enabled", true); // Default: true
     }
 
     /**
@@ -111,31 +129,44 @@ public class NotificationScheduler {
 
             Log.d(TAG, "PendingIntent created: " + pendingIntent);
 
-            // Schedule the alarm
+            // Schedule the alarm - WITH USER PREFERENCE FOR EXACT ALARMS
+            boolean useExactAlarm = isExactAlarmEnabled();
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (alarmManager.canScheduleExactAlarms()) {
+                if (useExactAlarm && alarmManager.canScheduleExactAlarms()) {
                     alarmManager.setExactAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
                             notificationCalendar.getTimeInMillis(),
                             pendingIntent
                     );
-                    Log.d(TAG, "✅ Alarm scheduled with setExactAndAllowWhileIdle (Android 12+)");
+                    Log.d(TAG, "✅ Exact alarm scheduled with setExactAndAllowWhileIdle (Android 12+)");
                 } else {
-                    Log.e(TAG, "❌ Cannot schedule exact alarms - permission denied");
+                    if (!useExactAlarm) {
+                        Log.d(TAG, "ℹ️ Exact alarms disabled by user preference");
+                    }
                     alarmManager.setAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
                             notificationCalendar.getTimeInMillis(),
                             pendingIntent
                     );
-                    Log.d(TAG, "⚠️ Fallback: scheduled with setAndAllowWhileIdle");
+                    Log.d(TAG, "⚠️ Standard alarm scheduled with setAndAllowWhileIdle");
                 }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        notificationCalendar.getTimeInMillis(),
-                        pendingIntent
-                );
-                Log.d(TAG, "✅ Alarm scheduled with setExactAndAllowWhileIdle (Android M+)");
+                if (useExactAlarm) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            notificationCalendar.getTimeInMillis(),
+                            pendingIntent
+                    );
+                    Log.d(TAG, "✅ Exact alarm scheduled with setExactAndAllowWhileIdle (Android M+)");
+                } else {
+                    alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            notificationCalendar.getTimeInMillis(),
+                            pendingIntent
+                    );
+                    Log.d(TAG, "⚠️ Standard alarm scheduled with setAndAllowWhileIdle (user disabled exact)");
+                }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 alarmManager.setExact(
                         AlarmManager.RTC_WAKEUP,
@@ -172,11 +203,20 @@ public class NotificationScheduler {
             Log.d(TAG, "🔴 TEST MODE: Scheduling single test notification");
             scheduleExpiryNotification(product, 5);
         } else {
-            // NORMAL MODE: Schedule all reminder days
-            int[] reminderDays = {10, 5, 3, 1, 0};
-            for (int days : reminderDays) {
-                scheduleExpiryNotification(product, days);
+            // NORMAL MODE: Get user's preferred reminder frequency
+            int reminderDays = getPreferredReminderDays();
+            Log.d(TAG, "📅 User preferred reminder days: " + reminderDays);
+
+            // Schedule the single notification at user's preferred days before expiry
+            // Only if reminderDays > 0 and it's not the same as expiry day
+            if (reminderDays > 0) {
+                scheduleExpiryNotification(product, reminderDays);
+            } else {
+                Log.d(TAG, "ℹ️ User selected same-day notification only");
             }
+
+            // Always schedule the day-of-expiry notification (0 days before)
+            scheduleExpiryNotification(product, 0);
         }
 
         Log.d(TAG, "===== FINISHED SCHEDULING ALL NOTIFICATIONS =====\n");
@@ -188,6 +228,7 @@ public class NotificationScheduler {
     public void scheduleAllAlarms(List<Product> products) {
         Log.d(TAG, "===== SCHEDULING ALARMS FOR ALL PRODUCTS =====");
         Log.d(TAG, "Total products: " + products.size());
+        Log.d(TAG, "Current reminder setting: " + getPreferredReminderDays() + " days before");
 
         if (products.isEmpty()) {
             Log.d(TAG, "No products to schedule");
@@ -210,8 +251,8 @@ public class NotificationScheduler {
 
             Intent intent = new Intent(context, ExpiryAlarmReceiver.class);
 
-            // Cancel all reminder days for this product
-            int[] reminderDays = {10, 5, 3, 1, 0};
+            // Cancel all reminder days for this product (including user preference and expiry day)
+            int[] reminderDays = {10, 5, 3, 1, 0}; // Cancel all possible days
 
             for (int days : reminderDays) {
                 int flags = PendingIntent.FLAG_NO_CREATE;
@@ -230,8 +271,6 @@ public class NotificationScheduler {
                     alarmManager.cancel(pendingIntent);
                     pendingIntent.cancel();
                     Log.d(TAG, "✅ Cancelled notification for: " + product.getName() + " (" + days + " days)");
-                } else {
-                    Log.d(TAG, "No pending intent found for: " + product.getName() + " (" + days + " days)");
                 }
             }
 
