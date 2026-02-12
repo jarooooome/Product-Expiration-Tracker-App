@@ -29,57 +29,60 @@ public class ExpiryAlarmReceiver extends BroadcastReceiver {
         Log.d(TAG, "Product: " + productName + " (ID: " + productId + ")");
         Log.d(TAG, "Days left: " + daysLeft);
 
-        // Recreate notification channel with latest settings
-        recreateNotificationChannel(context);
+        // ✅ Get or create notification channel
+        getOrCreateNotificationChannel(context);
         showNotification(context, productName, productId, daysLeft);
     }
 
-    private void recreateNotificationChannel(Context context) {
+    private void getOrCreateNotificationChannel(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = context.getSystemService(NotificationManager.class);
 
-            // DELETE existing channel para ma-apply ang bagong settings
-            manager.deleteNotificationChannel(CHANNEL_ID);
-            Log.d(TAG, "🗑️ Deleted existing notification channel");
+            // ✅ Check if channel already exists
+            NotificationChannel existingChannel = manager.getNotificationChannel(CHANNEL_ID);
 
-            // Get user's vibration preference
-            SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
-            String vibrationPattern = prefs.getString("vibration_pattern", "default");
+            if (existingChannel == null) {
+                // ✅ Create new channel only if it doesn't exist
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        CHANNEL_NAME,
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+                channel.setDescription("Get notified when products are about to expire");
 
-            // CREATE channel with new settings
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel.setDescription("Get notified when products are about to expire");
+                // Get user's vibration preference
+                SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+                String vibrationPattern = prefs.getString("vibration_pattern", "default");
 
-            // ✅ FIXED: Set vibration pattern correctly
-            if (vibrationPattern.equals("none")) {
-                channel.enableVibration(false);
-                // ❌ REMOVED: channel.setVibrationPattern(new long[]{0});
-                Log.d(TAG, "📳 Vibration: OFF");
-            } else {
-                channel.enableVibration(true);
-                switch (vibrationPattern) {
-                    case "short":
-                        channel.setVibrationPattern(new long[]{0, 200, 100, 200});
-                        Log.d(TAG, "📳 Vibration: SHORT");
-                        break;
-                    case "long":
-                        channel.setVibrationPattern(new long[]{0, 800, 200, 800});
-                        Log.d(TAG, "📳 Vibration: LONG");
-                        break;
-                    case "default":
-                    default:
-                        channel.setVibrationPattern(new long[]{0, 500, 200, 500});
-                        Log.d(TAG, "📳 Vibration: DEFAULT");
-                        break;
+                // Set vibration pattern
+                if (vibrationPattern.equals("none")) {
+                    channel.enableVibration(false);
+                    Log.d(TAG, "📳 Channel created - Vibration: OFF");
+                } else {
+                    channel.enableVibration(true);
+                    switch (vibrationPattern) {
+                        case "short":
+                            channel.setVibrationPattern(new long[]{0, 200, 100, 200});
+                            Log.d(TAG, "📳 Channel created - Vibration: SHORT");
+                            break;
+                        case "long":
+                            channel.setVibrationPattern(new long[]{0, 800, 200, 800});
+                            Log.d(TAG, "📳 Channel created - Vibration: LONG");
+                            break;
+                        case "default":
+                        default:
+                            channel.setVibrationPattern(new long[]{0, 500, 200, 500});
+                            Log.d(TAG, "📳 Channel created - Vibration: DEFAULT");
+                            break;
+                    }
                 }
-            }
 
-            manager.createNotificationChannel(channel);
-            Log.d(TAG, "✅ Recreated notification channel with new settings");
+                manager.createNotificationChannel(channel);
+                Log.d(TAG, "✅ Created new notification channel");
+            } else {
+                // ✅ Channel exists - no need to recreate
+                Log.d(TAG, "✅ Notification channel already exists");
+            }
         }
     }
 

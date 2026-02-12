@@ -11,14 +11,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import android.view.View;
 
 public class SettingsActivity extends AppCompatActivity {
 
     private SeekBar reminderFrequencySeekBar;
     private TextView frequencyValueText;
-    private SwitchCompat exactAlarmSwitch;
     private RadioGroup vibrationRadioGroup;
     private Button saveButton;
     private Button cancelButton;
@@ -27,7 +25,6 @@ public class SettingsActivity extends AppCompatActivity {
     private SharedPreferences.Editor editor;
 
     public static final String PREF_REMINDER_DAYS = "reminder_days";
-    public static final String PREF_EXACT_ALARM = "exact_alarm_enabled";
     public static final String PREF_VIBRATION_PATTERN = "vibration_pattern";
     public static final int DEFAULT_REMINDER_DAYS = 3;
     public static final String DEFAULT_VIBRATION_PATTERN = "default";
@@ -49,7 +46,6 @@ public class SettingsActivity extends AppCompatActivity {
     private void initializeViews() {
         reminderFrequencySeekBar = findViewById(R.id.reminderFrequencySeekBar);
         frequencyValueText = findViewById(R.id.frequencyValueText);
-        exactAlarmSwitch = findViewById(R.id.exactAlarmSwitch);
         vibrationRadioGroup = findViewById(R.id.vibrationRadioGroup);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
@@ -82,9 +78,6 @@ public class SettingsActivity extends AppCompatActivity {
     private void loadCurrentSettings() {
         int currentDays = preferences.getInt(PREF_REMINDER_DAYS, DEFAULT_REMINDER_DAYS);
         reminderFrequencySeekBar.setProgress(currentDays);
-
-        boolean exactAlarmEnabled = preferences.getBoolean(PREF_EXACT_ALARM, true);
-        exactAlarmSwitch.setChecked(exactAlarmEnabled);
 
         String vibrationPattern = preferences.getString(PREF_VIBRATION_PATTERN, DEFAULT_VIBRATION_PATTERN);
         switch (vibrationPattern) {
@@ -132,7 +125,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void saveSettings() {
         int reminderDays = reminderFrequencySeekBar.getProgress();
-        boolean exactAlarmEnabled = exactAlarmSwitch.isChecked();
 
         int selectedVibrationId = vibrationRadioGroup.getCheckedRadioButtonId();
         String vibrationPattern;
@@ -147,11 +139,10 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         editor.putInt(PREF_REMINDER_DAYS, reminderDays);
-        editor.putBoolean(PREF_EXACT_ALARM, exactAlarmEnabled);
         editor.putString(PREF_VIBRATION_PATTERN, vibrationPattern);
         editor.apply();
 
-        // ✅ RECREATE notification channel with new settings
+        // ✅ CRITICAL: Delete and recreate notification channel
         recreateNotificationChannel(vibrationPattern);
 
         Toast.makeText(this, "Settings saved!", Toast.LENGTH_SHORT).show();
@@ -159,7 +150,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     /**
-     * Recreate notification channel with new vibration pattern
+     * Delete and recreate notification channel with new vibration pattern
      */
     private void recreateNotificationChannel(String vibrationPattern) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -167,6 +158,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             // Delete old channel
             manager.deleteNotificationChannel("expiry_channel");
+            android.util.Log.d("NOTIF_DEBUG", "🗑️ Deleted notification channel from Settings");
 
             // Create new channel with updated settings
             NotificationChannel channel = new NotificationChannel(
@@ -179,24 +171,28 @@ public class SettingsActivity extends AppCompatActivity {
             // Set vibration pattern
             if (vibrationPattern.equals("none")) {
                 channel.enableVibration(false);
+                android.util.Log.d("NOTIF_DEBUG", "📳 Settings - Vibration: OFF");
             } else {
                 channel.enableVibration(true);
                 switch (vibrationPattern) {
                     case "short":
                         channel.setVibrationPattern(new long[]{0, 200, 100, 200});
+                        android.util.Log.d("NOTIF_DEBUG", "📳 Settings - Vibration: SHORT");
                         break;
                     case "long":
                         channel.setVibrationPattern(new long[]{0, 800, 200, 800});
+                        android.util.Log.d("NOTIF_DEBUG", "📳 Settings - Vibration: LONG");
                         break;
                     case "default":
                     default:
                         channel.setVibrationPattern(new long[]{0, 500, 200, 500});
+                        android.util.Log.d("NOTIF_DEBUG", "📳 Settings - Vibration: DEFAULT");
                         break;
                 }
             }
 
             manager.createNotificationChannel(channel);
-            android.util.Log.d("NOTIF_DEBUG", "✅ Notification channel recreated with pattern: " + vibrationPattern);
+            android.util.Log.d("NOTIF_DEBUG", "✅ Recreated notification channel with pattern: " + vibrationPattern);
         }
     }
 }
