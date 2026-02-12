@@ -3,6 +3,8 @@ package com.example.productexpirationtrackerapp;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,20 +13,16 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.Color;
 import android.widget.HorizontalScrollView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class ProductListActivity extends AppCompatActivity {
 
@@ -38,7 +36,7 @@ public class ProductListActivity extends AppCompatActivity {
     private TextView categoryLabelTextView;
     private ImageView addButton;
     private TextView productCountText;
-    private ListView productListView;
+    private RecyclerView productListView;  // CHANGED: ListView -> RecyclerView
     private View rootView;
     private LinearLayout bottomNavigation;
     private LinearLayout headerLayout;
@@ -47,7 +45,7 @@ public class ProductListActivity extends AppCompatActivity {
     private ImageView clearSearchButton;
     private HorizontalScrollView categoryScrollView;
 
-    // Category filter buttons - CHANGED FROM Button TO TextView
+    // Category filter buttons
     private TextView categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
 
     // Bottom Navigation
@@ -58,7 +56,7 @@ public class ProductListActivity extends AppCompatActivity {
     // Data
     private ArrayList<Product> productList;
     private ArrayList<Product> allProducts;
-    private ProductListAdapter adapter;
+    private ProductRecyclerAdapter adapter;  // CHANGED: ProductListAdapter -> ProductListRecyclerAdapter
     private SharedPreferences preferences;
     private UserRepository userRepository;
     private ProductViewModel productViewModel;
@@ -207,8 +205,7 @@ public class ProductListActivity extends AppCompatActivity {
                 backgroundColor = getResources().getColor(R.color.color_background_black);
                 fabBackgroundColor = getResources().getColor(R.color.color_fab_black);
                 break;
-            case "white":
-            default:
+            default: // white/default
                 primaryColor = getResources().getColor(R.color.color_primary_white);
                 textColor = getResources().getColor(R.color.color_text_white);
                 backgroundColor = getResources().getColor(R.color.color_background_white);
@@ -216,224 +213,160 @@ public class ProductListActivity extends AppCompatActivity {
                 break;
         }
 
-        // DEBUG LOGGING
-        Log.d(TAG, "Theme: " + theme);
-        Log.d(TAG, "Background Color: " + String.format("#%08X", backgroundColor));
-        Log.d(TAG, "FAB Color: " + String.format("#%08X", fabBackgroundColor));
-
-        // Save FAB color to preferences for later use
+        // Store FAB color for category buttons
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("fab_background_color", fabBackgroundColor);
         editor.apply();
 
-        // Apply colors to views if they exist
-        if (appNameTextView != null) {
-            appNameTextView.setTextColor(fabBackgroundColor);
-        }
-
-        // Apply FAB color to big "Hi, User!" text
-        if (hiUserTextView != null) {
-            hiUserTextView.setTextColor(fabBackgroundColor);
-        }
-
-        // Apply FAB color to small description text
-        if (welcomeDescriptionTextView != null) {
-            welcomeDescriptionTextView.setTextColor(fabBackgroundColor);
-        }
-
-        // Apply FAB color to category label
-        if (categoryLabelTextView != null) {
-            categoryLabelTextView.setTextColor(fabBackgroundColor);
-        }
-
-        if (productCountText != null) {
-            productCountText.setTextColor(textColor);
-        }
-
-        // Apply background to root view
+        // Apply colors to various components
         if (rootView != null) {
             rootView.setBackgroundColor(backgroundColor);
         }
 
-        // Apply background to ListView
-        if (productListView != null) {
-            productListView.setBackgroundColor(backgroundColor);
-        }
-
-        // Header background color matches body color
         if (headerLayout != null) {
-            headerLayout.setBackgroundColor(backgroundColor);
-            Log.d(TAG, "Set header to body color: " + String.format("#%08X", backgroundColor));
+            headerLayout.setBackgroundColor(primaryColor);
         }
 
-        // Apply search bar styling
-        if (searchEditText != null) {
-            searchEditText.setTextColor(textColor);
-            searchEditText.setHintTextColor(Color.parseColor("#999999"));
-        }
-
-        // Set category button colors to match FAB
-        setCategoryButtonColors(fabBackgroundColor);
-
-        // Set active category button (default to "All")
-        if (categoryAllButton != null) {
-            setActiveCategoryButton(categoryAllButton, fabBackgroundColor);
-        }
-
-        // Apply FAB and bottom navigation colors
-        applyFABAndBottomNavColors();
-    }
-
-    private void setCategoryButtonColors(int fabColor) {
-        // All buttons start with lighter FAB color
-        float[] hsv = new float[3];
-        Color.colorToHSV(fabColor, hsv);
-        hsv[2] = 0.8f; // Reduce brightness to 80% for lighter version
-        int lighterFabColor = Color.HSVToColor(hsv);
-
-        if (categoryAllButton != null) {
-            categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryAllButton.setTextColor(Color.WHITE);
-        }
-
-        if (categoryFoodButton != null) {
-            categoryFoodButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryFoodButton.setTextColor(Color.WHITE);
-        }
-
-        if (categoryMedicineButton != null) {
-            categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryMedicineButton.setTextColor(Color.WHITE);
-        }
-
-        if (categoryDrinksButton != null) {
-            categoryDrinksButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryDrinksButton.setTextColor(Color.WHITE);
-        }
-
-        if (categoryOtherButton != null) {
-            categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryOtherButton.setTextColor(Color.WHITE);
-        }
-    }
-
-    private void applyFABAndBottomNavColors() {
-        SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-
-        int fabBackgroundColor = prefs.getInt("fab_background_color",
-                getResources().getColor(R.color.color_fab_white));
-        int fabIconColor = prefs.getInt("fab_icon_color",
-                getResources().getColor(R.color.color_fab_icon_white));
-
-        // Apply FAB colors
-        if (addButton != null) {
-            addButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fabBackgroundColor));
-            addButton.setImageTintList(android.content.res.ColorStateList.valueOf(fabIconColor));
-        }
-
-        // Apply bottom navigation background color - SAME AS FAB
         if (bottomNavigation != null) {
-            bottomNavigation.setBackgroundColor(fabBackgroundColor);
+            // Note: Bottom navigation gradient will be applied via drawable
         }
 
-        // Make all navigation icons/text WHITE for contrast
-        int whiteColor = Color.WHITE;
-
-        if (navProfileIcon != null) {
-            navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
-        }
-        if (navProfileText != null) {
-            navProfileText.setTextColor(whiteColor);
-        }
-        if (navProductsIcon != null) {
-            navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
-        }
-        if (navProductsText != null) {
-            navProductsText.setTextColor(whiteColor);
-        }
-        if (navSettingsIcon != null) {
-            navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
-        }
-        if (navSettingsText != null) {
-            navSettingsText.setTextColor(whiteColor);
-        }
-
-        // Search emoji - set to white for contrast on search bar
-        if (searchEmoji != null) {
-            searchEmoji.setTextColor(whiteColor);
-        }
-        if (clearSearchButton != null) {
-            clearSearchButton.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
-        }
-
-        // Logo - keep original colors
-        if (logoImageView != null) {
-            logoImageView.setImageTintList(null);
-        }
+        Log.d(TAG, "Custom theme colors applied");
     }
 
     private void initializeViews() {
-        Log.d(TAG, "Starting initializeViews");
-
         try {
-            // Initialize views
+            // Header components
             logoImageView = findViewById(R.id.logoImageView);
             appNameTextView = findViewById(R.id.appNameTextView);
             hiUserTextView = findViewById(R.id.hiUserTextView);
             welcomeDescriptionTextView = findViewById(R.id.welcomeDescriptionTextView);
             categoryLabelTextView = findViewById(R.id.categoryLabelTextView);
-            addButton = findViewById(R.id.addButton);
-            productCountText = findViewById(R.id.productCountText);
-            productListView = findViewById(R.id.productListView);
-            bottomNavigation = findViewById(R.id.bottomNavigation);
             headerLayout = findViewById(R.id.headerLayout);
+
+            // Search components
             searchEditText = findViewById(R.id.searchEditText);
             searchEmoji = findViewById(R.id.searchEmoji);
             clearSearchButton = findViewById(R.id.clearSearchButton);
             categoryScrollView = findViewById(R.id.categoryScrollView);
 
-            Log.d(TAG, "Views found successfully");
+            // Product list components
+            productCountText = findViewById(R.id.productCountText);
+            productListView = findViewById(R.id.productListView);
 
+            // Action button
+            addButton = findViewById(R.id.addButton);
+
+            // Bottom navigation
+            bottomNavigation = findViewById(R.id.bottomNavigation);
+
+            Log.d(TAG, "All views initialized successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Error in initializeViews: " + e.getMessage());
-            Toast.makeText(this, "View error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Error initializing views: " + e.getMessage());
+            throw e;
         }
     }
 
     private void initializeCategoryButtons() {
-        categoryAllButton = findViewById(R.id.categoryAllButton);
-        categoryFoodButton = findViewById(R.id.categoryFoodButton);
-        categoryMedicineButton = findViewById(R.id.categoryMedicineButton);
-        categoryDrinksButton = findViewById(R.id.categoryDrinksButton);
-        categoryOtherButton = findViewById(R.id.categoryOtherButton);
+        try {
+            categoryAllButton = findViewById(R.id.categoryAllButton);
+            categoryFoodButton = findViewById(R.id.categoryFoodButton);
+            categoryMedicineButton = findViewById(R.id.categoryMedicineButton);
+            categoryDrinksButton = findViewById(R.id.categoryDrinksButton);
+            categoryOtherButton = findViewById(R.id.categoryOtherButton);
 
-        Log.d(TAG, "Category buttons initialized as TextViews");
+            // Set click listeners for category buttons
+            if (categoryAllButton != null) {
+                categoryAllButton.setOnClickListener(v -> {
+                    currentCategory = "All";
+                    loadAllProducts();
+                    setActiveCategoryButton(categoryAllButton, getFabColorFromPreferences());
+                    Log.d(TAG, "Category changed to: All");
+                });
+            }
+
+            if (categoryFoodButton != null) {
+                categoryFoodButton.setOnClickListener(v -> {
+                    currentCategory = "Food";
+                    loadProductsByCategory("Food");
+                    setActiveCategoryButton(categoryFoodButton, getFabColorFromPreferences());
+                    Log.d(TAG, "Category changed to: Food");
+                });
+            }
+
+            if (categoryMedicineButton != null) {
+                categoryMedicineButton.setOnClickListener(v -> {
+                    currentCategory = "Medicine";
+                    loadProductsByCategory("Medicine");
+                    setActiveCategoryButton(categoryMedicineButton, getFabColorFromPreferences());
+                    Log.d(TAG, "Category changed to: Medicine");
+                });
+            }
+
+            if (categoryDrinksButton != null) {
+                categoryDrinksButton.setOnClickListener(v -> {
+                    currentCategory = "Drinks";
+                    loadProductsByCategory("Drinks");
+                    setActiveCategoryButton(categoryDrinksButton, getFabColorFromPreferences());
+                    Log.d(TAG, "Category changed to: Drinks");
+                });
+            }
+
+            if (categoryOtherButton != null) {
+                categoryOtherButton.setOnClickListener(v -> {
+                    currentCategory = "Other";
+                    loadProductsByCategory("Other");
+                    setActiveCategoryButton(categoryOtherButton, getFabColorFromPreferences());
+                    Log.d(TAG, "Category changed to: Other");
+                });
+            }
+
+            Log.d(TAG, "Category buttons initialized");
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing category buttons: " + e.getMessage());
+        }
     }
 
     private void initializeBottomNavigation() {
-        // Initialize bottom navigation views
-        navProfile = findViewById(R.id.navProfile);
-        navProducts = findViewById(R.id.navProducts);
-        navSettings = findViewById(R.id.navSettings);
+        try {
+            navProfile = findViewById(R.id.navProfile);
+            navProducts = findViewById(R.id.navProducts);
+            navSettings = findViewById(R.id.navSettings);
 
-        navProfileIcon = findViewById(R.id.navProfileIcon);
-        navProductsIcon = findViewById(R.id.navProductsIcon);
-        navSettingsIcon = findViewById(R.id.navSettingsIcon);
+            navProfileIcon = findViewById(R.id.navProfileIcon);
+            navProductsIcon = findViewById(R.id.navProductsIcon);
+            navSettingsIcon = findViewById(R.id.navSettingsIcon);
 
-        navProfileText = findViewById(R.id.navProfileText);
-        navProductsText = findViewById(R.id.navProductsText);
-        navSettingsText = findViewById(R.id.navSettingsText);
+            navProfileText = findViewById(R.id.navProfileText);
+            navProductsText = findViewById(R.id.navProductsText);
+            navSettingsText = findViewById(R.id.navSettingsText);
 
-        Log.d(TAG, "Bottom navigation initialized");
+            // Set click listeners - REMOVED ProfileActivity
+            if (navProfile != null) {
+                navProfile.setOnClickListener(v -> {
+                    Toast.makeText(ProductListActivity.this, "Profile feature coming soon!", Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            if (navSettings != null) {
+                navSettings.setOnClickListener(v -> {
+                    Intent settingsIntent = new Intent(ProductListActivity.this, SettingsActivity.class);
+                    startActivity(settingsIntent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                });
+            }
+
+            Log.d(TAG, "Bottom navigation initialized");
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing bottom navigation: " + e.getMessage());
+        }
     }
 
     private void setupSearchFunctionality() {
-        if (searchEditText != null) {
+        if (searchEditText != null && clearSearchButton != null) {
             searchEditText.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    // Not needed
-                }
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -441,241 +374,114 @@ public class ProductListActivity extends AppCompatActivity {
                     filterProducts(currentSearchQuery);
 
                     // Show/hide clear button
-                    if (clearSearchButton != null) {
-                        clearSearchButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+                    if (s.length() > 0) {
+                        clearSearchButton.setVisibility(View.VISIBLE);
+                    } else {
+                        clearSearchButton.setVisibility(View.GONE);
                     }
                 }
 
                 @Override
-                public void afterTextChanged(Editable s) {
-                    // Not needed
-                }
+                public void afterTextChanged(Editable s) {}
             });
-        }
 
-        if (clearSearchButton != null) {
-            clearSearchButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    searchEditText.setText("");
-                    currentSearchQuery = "";
-                    clearSearchButton.setVisibility(View.GONE);
-                }
+            clearSearchButton.setOnClickListener(v -> {
+                searchEditText.setText("");
+                clearSearchButton.setVisibility(View.GONE);
             });
+
+            Log.d(TAG, "Search functionality setup complete");
         }
     }
 
     private void filterProducts(String query) {
-        if (allProducts == null || allProducts.isEmpty()) {
-            return;
-        }
-
         if (query == null || query.trim().isEmpty()) {
             // Show all products in current category
-            updateProductList(allProducts);
-            return;
-        }
-
-        String lowerCaseQuery = query.toLowerCase().trim();
-        ArrayList<Product> filteredList = new ArrayList<>();
-
-        for (Product product : allProducts) {
-            String productName = product.getName();
-            if (productName != null && productName.toLowerCase().contains(lowerCaseQuery)) {
-                filteredList.add(product);
+            if (currentCategory.equals("All")) {
+                updateProductList(allProducts);
             } else {
-                String category = product.getCategory();
-                if (category != null && category.toLowerCase().contains(lowerCaseQuery)) {
-                    filteredList.add(product);
+                List<Product> filteredByCategory = new ArrayList<>();
+                for (Product product : allProducts) {
+                    if (product.getCategory().equals(currentCategory)) {
+                        filteredByCategory.add(product);
+                    }
+                }
+                updateProductList(filteredByCategory);
+            }
+        } else {
+            // Filter by search query
+            List<Product> filtered = new ArrayList<>();
+            String lowerQuery = query.toLowerCase();
+
+            for (Product product : allProducts) {
+                boolean matchesCategory = currentCategory.equals("All") ||
+                        product.getCategory().equals(currentCategory);
+                boolean matchesQuery = product.getName().toLowerCase().contains(lowerQuery);
+
+                if (matchesCategory && matchesQuery) {
+                    filtered.add(product);
                 }
             }
+            updateProductList(filtered);
         }
-
-        updateProductList(filteredList);
-
-        Log.d(TAG, "Filtered " + filteredList.size() + " products from search: " + query);
     }
 
+    // CHANGED: Modified setupProductList to work with RecyclerView
     private void setupProductList() {
-        Log.d(TAG, "Setting up product list from database");
+        try {
+            productList = new ArrayList<>();
+            allProducts = new ArrayList<>();
 
-        // Initialize product list
-        productList = new ArrayList<>();
-        allProducts = new ArrayList<>();
+            // Create your existing ListView adapter
+            ProductListAdapter listAdapter = new ProductListAdapter(this, productList);
 
-        // Create custom adapter
-        adapter = new ProductListAdapter(this, productList);
+            // Wrap it for RecyclerView
+            adapter = new ProductRecyclerAdapter(listAdapter);
 
-        // Set adapter to ListView
-        if (productListView != null) {
+            // Setup RecyclerView
+            productListView.setLayoutManager(new LinearLayoutManager(this));
             productListView.setAdapter(adapter);
-            Log.d(TAG, "Adapter set to ListView");
+
+            // Item click listener
+            adapter.setOnItemClickListener(position -> {
+                if (position < productList.size()) {
+                    Product product = productList.get(position);
+                    Intent productDetailIntent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
+                    productDetailIntent.putExtra("product_id", product.getId());
+                    startActivityForResult(productDetailIntent, 100);
+                }
+            });
+
+            // Long click listener for delete
+            adapter.setOnItemLongClickListener(position -> {
+                if (position < productList.size()) {
+                    Product product = productList.get(position);
+                    productViewModel.delete(product);
+                    Toast.makeText(ProductListActivity.this,
+                            "Removed: " + product.getName(),
+                            Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Item long clicked and removed from database: " + product.getName());
+                }
+                return true;
+            });
+
+            Log.d(TAG, "Product list setup complete");
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up product list: " + e.getMessage());
+            Toast.makeText(this, "Error setting up product list", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void setupClickListeners() {
-        Log.d(TAG, "Setting up click listeners");
-
-        // Add button (FAB) - open AddProductActivity
+        // Add button click listener
         if (addButton != null) {
-            addButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Add button clicked - opening AddProductActivity");
-                    Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
-                    startActivityForResult(intent, 200);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                }
-            });
-        }
-
-        // Category button click listeners - CHANGED FROM Button TO TextView
-        if (categoryAllButton != null) {
-            categoryAllButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "All";
-                    int fabColor = getFabColorFromPreferences();
-                    setActiveCategoryButton(categoryAllButton, fabColor);
-                    loadAllProducts();
-                }
-            });
-        }
-
-        if (categoryFoodButton != null) {
-            categoryFoodButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Food";
-                    int fabColor = getFabColorFromPreferences();
-                    setActiveCategoryButton(categoryFoodButton, fabColor);
-                    loadProductsByCategory("Food");
-                }
-            });
-        }
-
-        if (categoryMedicineButton != null) {
-            categoryMedicineButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Medicine";
-                    int fabColor = getFabColorFromPreferences();
-                    setActiveCategoryButton(categoryMedicineButton, fabColor);
-                    loadProductsByCategory("Medicine");
-                }
-            });
-        }
-
-        if (categoryDrinksButton != null) {
-            categoryDrinksButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Drinks";
-                    int fabColor = getFabColorFromPreferences();
-                    setActiveCategoryButton(categoryDrinksButton, fabColor);
-                    loadProductsByCategory("Drinks");
-                }
-            });
-        }
-
-        if (categoryOtherButton != null) {
-            categoryOtherButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Other";
-                    int fabColor = getFabColorFromPreferences();
-                    setActiveCategoryButton(categoryOtherButton, fabColor);
-                    loadProductsByCategory("Other");
-                }
-            });
-        }
-
-        // Bottom Navigation Click Listeners
-        if (navProfile != null) {
-            navProfile.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Profile navigation clicked");
-                    Intent intent = new Intent(ProductListActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    finish();
-                }
-            });
-        }
-
-        if (navProducts != null) {
-            navProducts.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Products navigation clicked - already on this screen");
-                    if (productListView != null) {
-                        productListView.smoothScrollToPosition(0);
-                    }
-                }
-            });
-        }
-
-        if (navSettings != null) {
-            navSettings.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Settings navigation clicked");
-                    Intent intent = new Intent(ProductListActivity.this, SettingsActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    finish();
-                }
-            });
-        }
-
-        // List item click - OPEN PRODUCT DETAILS
-        if (productListView != null) {
-            productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (position < productList.size()) {
-                        Product product = productList.get(position);
-
-                        Log.d(TAG, "Opening product details: " + product.getName());
-
-                        Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
-                        intent.putExtra("product_id", product.getId());
-                        intent.putExtra("product_name", product.getName());
-
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                        intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
-
-                        startActivityForResult(intent, 100);
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    }
-                }
-            });
-        }
-
-        // List item long click - delete product
-        if (productListView != null) {
-            productListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (position < productList.size()) {
-                        Product product = productList.get(position);
-
-                        productViewModel.delete(product);
-
-                        Toast.makeText(ProductListActivity.this,
-                                "Removed: " + product.getName(),
-                                Toast.LENGTH_SHORT).show();
-
-                        Log.d(TAG, "Item long clicked and removed from database: " + product.getName());
-                    }
-                    return true;
-                }
+            addButton.setOnClickListener(v -> {
+                Intent addProductIntent = new Intent(ProductListActivity.this, AddProductActivity.class);
+                startActivityForResult(addProductIntent, 200);
             });
         }
     }
 
-    // FIXED: Changed parameter from Button to TextView
     private void setActiveCategoryButton(TextView activeButton, int fabColor) {
         // Reset all buttons to lighter FAB color
         float[] hsv = new float[3];
