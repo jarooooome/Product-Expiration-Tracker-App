@@ -31,14 +31,12 @@ public class ProductListActivity extends AppCompatActivity {
     private static final String TAG = "ProductListDebug";
 
     // UI Components
-    private ImageView logoImageView;
-    private TextView appNameTextView;
     private TextView hiUserTextView;
     private TextView welcomeDescriptionTextView;
     private TextView categoryLabelTextView;
     private ImageView addButton;
     private TextView productCountText;
-    private WrapContentRecyclerView productRecyclerView; // CHANGED: from RecyclerView to WrapContentRecyclerView
+    private WrapContentRecyclerView productRecyclerView;
     private View rootView;
     private LinearLayout bottomNavigation;
     private LinearLayout headerLayout;
@@ -48,8 +46,21 @@ public class ProductListActivity extends AppCompatActivity {
     private HorizontalScrollView categoryScrollView;
     private ScrollView scrollView;
 
-    // Category filter buttons
-    private TextView categoryAllButton, categoryFoodButton, categoryMedicineButton, categoryDrinksButton, categoryOtherButton;
+    // Category filter buttons - UPDATED with food-specific categories
+    private LinearLayout categoryAllButton, categoryDairyButton, categoryVegetablesButton, categoryFruitsButton,
+            categoryMeatsButton, categoryBeveragesButton, categoryMedicineButton, categoryOtherButton;
+
+    // Category count TextViews - UPDATED with food-specific categories
+    private TextView categoryAllCount, categoryDairyCount, categoryVegetablesCount, categoryFruitsCount,
+            categoryMeatsCount, categoryBeveragesCount, categoryMedicineCount, categoryOtherCount;
+
+    // Category title TextViews - UPDATED with food-specific categories
+    private TextView categoryDairyTitle, categoryVegetablesTitle, categoryFruitsTitle,
+            categoryMeatsTitle, categoryBeveragesTitle, categoryMedicineTitle, categoryOtherTitle;
+
+    // Category icon TextViews - UPDATED with food-specific categories
+    private TextView categoryDairyIcon, categoryVegetablesIcon, categoryFruitsIcon,
+            categoryMeatsIcon, categoryBeveragesIcon, categoryMedicineIcon, categoryOtherIcon;
 
     // Bottom Navigation
     private LinearLayout navProfile, navProducts, navSettings;
@@ -59,7 +70,7 @@ public class ProductListActivity extends AppCompatActivity {
     // Data
     private ArrayList<Product> productList;
     private ArrayList<Product> allProducts;
-    private ProductRecyclerAdapter adapter;
+    private ProductAdapter adapter;
     private SharedPreferences preferences;
     private UserRepository userRepository;
     private ProductViewModel productViewModel;
@@ -228,10 +239,6 @@ public class ProductListActivity extends AppCompatActivity {
         editor.apply();
 
         // Apply colors to views if they exist
-        if (appNameTextView != null) {
-            appNameTextView.setTextColor(fabBackgroundColor);
-        }
-
         // Apply FAB color to big "Hi, User!" text
         if (hiUserTextView != null) {
             hiUserTextView.setTextColor(fabBackgroundColor);
@@ -294,27 +301,27 @@ public class ProductListActivity extends AppCompatActivity {
 
         if (categoryAllButton != null) {
             categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryAllButton.setTextColor(Color.WHITE);
         }
-
-        if (categoryFoodButton != null) {
-            categoryFoodButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryFoodButton.setTextColor(Color.WHITE);
+        if (categoryDairyButton != null) {
+            categoryDairyButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
         }
-
+        if (categoryVegetablesButton != null) {
+            categoryVegetablesButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryFruitsButton != null) {
+            categoryFruitsButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryMeatsButton != null) {
+            categoryMeatsButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryBeveragesButton != null) {
+            categoryBeveragesButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
         if (categoryMedicineButton != null) {
             categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryMedicineButton.setTextColor(Color.WHITE);
         }
-
-        if (categoryDrinksButton != null) {
-            categoryDrinksButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryDrinksButton.setTextColor(Color.WHITE);
-        }
-
         if (categoryOtherButton != null) {
             categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-            categoryOtherButton.setTextColor(Color.WHITE);
         }
     }
 
@@ -366,11 +373,6 @@ public class ProductListActivity extends AppCompatActivity {
         if (clearSearchButton != null) {
             clearSearchButton.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
         }
-
-        // Logo - keep original colors
-        if (logoImageView != null) {
-            logoImageView.setImageTintList(null);
-        }
     }
 
     private void initializeViews() {
@@ -378,14 +380,12 @@ public class ProductListActivity extends AppCompatActivity {
 
         try {
             // Initialize views
-            logoImageView = findViewById(R.id.logoImageView);
-            appNameTextView = findViewById(R.id.appNameTextView);
             hiUserTextView = findViewById(R.id.hiUserTextView);
             welcomeDescriptionTextView = findViewById(R.id.welcomeDescriptionTextView);
             categoryLabelTextView = findViewById(R.id.categoryLabelTextView);
             addButton = findViewById(R.id.addButton);
             productCountText = findViewById(R.id.productCountText);
-            productRecyclerView = findViewById(R.id.productRecyclerView); // Now using WrapContentRecyclerView
+            productRecyclerView = findViewById(R.id.productRecyclerView);
             bottomNavigation = findViewById(R.id.bottomNavigation);
             headerLayout = findViewById(R.id.headerLayout);
             searchEditText = findViewById(R.id.searchEditText);
@@ -403,13 +403,45 @@ public class ProductListActivity extends AppCompatActivity {
     }
 
     private void initializeCategoryButtons() {
+        // Initialize category button containers (LinearLayouts)
         categoryAllButton = findViewById(R.id.categoryAllButton);
-        categoryFoodButton = findViewById(R.id.categoryFoodButton);
+        categoryDairyButton = findViewById(R.id.categoryDairyButton);
+        categoryVegetablesButton = findViewById(R.id.categoryVegetablesButton);
+        categoryFruitsButton = findViewById(R.id.categoryFruitsButton);
+        categoryMeatsButton = findViewById(R.id.categoryMeatsButton);
+        categoryBeveragesButton = findViewById(R.id.categoryBeveragesButton);
         categoryMedicineButton = findViewById(R.id.categoryMedicineButton);
-        categoryDrinksButton = findViewById(R.id.categoryDrinksButton);
         categoryOtherButton = findViewById(R.id.categoryOtherButton);
 
-        Log.d(TAG, "Category buttons initialized as TextViews");
+        // Initialize count TextViews
+        categoryAllCount = findViewById(R.id.categoryAllCount);
+        categoryDairyCount = findViewById(R.id.categoryDairyCount);
+        categoryVegetablesCount = findViewById(R.id.categoryVegetablesCount);
+        categoryFruitsCount = findViewById(R.id.categoryFruitsCount);
+        categoryMeatsCount = findViewById(R.id.categoryMeatsCount);
+        categoryBeveragesCount = findViewById(R.id.categoryBeveragesCount);
+        categoryMedicineCount = findViewById(R.id.categoryMedicineCount);
+        categoryOtherCount = findViewById(R.id.categoryOtherCount);
+
+        // Initialize title TextViews
+        categoryDairyTitle = findViewById(R.id.categoryDairyTitle);
+        categoryVegetablesTitle = findViewById(R.id.categoryVegetablesTitle);
+        categoryFruitsTitle = findViewById(R.id.categoryFruitsTitle);
+        categoryMeatsTitle = findViewById(R.id.categoryMeatsTitle);
+        categoryBeveragesTitle = findViewById(R.id.categoryBeveragesTitle);
+        categoryMedicineTitle = findViewById(R.id.categoryMedicineTitle);
+        categoryOtherTitle = findViewById(R.id.categoryOtherTitle);
+
+        // Initialize icon TextViews
+        categoryDairyIcon = findViewById(R.id.categoryDairyIcon);
+        categoryVegetablesIcon = findViewById(R.id.categoryVegetablesIcon);
+        categoryFruitsIcon = findViewById(R.id.categoryFruitsIcon);
+        categoryMeatsIcon = findViewById(R.id.categoryMeatsIcon);
+        categoryBeveragesIcon = findViewById(R.id.categoryBeveragesIcon);
+        categoryMedicineIcon = findViewById(R.id.categoryMedicineIcon);
+        categoryOtherIcon = findViewById(R.id.categoryOtherIcon);
+
+        Log.d(TAG, "Category buttons initialized with food-specific categories");
     }
 
     private void initializeBottomNavigation() {
@@ -506,19 +538,15 @@ public class ProductListActivity extends AppCompatActivity {
         allProducts = new ArrayList<>();
 
         // Create RecyclerView adapter
-        adapter = new ProductRecyclerAdapter();
+        adapter = new ProductAdapter(productList);
 
         // Set up WrapContentRecyclerView
         if (productRecyclerView != null) {
-            // Simple LinearLayoutManager - no need to override canScrollVertically
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-
             productRecyclerView.setLayoutManager(layoutManager);
             productRecyclerView.setAdapter(adapter);
-
-            // Disable nested scrolling
             productRecyclerView.setNestedScrollingEnabled(false);
-            productRecyclerView.setHasFixedSize(false); // Important for wrap_content
+            productRecyclerView.setHasFixedSize(false);
 
             Log.d(TAG, "Adapter set to WrapContentRecyclerView");
         }
@@ -553,14 +581,62 @@ public class ProductListActivity extends AppCompatActivity {
             });
         }
 
-        if (categoryFoodButton != null) {
-            categoryFoodButton.setOnClickListener(new View.OnClickListener() {
+        if (categoryDairyButton != null) {
+            categoryDairyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    currentCategory = "Food";
+                    currentCategory = "Dairy";
                     int fabColor = getFabColorFromPreferences();
-                    setActiveCategoryButton(categoryFoodButton, fabColor);
-                    loadProductsByCategory("Food");
+                    setActiveCategoryButton(categoryDairyButton, fabColor);
+                    loadProductsByCategory("Dairy");
+                }
+            });
+        }
+
+        if (categoryVegetablesButton != null) {
+            categoryVegetablesButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "Vegetables";
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryVegetablesButton, fabColor);
+                    loadProductsByCategory("Vegetables");
+                }
+            });
+        }
+
+        if (categoryFruitsButton != null) {
+            categoryFruitsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "Fruits";
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryFruitsButton, fabColor);
+                    loadProductsByCategory("Fruits");
+                }
+            });
+        }
+
+        if (categoryMeatsButton != null) {
+            categoryMeatsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "Meats";
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryMeatsButton, fabColor);
+                    loadProductsByCategory("Meats");
+                }
+            });
+        }
+
+        if (categoryBeveragesButton != null) {
+            categoryBeveragesButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentCategory = "Beverages";
+                    int fabColor = getFabColorFromPreferences();
+                    setActiveCategoryButton(categoryBeveragesButton, fabColor);
+                    loadProductsByCategory("Beverages");
                 }
             });
         }
@@ -573,18 +649,6 @@ public class ProductListActivity extends AppCompatActivity {
                     int fabColor = getFabColorFromPreferences();
                     setActiveCategoryButton(categoryMedicineButton, fabColor);
                     loadProductsByCategory("Medicine");
-                }
-            });
-        }
-
-        if (categoryDrinksButton != null) {
-            categoryDrinksButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    currentCategory = "Drinks";
-                    int fabColor = getFabColorFromPreferences();
-                    setActiveCategoryButton(categoryDrinksButton, fabColor);
-                    loadProductsByCategory("Drinks");
                 }
             });
         }
@@ -620,7 +684,6 @@ public class ProductListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "Products navigation clicked - already on this screen");
-                    // Scroll the parent ScrollView to top
                     if (scrollView != null) {
                         scrollView.smoothScrollTo(0, 0);
                     }
@@ -643,9 +706,10 @@ public class ProductListActivity extends AppCompatActivity {
 
         // RecyclerView click listeners
         if (adapter != null) {
-            adapter.setOnItemClickListener(new ProductRecyclerAdapter.OnItemClickListener() {
+            adapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener() {
                 @Override
-                public void onItemClick(Product product) {
+                public void onItemClick(int position) {
+                    Product product = productList.get(position);
                     Log.d(TAG, "Opening product details: " + product.getName());
 
                     Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
@@ -658,11 +722,10 @@ public class ProductListActivity extends AppCompatActivity {
                     startActivityForResult(intent, 100);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
-            });
 
-            adapter.setOnItemLongClickListener(new ProductRecyclerAdapter.OnItemLongClickListener() {
                 @Override
-                public void onItemLongClick(Product product) {
+                public void onItemLongClick(int position) {
+                    Product product = productList.get(position);
                     productViewModel.delete(product);
 
                     Toast.makeText(ProductListActivity.this,
@@ -675,7 +738,8 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
-    private void setActiveCategoryButton(TextView activeButton, int fabColor) {
+    // UPDATED: to work with LinearLayout instead of TextView
+    private void setActiveCategoryButton(LinearLayout activeButton, int fabColor) {
         // Reset all buttons to lighter FAB color
         float[] hsv = new float[3];
         Color.colorToHSV(fabColor, hsv);
@@ -686,16 +750,28 @@ public class ProductListActivity extends AppCompatActivity {
             categoryAllButton.setBackgroundTintList(
                     android.content.res.ColorStateList.valueOf(lighterFabColor));
         }
-        if (categoryFoodButton != null) {
-            categoryFoodButton.setBackgroundTintList(
+        if (categoryDairyButton != null) {
+            categoryDairyButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryVegetablesButton != null) {
+            categoryVegetablesButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryFruitsButton != null) {
+            categoryFruitsButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryMeatsButton != null) {
+            categoryMeatsButton.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(lighterFabColor));
+        }
+        if (categoryBeveragesButton != null) {
+            categoryBeveragesButton.setBackgroundTintList(
                     android.content.res.ColorStateList.valueOf(lighterFabColor));
         }
         if (categoryMedicineButton != null) {
             categoryMedicineButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryDrinksButton != null) {
-            categoryDrinksButton.setBackgroundTintList(
                     android.content.res.ColorStateList.valueOf(lighterFabColor));
         }
         if (categoryOtherButton != null) {
@@ -722,23 +798,30 @@ public class ProductListActivity extends AppCompatActivity {
             public void onChanged(List<Product> products) {
                 if (products != null) {
                     int allCount = products.size();
-                    int foodCount = 0;
-                    int medicineCount = 0;
-                    int drinksCount = 0;
-                    int otherCount = 0;
+                    int dairyCount = 0, vegetablesCount = 0, fruitsCount = 0, meatsCount = 0;
+                    int beveragesCount = 0, medicineCount = 0, otherCount = 0;
 
                     for (Product product : products) {
                         String category = product.getCategory();
                         if (category != null) {
                             switch (category) {
-                                case "Food":
-                                    foodCount++;
+                                case "Dairy":
+                                    dairyCount++;
+                                    break;
+                                case "Vegetables":
+                                    vegetablesCount++;
+                                    break;
+                                case "Fruits":
+                                    fruitsCount++;
+                                    break;
+                                case "Meats":
+                                    meatsCount++;
+                                    break;
+                                case "Beverages":
+                                    beveragesCount++;
                                     break;
                                 case "Medicine":
                                     medicineCount++;
-                                    break;
-                                case "Drinks":
-                                    drinksCount++;
                                     break;
                                 case "Other":
                                     otherCount++;
@@ -747,21 +830,44 @@ public class ProductListActivity extends AppCompatActivity {
                         }
                     }
 
-                    // Update button texts with counts
-                    if (categoryAllButton != null) {
-                        categoryAllButton.setText("All\n" + allCount + " items");
+                    // Update ALL button count
+                    if (categoryAllCount != null) {
+                        categoryAllCount.setText(allCount + " items");
                     }
-                    if (categoryFoodButton != null) {
-                        categoryFoodButton.setText("🍎\nFood\n" + foodCount + " items");
+
+                    // Update Dairy button count
+                    if (categoryDairyCount != null) {
+                        categoryDairyCount.setText(dairyCount + " items");
                     }
-                    if (categoryMedicineButton != null) {
-                        categoryMedicineButton.setText("💊\nMedicine\n" + medicineCount + " items");
+
+                    // Update Vegetables button count
+                    if (categoryVegetablesCount != null) {
+                        categoryVegetablesCount.setText(vegetablesCount + " items");
                     }
-                    if (categoryDrinksButton != null) {
-                        categoryDrinksButton.setText("🥤\nDrinks\n" + drinksCount + " items");
+
+                    // Update Fruits button count
+                    if (categoryFruitsCount != null) {
+                        categoryFruitsCount.setText(fruitsCount + " items");
                     }
-                    if (categoryOtherButton != null) {
-                        categoryOtherButton.setText("📦\nOther\n" + otherCount + " items");
+
+                    // Update Meats button count
+                    if (categoryMeatsCount != null) {
+                        categoryMeatsCount.setText(meatsCount + " items");
+                    }
+
+                    // Update Beverages button count
+                    if (categoryBeveragesCount != null) {
+                        categoryBeveragesCount.setText(beveragesCount + " items");
+                    }
+
+                    // Update Medicine button count
+                    if (categoryMedicineCount != null) {
+                        categoryMedicineCount.setText(medicineCount + " items");
+                    }
+
+                    // Update Other button count
+                    if (categoryOtherCount != null) {
+                        categoryOtherCount.setText(otherCount + " items");
                     }
                 }
             }
@@ -808,7 +914,7 @@ public class ProductListActivity extends AppCompatActivity {
         if (products != null) {
             productList.clear();
             productList.addAll(products);
-            adapter.setProducts(products);
+            adapter.updateData(productList);
             updateProductCount();
 
             Log.d(TAG, "Updated product list with " + products.size() + " products (Category: " + currentCategory + ")");
