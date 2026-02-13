@@ -1,8 +1,11 @@
 package com.example.productexpirationtrackerapp;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.LinearLayout;
 
@@ -37,7 +40,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Use your custom layout instead of android.R.layout.simple_list_item_1
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_product, parent, false);
         return new ViewHolder(view);
@@ -51,10 +53,36 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.productName.setText(product.getName());
         holder.productExpiry.setText("Expires: " + product.getFormattedExpiryDate());
 
-        // Get first emoji/icon from product name
-        if (product.getName().length() > 0) {
-            String firstChar = product.getName().substring(0, 2); // Get first 2 chars (emoji)
-            holder.productIcon.setText(firstChar);
+        // Load product image from byte array
+        if (product.hasPhoto()) {
+            // Convert byte array to Bitmap
+            byte[] photoBytes = product.getPhoto();
+            Bitmap bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
+            holder.productImage.setImageBitmap(bitmap);
+            holder.productImage.setVisibility(View.VISIBLE);
+        } else {
+            // If no image, show category-based placeholder
+            String category = product.getCategory();
+            int placeholderRes = R.drawable.ic_default_product;
+
+            if (category != null) {
+                switch (category) {
+                    case "Food":
+                        placeholderRes = R.drawable.ic_food_placeholder;
+                        break;
+                    case "Medicine":
+                        placeholderRes = R.drawable.ic_medicine_placeholder;
+                        break;
+                    case "Drinks":
+                        placeholderRes = R.drawable.ic_drinks_placeholder;
+                        break;
+                    case "Other":
+                        placeholderRes = R.drawable.ic_other_placeholder;
+                        break;
+                }
+            }
+            holder.productImage.setImageResource(placeholderRes);
+            holder.productImage.setVisibility(View.VISIBLE);
         }
 
         // Calculate days left
@@ -69,15 +97,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_light));
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_dark));
         } else if (daysLeft <= 3) {
-            holder.productDaysLeft.setText(daysLeft + " days left");
+            holder.productDaysLeft.setText(daysLeft + " days left ⚠️");
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_dark));
             holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_light));
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_dark));
-        } else if (daysLeft <= 7) {
-            holder.productDaysLeft.setText(daysLeft + " days left");
-            holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_light));
-            holder.productDaysLeft.setBackgroundColor(0xFFFBE9E7);
-            holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_light));
         } else {
             holder.productDaysLeft.setText(daysLeft + " days left");
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_dark));
@@ -85,22 +108,23 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_dark));
         }
 
-        // Set click listener on the entire item
+        // FIXED: Use getAdapterPosition() instead of storing position
         holder.itemLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (listener != null) {
-                    listener.onItemClick(position);
+                int adapterPosition = holder.getAdapterPosition();
+                if (listener != null && adapterPosition != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(adapterPosition);
                 }
             }
         });
 
-        // Set long click listener
         holder.itemLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if (listener != null) {
-                    listener.onItemLongClick(position);
+                int adapterPosition = holder.getAdapterPosition();
+                if (listener != null && adapterPosition != RecyclerView.NO_POSITION) {
+                    listener.onItemLongClick(adapterPosition);
                     return true;
                 }
                 return false;
@@ -113,9 +137,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         return productList.size();
     }
 
+    public void updateData(ArrayList<Product> newList) {
+        this.productList = newList;
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout itemLayout;
-        TextView productIcon;
+        ImageView productImage;  // CHANGED: from TextView productIcon to ImageView productImage
         TextView productName;
         TextView productExpiry;
         TextView productDaysLeft;
@@ -124,7 +153,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             itemLayout = itemView.findViewById(R.id.productItemLayout);
-            productIcon = itemView.findViewById(R.id.productIcon);
+            productImage = itemView.findViewById(R.id.productImage);  // CHANGED: from productIcon to productImage
             productName = itemView.findViewById(R.id.productName);
             productExpiry = itemView.findViewById(R.id.productExpiry);
             productDaysLeft = itemView.findViewById(R.id.productDaysLeft);

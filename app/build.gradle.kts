@@ -47,9 +47,14 @@ dependencies {
     implementation("com.airbnb.android:lottie:6.3.0")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
     implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.work:work-runtime:2.9.0")
 
     // Add Room database for Java
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
+
+    // Glide for image loading - ADD THIS
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 }

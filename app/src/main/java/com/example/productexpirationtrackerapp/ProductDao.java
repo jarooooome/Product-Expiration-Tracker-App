@@ -12,7 +12,7 @@ import java.util.Date;
 @Dao
 public interface ProductDao {
     @Insert
-    void insert(Product product);
+    long insert(Product product);  // CHANGED: void → long (returns generated row ID)
 
     @Update
     void update(Product product);
@@ -23,11 +23,9 @@ public interface ProductDao {
     @Query("DELETE FROM products WHERE id = :productId")
     void deleteById(int productId);
 
-    // UPDATE THIS METHOD to return LiveData
     @Query("SELECT * FROM products ORDER BY expiryDate ASC")
     LiveData<List<Product>> getAllProductsLiveData();
 
-    // Keep the non-LiveData version if needed elsewhere
     @Query("SELECT * FROM products ORDER BY expiryDate ASC")
     List<Product> getAllProducts();
 
@@ -40,7 +38,6 @@ public interface ProductDao {
     @Query("SELECT * FROM products WHERE expiryDate BETWEEN :startDate AND :endDate")
     List<Product> getProductsExpiringBetween(Date startDate, Date endDate);
 
-    // NEW: Add category filtering query
     @Query("SELECT * FROM products WHERE category = :category ORDER BY expiryDate ASC")
     LiveData<List<Product>> getProductsByCategory(String category);
 }

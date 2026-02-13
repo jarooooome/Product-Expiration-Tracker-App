@@ -160,26 +160,14 @@ public class MainActivity extends AppCompatActivity {
 
                     Thread.sleep(500);
 
+                    // REMOVED: Default product insertion code
                     if (initialCount == 0) {
                         runOnUiThread(() ->
-                                updateProgress(50, "Database empty, creating sample data..."));
-                        Thread.sleep(800);
+                                updateProgress(55, "Database ready - no products found"));
+                        Thread.sleep(500);
 
-                        runOnUiThread(() -> updateProgress(55, "Adding food items..."));
-                        database.productDao().insert(new Product("Milk", "2024-12-31"));
-                        Thread.sleep(300);
-
-                        runOnUiThread(() -> updateProgress(60, "Adding dairy products..."));
-                        database.productDao().insert(new Product("Eggs", "2024-12-15"));
-                        Thread.sleep(300);
-
-                        runOnUiThread(() -> updateProgress(65, "Adding pantry items..."));
-                        database.productDao().insert(new Product("Bread", "2024-12-20"));
-                        Thread.sleep(300);
-
-                        int count = database.productDao().getAllProducts().size();
                         runOnUiThread(() ->
-                                updateProgress(70, "Database ready with " + count + " sample items"));
+                                updateProgress(70, "Ready to add your first product!"));
                     } else {
                         runOnUiThread(() ->
                                 updateProgress(70, "Database loaded successfully"));

@@ -205,9 +205,24 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void setupCategorySpinner() {
-        // Create an ArrayAdapter using the string array and default spinner layout
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.product_categories, android.R.layout.simple_spinner_item);
+        // UPDATED: Food-specific categories
+        String[] categories = {
+                "Select a category",
+                "Dairy",
+                "Vegetables",
+                "Fruits",
+                "Meats",
+                "Beverages",
+                "Medicine",
+                "Other"
+        };
+
+        // Create ArrayAdapter with the food-specific categories
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                categories
+        );
 
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -222,7 +237,7 @@ public class AddProductActivity extends AppCompatActivity {
                 // Get selected category
                 String category = parent.getItemAtPosition(position).toString();
 
-                // Only set selectedCategory if it's not the default "Select Category" option
+                // Only set selectedCategory if it's not the default "Select a category" option
                 if (position > 0) {
                     selectedCategory = category;
                 } else {

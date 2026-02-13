@@ -176,10 +176,10 @@
             android:id="@+id/quantityEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="e.g., 1, 2, 500g"
+            android:hint="e.g., 1, 2, 500g, 1L"
             android:padding="16dp"
             android:background="@drawable/edittext_background"
-            android:inputType="number"
+            android:inputType="text"
             android:layout_marginBottom="24dp" />
 
         <!-- Notes (Optional) -->

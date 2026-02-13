@@ -12,39 +12,74 @@ public class ProductRepository {
     private ProductDao productDao;
     private LiveData<List<Product>> allProducts;
     private ExecutorService executorService;
+    private NotificationScheduler notificationScheduler; // Moved to top with other fields
 
     public ProductRepository(Application application) {
         AppDatabase database = AppDatabase.getDatabase(application);
         productDao = database.productDao();
         allProducts = productDao.getAllProductsLiveData();
         executorService = Executors.newSingleThreadExecutor();
+        notificationScheduler = new NotificationScheduler(application); // Initialize here
     }
 
     public LiveData<List<Product>> getAllProducts() {
         return allProducts;
     }
 
+    // SINGLE insert method - with notification scheduling
     public void insert(Product product) {
         executorService.execute(() -> {
-            productDao.insert(product);
+            long id = productDao.insert(product);
+            product.setId((int) id); // Set the generated ID
+
+            // Schedule notifications for this product
+            if (notificationScheduler != null) {
+                notificationScheduler.scheduleAllNotifications(product);
+            }
         });
     }
 
+    // SINGLE update method
     public void update(Product product) {
         executorService.execute(() -> {
             productDao.update(product);
+            // Optionally reschedule notifications after update
+            if (notificationScheduler != null) {
+                notificationScheduler.cancelNotification(product);
+                notificationScheduler.scheduleAllNotifications(product);
+            }
         });
     }
 
+    // SINGLE delete method - with notification cancellation
     public void delete(Product product) {
         executorService.execute(() -> {
+            // Cancel scheduled notifications first
+            if (notificationScheduler != null) {
+                notificationScheduler.cancelNotification(product);
+            }
             productDao.delete(product);
         });
     }
 
     public void deleteById(int productId) {
         executorService.execute(() -> {
+            // First get the product to cancel its notifications
+            Product product = productDao.getProductById(productId);
+            if (product != null && notificationScheduler != null) {
+                notificationScheduler.cancelNotification(product);
+            }
             productDao.deleteById(productId);
+        });
+    }
+
+    // SINGLE rescheduleAllNotifications method
+    public void rescheduleAllNotifications() {
+        executorService.execute(() -> {
+            List<Product> products = productDao.getAllProducts();
+            if (notificationScheduler != null) {
+                notificationScheduler.scheduleAllAlarms(products);
+            }
         });
     }
 
@@ -59,7 +94,7 @@ public class ProductRepository {
         });
     }
 
-    // NEW: Add category filtering method
+    // Category filtering method
     public LiveData<List<Product>> getProductsByCategory(String category) {
         return productDao.getProductsByCategory(category);
     }
