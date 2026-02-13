@@ -23,7 +23,7 @@ public class NotificationScheduler {
     private static final String TAG = "NOTIF_DEBUG";
 
     // TEST MODE FLAG - Set to false for production!
-    private static final boolean TEST_MODE = false; // CHANGED TO FALSE FOR PRODUCTION
+    private static final boolean TEST_MODE = true; // CHANGED TO FALSE FOR PRODUCTION
 
     public NotificationScheduler(Context context) {
         this.context = context;

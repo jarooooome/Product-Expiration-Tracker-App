@@ -90,7 +90,7 @@
                             android:id="@+id/total_items_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="247"
+                            android:text="0"
                             android:textSize="32sp"
                             android:textColor="#1A1E2C"
                             android:textStyle="bold"
@@ -107,7 +107,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Expiring Soon Card -->
+                <!-- Expiring Soon Card (7 days) -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/expiring_soon_card"
                     android:layout_width="0dp"
@@ -130,7 +130,7 @@
                             android:id="@+id/expiring_soon_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="12"
+                            android:text="0"
                             android:textSize="32sp"
                             android:textColor="#1A1E2C"
                             android:textStyle="bold"
@@ -140,7 +140,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Expiring"
+                            android:text="Expiring Soon"
                             android:textSize="14sp"
                             android:textColor="#8A8F9E"
                             android:textStyle="normal" />
@@ -169,7 +169,7 @@
                             android:id="@+id/expired_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3"
+                            android:text="0"
                             android:textSize="32sp"
                             android:textColor="#1A1E2C"
                             android:textStyle="bold"
@@ -205,7 +205,117 @@
                 android:orientation="horizontal"
                 android:layout_marginBottom="16dp">
 
-                <!-- Fruits & Vegetables Card -->
+                <!-- Dairy Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/dairy_card"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#FFF3E0">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:text="🥛"
+                            android:textSize="32sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Dairy"
+                                android:textSize="16sp"
+                                android:textColor="#1A1E2C"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/dairy_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 items"
+                                android:textSize="13sp"
+                                android:textColor="#8A8F9E"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Vegetables Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/vegetables_card"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#E8F5E9">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:text="🥦"
+                            android:textSize="32sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Vegetables"
+                                android:textSize="16sp"
+                                android:textColor="#1A1E2C"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/vegetables_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 items"
+                                android:textSize="13sp"
+                                android:textColor="#8A8F9E"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <!-- Second Row of Categories -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <!-- Fruits Card -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/fruits_card"
                     android:layout_width="0dp"
@@ -214,7 +324,7 @@
                     android:layout_marginEnd="8dp"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="2dp"
-                    app:cardBackgroundColor="#E8F0FE">
+                    app:cardBackgroundColor="#FFF3E0">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -239,8 +349,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Fruits &amp; Vegetables"
-                                android:textSize="14sp"
+                                android:text="Fruits"
+                                android:textSize="16sp"
                                 android:textColor="#1A1E2C"
                                 android:textStyle="bold" />
 
@@ -248,8 +358,118 @@
                                 android:id="@+id/fruits_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="124 items"
-                                android:textSize="12sp"
+                                android:text="0 items"
+                                android:textSize="13sp"
+                                android:textColor="#8A8F9E"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Meats Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/meats_card"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#FFEBEE">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:text="🥩"
+                            android:textSize="32sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Meats"
+                                android:textSize="16sp"
+                                android:textColor="#1A1E2C"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/meats_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 items"
+                                android:textSize="13sp"
+                                android:textColor="#8A8F9E"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <!-- Third Row of Categories -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <!-- Beverages Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/beverages_card"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#E0F2F1">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:text="🥤"
+                            android:textSize="32sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Beverages"
+                                android:textSize="16sp"
+                                android:textColor="#1A1E2C"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/beverages_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 items"
+                                android:textSize="13sp"
                                 android:textColor="#8A8F9E"
                                 android:layout_marginTop="4dp" />
                         </LinearLayout>
@@ -291,7 +511,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Medicine"
-                                android:textSize="14sp"
+                                android:textSize="16sp"
                                 android:textColor="#1A1E2C"
                                 android:textStyle="bold" />
 
@@ -299,8 +519,8 @@
                                 android:id="@+id/medicine_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="45 items"
-                                android:textSize="12sp"
+                                android:text="0 items"
+                                android:textSize="13sp"
                                 android:textColor="#8A8F9E"
                                 android:layout_marginTop="4dp" />
                         </LinearLayout>
@@ -308,63 +528,12 @@
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
 
-            <!-- Second Row of Categories -->
+            <!-- Fourth Row of Categories -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginBottom="30dp">
-
-                <!-- Drinks Card -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/drinks_card"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="2dp"
-                    app:cardBackgroundColor="#E8F4F0">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:text="🥤"
-                            android:textSize="32sp"
-                            android:gravity="center"
-                            android:layout_marginEnd="12dp" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Drinks"
-                                android:textSize="14sp"
-                                android:textColor="#1A1E2C"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/drinks_count"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="38 items"
-                                android:textSize="12sp"
-                                android:textColor="#8A8F9E"
-                                android:layout_marginTop="4dp" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
 
                 <!-- Other Card -->
                 <androidx.cardview.widget.CardView
@@ -372,7 +541,7 @@
                     android:layout_width="0dp"
                     android:layout_height="120dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="2dp"
                     app:cardBackgroundColor="#F3F0FF">
@@ -401,7 +570,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Other"
-                                android:textSize="14sp"
+                                android:textSize="16sp"
                                 android:textColor="#1A1E2C"
                                 android:textStyle="bold" />
 
@@ -409,13 +578,22 @@
                                 android:id="@+id/other_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="40 items"
-                                android:textSize="12sp"
+                                android:text="0 items"
+                                android:textSize="13sp"
                                 android:textColor="#8A8F9E"
                                 android:layout_marginTop="4dp" />
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
+
+                <!-- Empty placeholder for alignment -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:visibility="invisible"
+                    app:cardCornerRadius="20dp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -440,7 +618,7 @@
         app:tint="#FFFFFF"
         android:scaleType="fitCenter" />
 
-    <!-- Modern Bottom Navigation Bar - Matching ProductListActivity -->
+    <!-- Modern Bottom Navigation Bar -->
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
@@ -481,7 +659,6 @@
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
 
-            <!-- Active indicator -->
             <View
                 android:id="@+id/navProfileIndicator"
                 android:layout_width="30dp"
@@ -520,7 +697,6 @@
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
 
-            <!-- Inactive indicator (hidden) -->
             <View
                 android:id="@+id/navProductsIndicator"
                 android:layout_width="30dp"
@@ -560,7 +736,6 @@
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
 
-            <!-- Inactive indicator (hidden) -->
             <View
                 android:id="@+id/navSettingsIndicator"
                 android:layout_width="30dp"

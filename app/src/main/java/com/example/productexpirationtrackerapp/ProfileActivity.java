@@ -14,6 +14,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -28,16 +35,22 @@ public class ProfileActivity extends AppCompatActivity {
     private CardView expiringSoonCard;
     private CardView expiredCard;
 
-    // Category Cards
+    // Category Cards - UPDATED with 7 categories
+    private CardView dairyCard;
+    private CardView vegetablesCard;
     private CardView fruitsCard;
+    private CardView meatsCard;
+    private CardView beveragesCard;
     private CardView medicineCard;
-    private CardView drinksCard;
     private CardView otherCard;
 
-    // Category Item Count TextViews
+    // Category Item Count TextViews - UPDATED with 7 categories
+    private TextView dairyCount;
+    private TextView vegetablesCount;
     private TextView fruitsCount;
+    private TextView meatsCount;
+    private TextView beveragesCount;
     private TextView medicineCount;
-    private TextView drinksCount;
     private TextView otherCount;
 
     // Stat Count TextViews
@@ -64,11 +77,15 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ScrollView scrollView;
     private SharedPreferences preferences;
+    private ProductViewModel productViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        // Initialize ViewModel
+        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
         // Initialize preferences
         preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
@@ -85,7 +102,7 @@ public class ProfileActivity extends AppCompatActivity {
         // Apply theme
         applyTheme();
 
-        // Load sample data (replace with actual data from database)
+        // Load real data from database
         loadProfileData();
 
         Log.d(TAG, "ProfileActivity created successfully");
@@ -96,6 +113,8 @@ public class ProfileActivity extends AppCompatActivity {
         super.onResume();
         // Reapply theme when returning to this activity
         applyTheme();
+        // Refresh data when returning to profile
+        loadProfileData();
     }
 
     private void initializeViews() {
@@ -114,16 +133,22 @@ public class ProfileActivity extends AppCompatActivity {
             expiringSoonCount = findViewById(R.id.expiring_soon_count);
             expiredCount = findViewById(R.id.expired_count);
 
-            // Category Cards
+            // Category Cards - UPDATED with 7 categories
+            dairyCard = findViewById(R.id.dairy_card);
+            vegetablesCard = findViewById(R.id.vegetables_card);
             fruitsCard = findViewById(R.id.fruits_card);
+            meatsCard = findViewById(R.id.meats_card);
+            beveragesCard = findViewById(R.id.beverages_card);
             medicineCard = findViewById(R.id.medicine_card);
-            drinksCard = findViewById(R.id.drinks_card);
             otherCard = findViewById(R.id.other_card);
 
-            // Category Count TextViews
+            // Category Count TextViews - UPDATED with 7 categories
+            dairyCount = findViewById(R.id.dairy_count);
+            vegetablesCount = findViewById(R.id.vegetables_count);
             fruitsCount = findViewById(R.id.fruits_count);
+            meatsCount = findViewById(R.id.meats_count);
+            beveragesCount = findViewById(R.id.beverages_count);
             medicineCount = findViewById(R.id.medicine_count);
-            drinksCount = findViewById(R.id.drinks_count);
             otherCount = findViewById(R.id.other_count);
 
             // Floating Action Button
@@ -197,46 +222,74 @@ public class ProfileActivity extends AppCompatActivity {
     private void setupClickListeners() {
         // Activity stat cards
         if (totalItemsCard != null) {
-            totalItemsCard.setOnClickListener(v ->
-                    Toast.makeText(ProfileActivity.this, "Total Items: 247", Toast.LENGTH_SHORT).show()
-            );
+            totalItemsCard.setOnClickListener(v -> {
+                String count = totalItemsCount != null ? totalItemsCount.getText().toString() : "0";
+                Toast.makeText(ProfileActivity.this, "Total Items: " + count, Toast.LENGTH_SHORT).show();
+            });
         }
 
         if (expiringSoonCard != null) {
-            expiringSoonCard.setOnClickListener(v ->
-                    Toast.makeText(ProfileActivity.this, "Expiring Soon: 12 items", Toast.LENGTH_SHORT).show()
-            );
+            expiringSoonCard.setOnClickListener(v -> {
+                String count = expiringSoonCount != null ? expiringSoonCount.getText().toString() : "0";
+                Toast.makeText(ProfileActivity.this, "Expiring Soon: " + count + " items", Toast.LENGTH_SHORT).show();
+            });
         }
 
         if (expiredCard != null) {
-            expiredCard.setOnClickListener(v ->
-                    Toast.makeText(ProfileActivity.this, "Expired: 3 items", Toast.LENGTH_SHORT).show()
-            );
+            expiredCard.setOnClickListener(v -> {
+                String count = expiredCount != null ? expiredCount.getText().toString() : "0";
+                Toast.makeText(ProfileActivity.this, "Expired: " + count + " items", Toast.LENGTH_SHORT).show();
+            });
         }
 
-        // Category cards
+        // Category cards - UPDATED with 7 categories
+        if (dairyCard != null) {
+            dairyCard.setOnClickListener(v -> {
+                String count = dairyCount != null ? dairyCount.getText().toString() : "0 items";
+                Toast.makeText(ProfileActivity.this, "Dairy: " + count, Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        if (vegetablesCard != null) {
+            vegetablesCard.setOnClickListener(v -> {
+                String count = vegetablesCount != null ? vegetablesCount.getText().toString() : "0 items";
+                Toast.makeText(ProfileActivity.this, "Vegetables: " + count, Toast.LENGTH_SHORT).show();
+            });
+        }
+
         if (fruitsCard != null) {
-            fruitsCard.setOnClickListener(v ->
-                    Toast.makeText(ProfileActivity.this, "Fruits & Vegetables: 124 items", Toast.LENGTH_SHORT).show()
-            );
+            fruitsCard.setOnClickListener(v -> {
+                String count = fruitsCount != null ? fruitsCount.getText().toString() : "0 items";
+                Toast.makeText(ProfileActivity.this, "Fruits: " + count, Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        if (meatsCard != null) {
+            meatsCard.setOnClickListener(v -> {
+                String count = meatsCount != null ? meatsCount.getText().toString() : "0 items";
+                Toast.makeText(ProfileActivity.this, "Meats: " + count, Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        if (beveragesCard != null) {
+            beveragesCard.setOnClickListener(v -> {
+                String count = beveragesCount != null ? beveragesCount.getText().toString() : "0 items";
+                Toast.makeText(ProfileActivity.this, "Beverages: " + count, Toast.LENGTH_SHORT).show();
+            });
         }
 
         if (medicineCard != null) {
-            medicineCard.setOnClickListener(v ->
-                    Toast.makeText(ProfileActivity.this, "Medicine: 45 items", Toast.LENGTH_SHORT).show()
-            );
-        }
-
-        if (drinksCard != null) {
-            drinksCard.setOnClickListener(v ->
-                    Toast.makeText(ProfileActivity.this, "Drinks: 38 items", Toast.LENGTH_SHORT).show()
-            );
+            medicineCard.setOnClickListener(v -> {
+                String count = medicineCount != null ? medicineCount.getText().toString() : "0 items";
+                Toast.makeText(ProfileActivity.this, "Medicine: " + count, Toast.LENGTH_SHORT).show();
+            });
         }
 
         if (otherCard != null) {
-            otherCard.setOnClickListener(v ->
-                    Toast.makeText(ProfileActivity.this, "Other: 40 items", Toast.LENGTH_SHORT).show()
-            );
+            otherCard.setOnClickListener(v -> {
+                String count = otherCount != null ? otherCount.getText().toString() : "0 items";
+                Toast.makeText(ProfileActivity.this, "Other: " + count, Toast.LENGTH_SHORT).show();
+            });
         }
 
         // Floating Action Button - Add Product
@@ -315,17 +368,114 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadProfileData() {
-        // Set stat counts
-        if (totalItemsCount != null) totalItemsCount.setText("247");
-        if (expiringSoonCount != null) expiringSoonCount.setText("12");
-        if (expiredCount != null) expiredCount.setText("3");
+        // Observe all products to get real-time counts
+        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
+            @Override
+            public void onChanged(List<Product> products) {
+                if (products != null) {
+                    // Calculate total items
+                    int totalItems = products.size();
+                    if (totalItemsCount != null) {
+                        totalItemsCount.setText(String.valueOf(totalItems));
+                    }
 
-        // Set category item counts
-        if (fruitsCount != null) fruitsCount.setText("124 items");
-        if (medicineCount != null) medicineCount.setText("45 items");
-        if (drinksCount != null) drinksCount.setText("38 items");
-        if (otherCount != null) otherCount.setText("40 items");
+                    // Calculate expired items
+                    int expiredItems = 0;
+                    // Calculate expiring soon items (within 7 days)
+                    int expiringSoonItems = 0;
 
-        Log.d(TAG, "Profile data loaded");
+                    // Category counts
+                    int dairyCount = 0;
+                    int vegetablesCount = 0;
+                    int fruitsCount = 0;
+                    int meatsCount = 0;
+                    int beveragesCount = 0;
+                    int medicineCount = 0;
+                    int otherCount = 0;
+
+                    Date today = new Date();
+                    long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L;
+
+                    for (Product product : products) {
+                        // Count by category
+                        String category = product.getCategory();
+                        if (category != null) {
+                            switch (category) {
+                                case "Dairy":
+                                    dairyCount++;
+                                    break;
+                                case "Vegetables":
+                                    vegetablesCount++;
+                                    break;
+                                case "Fruits":
+                                    fruitsCount++;
+                                    break;
+                                case "Meats":
+                                    meatsCount++;
+                                    break;
+                                case "Beverages":
+                                    beveragesCount++;
+                                    break;
+                                case "Medicine":
+                                    medicineCount++;
+                                    break;
+                                case "Other":
+                                    otherCount++;
+                                    break;
+                            }
+                        }
+
+                        // Count expired items
+                        Date expiryDate = product.getExpiryDate();
+                        if (expiryDate != null && expiryDate.before(today)) {
+                            expiredItems++;
+                        }
+
+                        // Count expiring soon items (within 7 days and not expired)
+                        if (expiryDate != null && !expiryDate.before(today) &&
+                                expiryDate.getTime() - today.getTime() <= sevenDaysInMillis) {
+                            expiringSoonItems++;
+                        }
+                    }
+
+                    // Update expired count
+                    if (expiredCount != null) {
+                        expiredCount.setText(String.valueOf(expiredItems));
+                    }
+
+                    // Update expiring soon count
+                    if (expiringSoonCount != null) {
+                        expiringSoonCount.setText(String.valueOf(expiringSoonItems));
+                    }
+
+                    // Update category counts - UPDATED with 7 categories
+                    if (ProfileActivity.this.dairyCount != null) {
+                        ProfileActivity.this.dairyCount.setText(dairyCount + " items");
+                    }
+                    if (ProfileActivity.this.vegetablesCount != null) {
+                        ProfileActivity.this.vegetablesCount.setText(vegetablesCount + " items");
+                    }
+                    if (ProfileActivity.this.fruitsCount != null) {
+                        ProfileActivity.this.fruitsCount.setText(fruitsCount + " items");
+                    }
+                    if (ProfileActivity.this.meatsCount != null) {
+                        ProfileActivity.this.meatsCount.setText(meatsCount + " items");
+                    }
+                    if (ProfileActivity.this.beveragesCount != null) {
+                        ProfileActivity.this.beveragesCount.setText(beveragesCount + " items");
+                    }
+                    if (ProfileActivity.this.medicineCount != null) {
+                        ProfileActivity.this.medicineCount.setText(medicineCount + " items");
+                    }
+                    if (ProfileActivity.this.otherCount != null) {
+                        ProfileActivity.this.otherCount.setText(otherCount + " items");
+                    }
+
+                    Log.d(TAG, "Profile data loaded - Total: " + totalItems +
+                            ", Expired: " + expiredItems +
+                            ", Expiring Soon: " + expiringSoonItems);
+                }
+            }
+        });
     }
 }
