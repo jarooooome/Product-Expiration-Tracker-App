@@ -21,7 +21,7 @@
             android:orientation="vertical"
             android:paddingBottom="80dp">
 
-            <!-- Modern Header - Matches Body Color -->
+            <!-- Modern Header - NO BACKGROUND ATTRIBUTE -->
             <LinearLayout
                 android:id="@+id/headerLayout"
                 android:layout_width="match_parent"
@@ -29,10 +29,7 @@
                 android:orientation="vertical"
                 android:padding="20dp"
                 android:paddingTop="28dp"
-                android:paddingBottom="20dp"
-                android:background="?attr/colorPrimary">
-
-                <!-- REMOVED: Logo and App Name Row (completely deleted) -->
+                android:paddingBottom="20dp">
 
                 <!-- Big "Hi, <user name>!" -->
                 <TextView
@@ -42,7 +39,6 @@
                     android:text="Hi, User! 👋"
                     android:textSize="25sp"
                     android:textStyle="bold"
-                    android:textColor="#FFFFFF"
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"
                     android:letterSpacing="0.02" />
@@ -54,7 +50,6 @@
                     android:layout_height="wrap_content"
                     android:text="these are your products"
                     android:textSize="14sp"
-                    android:textColor="#FFFFFF"
                     android:textStyle="normal"
                     android:alpha="0.9"
                     android:layout_marginBottom="24dp"
@@ -92,8 +87,6 @@
                         android:layout_marginEnd="8dp"
                         android:background="@android:color/transparent"
                         android:hint="Search products..."
-                        android:textColorHint="#9E9E9E"
-                        android:textColor="#424242"
                         android:textSize="16sp"
                         android:inputType="text"
                         android:imeOptions="actionSearch"
@@ -108,7 +101,6 @@
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="16dp"
                         android:src="@android:drawable/ic_menu_close_clear_cancel"
-                        app:tint="#757575"
                         android:visibility="gone"
                         android:contentDescription="Clear search"
                         android:clickable="true"
@@ -125,12 +117,11 @@
                     android:text="Categories"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="#FFFFFF"
                     android:letterSpacing="0.08"
                     android:layout_marginBottom="8dp"
                     android:layout_marginStart="4dp" />
 
-                <!-- Category Filter Chips with increased height -->
+                <!-- Category Filter Chips -->
                 <HorizontalScrollView
                     android:id="@+id/categoryScrollView"
                     android:layout_width="match_parent"
@@ -163,7 +154,6 @@
                             android:paddingHorizontal="8dp"
                             android:layout_marginEnd="10dp"
                             android:background="@drawable/category_button_square_curve"
-                            android:backgroundTint="#FFFFFF"
                             android:elevation="2dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -175,7 +165,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="All"
                                 android:textSize="15sp"
-                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02" />
@@ -186,7 +175,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="0 items"
                                 android:textSize="12sp"
-                                android:textColor="#FFFFFF"
                                 android:alpha="0.7"
                                 android:layout_marginTop="4dp"
                                 android:textAllCaps="false"
@@ -204,7 +192,6 @@
                             android:paddingHorizontal="8dp"
                             android:layout_marginEnd="10dp"
                             android:background="@drawable/category_button_square_curve"
-                            android:backgroundTint="#80FFFFFF"
                             android:elevation="2dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -215,8 +202,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="🥛"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF" />
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/categoryDairyTitle"
@@ -224,7 +210,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="Dairy"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02"
@@ -236,7 +221,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="0 items"
                                 android:textSize="11sp"
-                                android:textColor="#FFFFFF"
                                 android:alpha="0.7"
                                 android:layout_marginTop="2dp"
                                 android:textAllCaps="false"
@@ -254,7 +238,6 @@
                             android:paddingHorizontal="8dp"
                             android:layout_marginEnd="10dp"
                             android:background="@drawable/category_button_square_curve"
-                            android:backgroundTint="#80FFFFFF"
                             android:elevation="2dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -265,8 +248,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="🥦"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF" />
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/categoryVegetablesTitle"
@@ -274,7 +256,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="Vegetables"
                                 android:textSize="12sp"
-                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02"
@@ -286,7 +267,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="0 items"
                                 android:textSize="11sp"
-                                android:textColor="#FFFFFF"
                                 android:alpha="0.7"
                                 android:layout_marginTop="2dp"
                                 android:textAllCaps="false"
@@ -304,7 +284,6 @@
                             android:paddingHorizontal="8dp"
                             android:layout_marginEnd="10dp"
                             android:background="@drawable/category_button_square_curve"
-                            android:backgroundTint="#80FFFFFF"
                             android:elevation="2dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -315,8 +294,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="🍎"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF" />
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/categoryFruitsTitle"
@@ -324,7 +302,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="Fruits"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02"
@@ -336,7 +313,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="0 items"
                                 android:textSize="11sp"
-                                android:textColor="#FFFFFF"
                                 android:alpha="0.7"
                                 android:layout_marginTop="2dp"
                                 android:textAllCaps="false"
@@ -354,7 +330,6 @@
                             android:paddingHorizontal="8dp"
                             android:layout_marginEnd="10dp"
                             android:background="@drawable/category_button_square_curve"
-                            android:backgroundTint="#80FFFFFF"
                             android:elevation="2dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -365,8 +340,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="🥩"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF" />
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/categoryMeatsTitle"
@@ -374,7 +348,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="Meats"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02"
@@ -386,7 +359,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="0 items"
                                 android:textSize="11sp"
-                                android:textColor="#FFFFFF"
                                 android:alpha="0.7"
                                 android:layout_marginTop="2dp"
                                 android:textAllCaps="false"
@@ -404,7 +376,6 @@
                             android:paddingHorizontal="8dp"
                             android:layout_marginEnd="10dp"
                             android:background="@drawable/category_button_square_curve"
-                            android:backgroundTint="#80FFFFFF"
                             android:elevation="2dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -415,8 +386,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="🥤"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF" />
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/categoryBeveragesTitle"
@@ -424,7 +394,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="Beverages"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02"
@@ -436,7 +405,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="0 items"
                                 android:textSize="11sp"
-                                android:textColor="#FFFFFF"
                                 android:alpha="0.7"
                                 android:layout_marginTop="2dp"
                                 android:textAllCaps="false"
@@ -454,7 +422,6 @@
                             android:paddingHorizontal="8dp"
                             android:layout_marginEnd="10dp"
                             android:background="@drawable/category_button_square_curve"
-                            android:backgroundTint="#80FFFFFF"
                             android:elevation="2dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -465,8 +432,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="💊"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF" />
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/categoryMedicineTitle"
@@ -474,7 +440,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="Medicine"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02"
@@ -486,7 +451,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="0 items"
                                 android:textSize="11sp"
-                                android:textColor="#FFFFFF"
                                 android:alpha="0.7"
                                 android:layout_marginTop="2dp"
                                 android:textAllCaps="false"
@@ -503,7 +467,6 @@
                             android:paddingVertical="12dp"
                             android:paddingHorizontal="8dp"
                             android:background="@drawable/category_button_square_curve"
-                            android:backgroundTint="#80FFFFFF"
                             android:elevation="2dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -514,8 +477,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="📦"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF" />
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/categoryOtherTitle"
@@ -523,7 +485,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="Other"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02"
@@ -535,16 +496,76 @@
                                 android:layout_height="wrap_content"
                                 android:text="0 items"
                                 android:textSize="11sp"
-                                android:textColor="#FFFFFF"
                                 android:alpha="0.7"
                                 android:layout_marginTop="2dp"
                                 android:textAllCaps="false"
                                 android:letterSpacing="0.02" />
                         </LinearLayout>
                     </LinearLayout>
-                </HorizontalScrollView>            </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
 
-            <!-- Product Count with modern styling -->
+            <!-- BULK ACTION BAR - ADDED HERE -->
+            <LinearLayout
+                android:id="@+id/bulkActionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:background="#2196F3"
+                android:visibility="gone"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:id="@+id/bulkActionTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 item(s) selected"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/bulkSelectAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select All"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/bulkDiscard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Discard"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginHorizontal="8dp" />
+
+                <TextView
+                    android:id="@+id/bulkCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </LinearLayout>
+
+            <!-- Product Count with modern styling and History Button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -567,8 +588,19 @@
                     android:text="Total: 0 products"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    android:textColor="#424242"
                     android:letterSpacing="0.02" />
+
+                <!-- History Button - Right side of product count -->
+                <ImageView
+                    android:id="@+id/historyButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_history"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="History"
+                    android:layout_marginStart="8dp" />
+
             </LinearLayout>
 
             <!-- Product List with RecyclerView -->
@@ -585,14 +617,13 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Modern Bottom Navigation Bar with gradient -->
+    <!-- Modern Bottom Navigation Bar - NO BACKGROUND ATTRIBUTE -->
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:background="@drawable/bottom_nav_gradient"
         android:elevation="12dp"
         android:paddingVertical="8dp">
 
@@ -612,8 +643,7 @@
                 android:id="@+id/navProfileIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="#FFFFFF" />
+                android:src="@android:drawable/ic_menu_myplaces" />
 
             <TextView
                 android:id="@+id/navProfileText"
@@ -621,9 +651,17 @@
                 android:layout_height="wrap_content"
                 android:text="Profile"
                 android:textSize="12sp"
-                android:textColor="#FFFFFF"
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
+
+            <!-- Profile Indicator -->
+            <View
+                android:id="@+id/navProfileIndicator"
+                android:layout_width="30dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:alpha="0.8"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- Products Button (Active) -->
@@ -642,8 +680,7 @@
                 android:id="@+id/navProductsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_view"
-                app:tint="#FFFFFF" />
+                android:src="@android:drawable/ic_menu_view" />
 
             <TextView
                 android:id="@+id/navProductsText"
@@ -651,16 +688,15 @@
                 android:layout_height="wrap_content"
                 android:text="Products"
                 android:textSize="12sp"
-                android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
 
-            <!-- Active indicator -->
+            <!-- Products Indicator -->
             <View
+                android:id="@+id/navProductsIndicator"
                 android:layout_width="30dp"
                 android:layout_height="3dp"
-                android:background="#FFFFFF"
                 android:layout_marginTop="4dp"
                 android:alpha="0.8" />
         </LinearLayout>
@@ -681,8 +717,7 @@
                 android:id="@+id/navSettingsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_preferences"
-                app:tint="#FFFFFF" />
+                android:src="@android:drawable/ic_menu_preferences" />
 
             <TextView
                 android:id="@+id/navSettingsText"
@@ -690,9 +725,17 @@
                 android:layout_height="wrap_content"
                 android:text="Settings"
                 android:textSize="12sp"
-                android:textColor="#FFFFFF"
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
+
+            <!-- Settings Indicator -->
+            <View
+                android:id="@+id/navSettingsIndicator"
+                android:layout_width="30dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:alpha="0.8"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 
@@ -712,7 +755,6 @@
         android:clickable="true"
         android:focusable="true"
         android:padding="18dp"
-        app:tint="#FFFFFF"
         android:scaleType="fitCenter" />
 
 </RelativeLayout>

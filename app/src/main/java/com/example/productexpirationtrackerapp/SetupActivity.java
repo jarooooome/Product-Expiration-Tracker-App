@@ -382,35 +382,45 @@ public class SetupActivity extends AppCompatActivity {
     }
 
     private void savePreferences() {
-        // Get values from UI
-        String userName = userNameEditText.getText().toString().trim();
-        if (userName.isEmpty()) {
-            userName = "User";
-        }
+        // Get values from UI - make them final
+        final String userName = userNameEditText.getText().toString().trim();
+        final String selectedTheme = getSelectedTheme();
+        final boolean notifications = notificationSwitch.isChecked();
 
-        String selectedTheme = getSelectedTheme();
-        boolean notifications = notificationSwitch.isChecked();
-
-        Log.d("SETUP", "Attempting to save to Room database: Name=" + userName +
+        Log.d("SETUP", "🔵 SAVING to Room database: Name=" + userName +
                 ", Theme=" + selectedTheme + ", Notifications=" + notifications);
 
-        // Save to Room database
+        // ✅ CREATE USER OBJECT
         User user = new User(userName, selectedTheme, notifications);
-        userRepository.insertOrUpdate(user);
+        Log.d("SETUP", "🟡 User object created with theme: " + user.getColorTheme());
 
-        // Also save to SharedPreferences for backward compatibility
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("user_name", userName);
-        editor.putString("color_theme", selectedTheme);
-        editor.putBoolean("notifications", notifications);
-        editor.putBoolean(PREF_SETUP_COMPLETED, true);
-        editor.apply();
+        // ✅ USE CALLBACK with lambda
+        userRepository.insertOrUpdate(user, success -> {
+            runOnUiThread(() -> {
+                if (success) {
+                    Log.d("SETUP", "✅✅✅ Database operation completed successfully");
 
-        Toast.makeText(this, "Settings saved to database!", Toast.LENGTH_SHORT).show();
-        Toast.makeText(this, getThemeName(selectedTheme) + " theme selected", Toast.LENGTH_SHORT).show();
-    }
+                    User savedUser = userRepository.getUserSync();
+                    if (savedUser != null) {
+                        Log.d("SETUP", "✅ VERIFIED: User saved with theme: " + savedUser.getColorTheme());
+                    }
 
-    private void debugDatabase() {
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("user_name", userName);
+                    editor.putString("color_theme", selectedTheme);
+                    editor.putBoolean("notifications", notifications);
+                    editor.putBoolean(PREF_SETUP_COMPLETED, true);
+                    editor.apply();
+
+                    Toast.makeText(SetupActivity.this, "Settings saved to database!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SetupActivity.this, getThemeName(selectedTheme) + " theme selected", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e("SETUP", "❌ Database operation failed");
+                    Toast.makeText(SetupActivity.this, "Error saving to database", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+    }    private void debugDatabase() {
         StringBuilder debugInfo = new StringBuilder();
 
         debugInfo.append("📊 ROOM DATABASE DEBUG\n\n");

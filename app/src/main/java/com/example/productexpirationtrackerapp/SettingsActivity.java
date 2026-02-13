@@ -3,22 +3,24 @@ package com.example.productexpirationtrackerapp;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.content.Intent;
-import android.graphics.Color;
-import android.util.Log;  // ← THIS WAS MISSING - NOW ADDED
+
 import java.util.Calendar;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -26,6 +28,7 @@ public class SettingsActivity extends AppCompatActivity {
     private SeekBar reminderFrequencySeekBar;
     private TextView frequencyValueText;
     private RadioGroup vibrationRadioGroup;
+    private RadioGroup themeRadioGroup; // ADDED
     private TextView notificationTimeText;
     private Button notificationTimeButton;
     private Button saveButton;
@@ -50,12 +53,14 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static final String PREF_REMINDER_DAYS = "reminder_days";
     public static final String PREF_VIBRATION_PATTERN = "vibration_pattern";
+    public static final String PREF_THEME = "color_theme"; // ADDED
     public static final String PREF_NOTIFICATION_HOUR = "notification_hour";
     public static final String PREF_NOTIFICATION_MINUTE = "notification_minute";
 
     public static final int DEFAULT_REMINDER_DAYS = 3;
     public static final String DEFAULT_VIBRATION_PATTERN = "default";
-    public static final int DEFAULT_NOTIFICATION_HOUR = 9; // 9 AM
+    public static final String DEFAULT_THEME = "white"; // ADDED
+    public static final int DEFAULT_NOTIFICATION_HOUR = 9;
     public static final int DEFAULT_NOTIFICATION_MINUTE = 0;
 
     private int selectedHour = DEFAULT_NOTIFICATION_HOUR;
@@ -82,6 +87,7 @@ public class SettingsActivity extends AppCompatActivity {
         reminderFrequencySeekBar = findViewById(R.id.reminderFrequencySeekBar);
         frequencyValueText = findViewById(R.id.frequencyValueText);
         vibrationRadioGroup = findViewById(R.id.vibrationRadioGroup);
+        themeRadioGroup = findViewById(R.id.themeRadioGroup); // ADDED
         notificationTimeText = findViewById(R.id.notificationTimeText);
         notificationTimeButton = findViewById(R.id.notificationTimeButton);
         saveButton = findViewById(R.id.saveButton);
@@ -264,6 +270,32 @@ public class SettingsActivity extends AppCompatActivity {
                 break;
         }
 
+        // Load theme preference - ADDED
+        String theme = preferences.getString(PREF_THEME, DEFAULT_THEME);
+        switch (theme) {
+            case "white":
+                themeRadioGroup.check(R.id.theme_white);
+                break;
+            case "green":
+                themeRadioGroup.check(R.id.theme_green);
+                break;
+            case "blue":
+                themeRadioGroup.check(R.id.theme_blue);
+                break;
+            case "pink":
+                themeRadioGroup.check(R.id.theme_pink);
+                break;
+            case "purple":
+                themeRadioGroup.check(R.id.theme_purple);
+                break;
+            case "black":
+                themeRadioGroup.check(R.id.theme_black);
+                break;
+            default:
+                themeRadioGroup.check(R.id.theme_white);
+                break;
+        }
+
         // Load notification time
         selectedHour = preferences.getInt(PREF_NOTIFICATION_HOUR, DEFAULT_NOTIFICATION_HOUR);
         selectedMinute = preferences.getInt(PREF_NOTIFICATION_MINUTE, DEFAULT_NOTIFICATION_MINUTE);
@@ -311,19 +343,45 @@ public class SettingsActivity extends AppCompatActivity {
             vibrationPattern = "default";
         }
 
+        // Get selected theme
+        int selectedThemeId = themeRadioGroup.getCheckedRadioButtonId();
+        String theme;
+        if (selectedThemeId == R.id.theme_white) {
+            theme = "white";
+        } else if (selectedThemeId == R.id.theme_green) {
+            theme = "green";
+        } else if (selectedThemeId == R.id.theme_blue) {
+            theme = "blue";
+        } else if (selectedThemeId == R.id.theme_pink) {
+            theme = "pink";
+        } else if (selectedThemeId == R.id.theme_purple) {
+            theme = "purple";
+        } else if (selectedThemeId == R.id.theme_black) {
+            theme = "black";
+        } else {
+            theme = "white";
+        }
+
+        // Save to SharedPreferences
         editor.putInt(PREF_REMINDER_DAYS, reminderDays);
         editor.putString(PREF_VIBRATION_PATTERN, vibrationPattern);
+        editor.putString(PREF_THEME, theme);
         editor.putInt(PREF_NOTIFICATION_HOUR, selectedHour);
         editor.putInt(PREF_NOTIFICATION_MINUTE, selectedMinute);
         editor.apply();
 
+        // ✅ SAVE THEME TO DATABASE - ADD THIS!
+        UserRepository userRepository = new UserRepository(getApplication());
+        userRepository.updateTheme(theme);
+
+        Log.d("SettingsActivity", "Theme saved to database: " + theme);
+
         // Recreate notification channel with new settings
         recreateNotificationChannel(vibrationPattern);
 
-        Toast.makeText(this, "Settings saved!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Settings saved to database!", Toast.LENGTH_LONG).show();
         finish();
     }
-
     private void recreateNotificationChannel(String vibrationPattern) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = getSystemService(NotificationManager.class);
@@ -355,7 +413,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             manager.createNotificationChannel(channel);
-            android.util.Log.d("NOTIF_DEBUG", "✅ Recreated notification channel");
+            Log.d("NOTIF_DEBUG", "✅ Recreated notification channel");
         }
     }
 }
