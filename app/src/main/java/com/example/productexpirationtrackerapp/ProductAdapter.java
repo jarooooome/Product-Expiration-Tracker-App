@@ -1,7 +1,10 @@
 package com.example.productexpirationtrackerapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,10 +51,31 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = productList.get(position);
+        Context context = holder.itemView.getContext();
 
-        // Set product data
+        // ✅ CHECK CURRENT THEME EVERY TIME!
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        String theme = prefs.getString("color_theme", "white");
+        boolean isBlackTheme = theme.equals("black");
+
+        // Set text colors based on current theme
+        int textColor;
+        int secondaryTextColor;
+
+        if (isBlackTheme) {
+            textColor = Color.WHITE;           // Primary text: WHITE
+            secondaryTextColor = Color.LTGRAY;  // Secondary text: LIGHT GRAY
+        } else {
+            textColor = Color.parseColor("#333333");  // Dark gray for light themes
+            secondaryTextColor = Color.parseColor("#666666"); // Medium gray
+        }
+
+        // Set product data with theme-aware colors
         holder.productName.setText(product.getName());
+        holder.productName.setTextColor(textColor);
+
         holder.productExpiry.setText("Expires: " + product.getFormattedExpiryDate());
+        holder.productExpiry.setTextColor(secondaryTextColor);
 
         // Load product image from byte array
         if (product.hasPhoto()) {
@@ -67,14 +91,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
             if (category != null) {
                 switch (category) {
-                    case "Food":
+                    case "Dairy":
+                    case "Vegetables":
+                    case "Fruits":
+                    case "Meats":
                         placeholderRes = R.drawable.ic_food_placeholder;
+                        break;
+                    case "Beverages":
+                        placeholderRes = R.drawable.ic_drinks_placeholder;
                         break;
                     case "Medicine":
                         placeholderRes = R.drawable.ic_medicine_placeholder;
-                        break;
-                    case "Drinks":
-                        placeholderRes = R.drawable.ic_drinks_placeholder;
                         break;
                     case "Other":
                         placeholderRes = R.drawable.ic_other_placeholder;
@@ -90,7 +117,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         long timeDiff = product.getExpiryDate().getTime() - now.getTime();
         long daysLeft = TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
 
-        // Set days left text and color
+        // Set days left text and color (these stay the same for all themes)
         if (daysLeft < 0) {
             holder.productDaysLeft.setText("EXPIRED");
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_dark));
@@ -144,7 +171,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout itemLayout;
-        ImageView productImage;  // CHANGED: from TextView productIcon to ImageView productImage
+        ImageView productImage;
         TextView productName;
         TextView productExpiry;
         TextView productDaysLeft;
@@ -153,7 +180,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             itemLayout = itemView.findViewById(R.id.productItemLayout);
-            productImage = itemView.findViewById(R.id.productImage);  // CHANGED: from productIcon to productImage
+            productImage = itemView.findViewById(R.id.productImage);
             productName = itemView.findViewById(R.id.productName);
             productExpiry = itemView.findViewById(R.id.productExpiry);
             productDaysLeft = itemView.findViewById(R.id.productDaysLeft);

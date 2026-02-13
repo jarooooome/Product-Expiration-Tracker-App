@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -47,6 +48,12 @@ public class AddProductActivity extends AppCompatActivity {
     private Button choosePhotoButton;
     private Button removePhotoButton;
     private TextView titleTextView;
+    private TextView photoLabel;
+    private TextView productNameLabel;
+    private TextView expiryDateLabel;
+    private TextView categoryLabel;
+    private TextView quantityLabel;
+    private TextView notesLabel;
     private ImageView productPhotoPreview;
 
     private ProductViewModel productViewModel;
@@ -112,6 +119,7 @@ public class AddProductActivity extends AppCompatActivity {
         } else {
             // Fallback to default theme
             ThemeUtils.applyTheme(this, "white");
+            applyCustomThemeColors("white");
         }
     }
 
@@ -119,6 +127,7 @@ public class AddProductActivity extends AppCompatActivity {
         int primaryColor;
         int textColor;
         int backgroundColor;
+        int hintColor;
 
         // Get colors based on theme
         switch (theme) {
@@ -126,60 +135,125 @@ public class AddProductActivity extends AppCompatActivity {
                 primaryColor = getResources().getColor(R.color.color_primary_green);
                 textColor = getResources().getColor(R.color.color_text_green);
                 backgroundColor = getResources().getColor(R.color.color_background_green);
+                hintColor = Color.parseColor("#80FFFFFF"); // Semi-transparent white
                 break;
             case "blue":
                 primaryColor = getResources().getColor(R.color.color_primary_blue);
                 textColor = getResources().getColor(R.color.color_text_blue);
                 backgroundColor = getResources().getColor(R.color.color_background_blue);
+                hintColor = Color.parseColor("#80FFFFFF");
                 break;
             case "pink":
                 primaryColor = getResources().getColor(R.color.color_primary_pink);
                 textColor = getResources().getColor(R.color.color_text_pink);
                 backgroundColor = getResources().getColor(R.color.color_background_pink);
+                hintColor = Color.parseColor("#80FFFFFF");
                 break;
             case "purple":
                 primaryColor = getResources().getColor(R.color.color_primary_purple);
                 textColor = getResources().getColor(R.color.color_text_purple);
                 backgroundColor = getResources().getColor(R.color.color_background_purple);
+                hintColor = Color.parseColor("#80FFFFFF");
                 break;
             case "black":
                 primaryColor = getResources().getColor(R.color.color_primary_black);
                 textColor = getResources().getColor(R.color.color_text_black);
                 backgroundColor = getResources().getColor(R.color.color_background_black);
+                hintColor = Color.parseColor("#80FFFFFF");
                 break;
             case "white":
             default:
                 primaryColor = getResources().getColor(R.color.color_primary_white);
                 textColor = getResources().getColor(R.color.color_text_white);
                 backgroundColor = getResources().getColor(R.color.color_background_white);
+                hintColor = Color.parseColor("#80FFFFFF");
                 break;
         }
 
-        // Apply colors to views if they exist
+        // Apply background color to main layout
+        View mainLayout = findViewById(R.id.mainLayout);
+        if (mainLayout != null) {
+            mainLayout.setBackgroundColor(backgroundColor);
+        }
+
+        // Set text colors for labels
         if (titleTextView != null) {
             titleTextView.setTextColor(textColor);
+        }
+        if (photoLabel != null) {
+            photoLabel.setTextColor(textColor);
+        }
+        if (productNameLabel != null) {
+            productNameLabel.setTextColor(textColor);
+        }
+        if (expiryDateLabel != null) {
+            expiryDateLabel.setTextColor(textColor);
+        }
+        if (categoryLabel != null) {
+            categoryLabel.setTextColor(textColor);
+        }
+        if (quantityLabel != null) {
+            quantityLabel.setTextColor(textColor);
+        }
+        if (notesLabel != null) {
+            notesLabel.setTextColor(textColor);
+        }
+
+        // Set text colors for EditText fields
+        if (productNameEditText != null) {
+            productNameEditText.setTextColor(textColor);
+            productNameEditText.setHintTextColor(hintColor);
+        }
+        if (expiryDateEditText != null) {
+            expiryDateEditText.setTextColor(textColor);
+            expiryDateEditText.setHintTextColor(hintColor);
+        }
+        if (quantityEditText != null) {
+            quantityEditText.setTextColor(textColor);
+            quantityEditText.setHintTextColor(hintColor);
+        }
+        if (notesEditText != null) {
+            notesEditText.setTextColor(textColor);
+            notesEditText.setHintTextColor(hintColor);
+        }
+
+        // Set text color for spinner
+        if (categorySpinner != null) {
+            // This requires custom adapter for spinner text color
+            // For now, we'll handle it in the spinner setup
         }
 
         // Apply button background colors
         if (saveButton != null) {
             saveButton.setBackgroundColor(primaryColor);
+            saveButton.setTextColor(Color.WHITE);
         }
 
         if (cancelButton != null) {
             cancelButton.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+            cancelButton.setTextColor(Color.WHITE);
         }
 
         // Apply colors to photo buttons
         if (takePhotoButton != null) {
             takePhotoButton.setBackgroundColor(primaryColor);
+            takePhotoButton.setTextColor(Color.WHITE);
         }
 
         if (choosePhotoButton != null) {
             choosePhotoButton.setBackgroundColor(primaryColor);
+            choosePhotoButton.setTextColor(Color.WHITE);
         }
 
         if (removePhotoButton != null) {
             removePhotoButton.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+            removePhotoButton.setTextColor(Color.WHITE);
+        }
+
+        // Set date picker button color
+        if (datePickerButton != null) {
+            datePickerButton.setBackgroundColor(primaryColor);
+            datePickerButton.setTextColor(Color.WHITE);
         }
     }
 
@@ -198,7 +272,15 @@ public class AddProductActivity extends AppCompatActivity {
         titleTextView = findViewById(R.id.titleTextView);
         productPhotoPreview = findViewById(R.id.productPhotoPreview);
 
-        // Set default date (7 days from now) - Fixed initialization
+        // Initialize label TextViews
+        photoLabel = findViewById(R.id.photoLabel);
+        productNameLabel = findViewById(R.id.productNameLabel);
+        expiryDateLabel = findViewById(R.id.expiryDateLabel);
+        categoryLabel = findViewById(R.id.categoryLabel);
+        quantityLabel = findViewById(R.id.quantityLabel);
+        notesLabel = findViewById(R.id.notesLabel);
+
+        // Set default date (7 days from now)
         calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, 7);
         expiryDateEditText.setText(dateFormat.format(calendar.getTime()));
@@ -242,6 +324,11 @@ public class AddProductActivity extends AppCompatActivity {
                     selectedCategory = category;
                 } else {
                     selectedCategory = "";
+                }
+
+                // Change spinner text color based on theme
+                if (view != null && view instanceof TextView) {
+                    ((TextView) view).setTextColor(Color.WHITE);
                 }
             }
 
@@ -356,7 +443,7 @@ public class AddProductActivity extends AppCompatActivity {
                 try {
                     // Load image with options to prevent memory issues
                     BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 4; // Reduce image size by 4x
+                    options.inSampleSize = 4;
 
                     InputStream inputStream = getContentResolver().openInputStream(selectedImage);
                     productPhotoBitmap = BitmapFactory.decodeStream(inputStream, null, options);
@@ -406,7 +493,6 @@ public class AddProductActivity extends AppCompatActivity {
 
         // Set minimum date to today
         datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
-
         datePickerDialog.show();
     }
 
@@ -448,9 +534,7 @@ public class AddProductActivity extends AppCompatActivity {
         byte[] photoBytes = null;
         if (productPhotoBitmap != null) {
             try {
-                // Convert bitmap to byte array
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                // Compress the bitmap (70% quality to save space)
                 productPhotoBitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
                 photoBytes = stream.toByteArray();
                 stream.close();
@@ -459,7 +543,7 @@ public class AddProductActivity extends AppCompatActivity {
             }
         }
 
-        // Create product object using empty constructor and set all fields
+        // Create product object
         Product product = new Product();
         product.setName(productName);
         product.setExpiryDate(expiryDate);
@@ -471,10 +555,8 @@ public class AddProductActivity extends AppCompatActivity {
         // Save to database
         productViewModel.insert(product);
 
-        // Show success message
         Toast.makeText(this, "Product added successfully!", Toast.LENGTH_SHORT).show();
 
-        // Return to ProductListActivity
         Intent resultIntent = new Intent();
         setResult(RESULT_OK, resultIntent);
         finish();

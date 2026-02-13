@@ -10,7 +10,7 @@
     android:padding="16dp"
     android:minHeight="72dp">
 
-    <!-- Product Image - CHANGE THIS FROM TextView TO ImageView -->
+    <!-- Product Image -->
     <ImageView
         android:id="@+id/productImage"
         android:layout_width="60dp"
@@ -18,7 +18,7 @@
         android:scaleType="centerCrop"
         android:background="#F5F5F5"
         android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_default_product" /> <!-- Add a default image -->
+        android:src="@drawable/ic_default_product" />
 
     <!-- Product Details -->
     <LinearLayout
@@ -27,38 +27,39 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <!-- Product Name -->
+        <!-- Product Name - REMOVED textColor -->
         <TextView
             android:id="@+id/productName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Milk"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#333333" />
+            android:textStyle="bold" />
+        <!-- ✅ REMOVED: android:textColor="#333333" -->
 
-        <!-- Expiry Date -->
+        <!-- Expiry Date - REMOVED textColor -->
         <TextView
             android:id="@+id/productExpiry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Expires: Dec 25, 2024"
             android:textSize="14sp"
-            android:textColor="#666666"
             android:layout_marginTop="4dp" />
+        <!-- ✅ REMOVED: android:textColor="#666666" -->
 
-        <!-- Days Left -->
+        <!-- Days Left - REMOVED textColor -->
         <TextView
             android:id="@+id/productDaysLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="5 days left"
             android:textSize="12sp"
-            android:textColor="#4CAF50"
             android:background="#E8F5E9"
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
             android:layout_marginTop="8dp" />
+        <!-- ✅ REMOVED: android:textColor="#4CAF50" -->
+
     </LinearLayout>
 
     <!-- Status Indicator -->

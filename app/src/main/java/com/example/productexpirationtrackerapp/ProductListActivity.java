@@ -57,6 +57,11 @@ public class ProductListActivity extends AppCompatActivity {
     private HorizontalScrollView categoryScrollView;
     private ScrollView scrollView;
 
+    // Bottom Navigation Indicators
+    private View navProfileIndicator;
+    private View navProductsIndicator;
+    private View navSettingsIndicator;
+
     // Category filter buttons
     private LinearLayout categoryAllButton, categoryDairyButton, categoryVegetablesButton, categoryFruitsButton,
             categoryMeatsButton, categoryBeveragesButton, categoryMedicineButton, categoryOtherButton;
@@ -66,7 +71,8 @@ public class ProductListActivity extends AppCompatActivity {
             categoryMeatsCount, categoryBeveragesCount, categoryMedicineCount, categoryOtherCount;
 
     // Category title TextViews
-    private TextView categoryDairyTitle, categoryVegetablesTitle, categoryFruitsTitle,
+    // Category title TextViews - ADD categoryAllTitle HERE!
+    private TextView categoryAllTitle, categoryDairyTitle, categoryVegetablesTitle, categoryFruitsTitle,
             categoryMeatsTitle, categoryBeveragesTitle, categoryMedicineTitle, categoryOtherTitle;
 
     // Category icon TextViews
@@ -161,13 +167,19 @@ public class ProductListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reapply theme
+
+        // ✅ Reapply theme agad - hindi na maghihintay ng next launch
         applyThemeFromDatabase();
 
         // Update welcome text with user name
         updateWelcomeText();
 
-        Log.d(TAG, "onResume called, theme reapplied and welcome text updated");
+        // ✅ Force refresh ng product list para mag-apply agad ang bagong theme
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+
+        Log.d(TAG, "onResume called, theme reapplied and product list refreshed");
     }
 
     /**
@@ -272,6 +284,7 @@ public class ProductListActivity extends AppCompatActivity {
         int textColor;
         int backgroundColor;
         int fabBackgroundColor = 0;
+        int fabIconColor = Color.WHITE; // Default icon color
 
         switch (theme) {
             case "green":
@@ -279,30 +292,60 @@ public class ProductListActivity extends AppCompatActivity {
                 textColor = getResources().getColor(R.color.color_text_green);
                 backgroundColor = getResources().getColor(R.color.color_background_green);
                 fabBackgroundColor = getResources().getColor(R.color.color_fab_green);
+                fabIconColor = getResources().getColor(R.color.color_fab_icon_green);
                 break;
             case "blue":
                 primaryColor = getResources().getColor(R.color.color_primary_blue);
                 textColor = getResources().getColor(R.color.color_text_blue);
                 backgroundColor = getResources().getColor(R.color.color_background_blue);
                 fabBackgroundColor = getResources().getColor(R.color.color_fab_blue);
+                fabIconColor = getResources().getColor(R.color.color_fab_icon_blue);
                 break;
             case "pink":
                 primaryColor = getResources().getColor(R.color.color_primary_pink);
                 textColor = getResources().getColor(R.color.color_text_pink);
                 backgroundColor = getResources().getColor(R.color.color_background_pink);
                 fabBackgroundColor = getResources().getColor(R.color.color_fab_pink);
+                fabIconColor = getResources().getColor(R.color.color_fab_icon_pink);
                 break;
             case "purple":
                 primaryColor = getResources().getColor(R.color.color_primary_purple);
                 textColor = getResources().getColor(R.color.color_text_purple);
                 backgroundColor = getResources().getColor(R.color.color_background_purple);
                 fabBackgroundColor = getResources().getColor(R.color.color_fab_purple);
+                fabIconColor = getResources().getColor(R.color.color_fab_icon_purple);
                 break;
             case "black":
                 primaryColor = getResources().getColor(R.color.color_primary_black);
                 textColor = getResources().getColor(R.color.color_text_black);
                 backgroundColor = getResources().getColor(R.color.color_background_black);
                 fabBackgroundColor = getResources().getColor(R.color.color_fab_black);
+                fabIconColor = getResources().getColor(R.color.color_fab_icon_black);
+
+                // FOR BLACK THEME: Set category text to WHITE
+                if (categoryAllTitle != null) categoryAllTitle.setTextColor(Color.WHITE);
+                if (categoryAllCount != null) categoryAllCount.setTextColor(Color.WHITE);
+                if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(Color.WHITE);
+                if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(Color.WHITE);
+                if (categoryDairyCount != null) categoryDairyCount.setTextColor(Color.WHITE);
+                if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(Color.WHITE);
+                if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(Color.WHITE);
+                if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(Color.WHITE);
+                if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(Color.WHITE);
+                if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(Color.WHITE);
+                if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(Color.WHITE);
+                if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(Color.WHITE);
+                if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(Color.WHITE);
+                if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(Color.WHITE);
+                if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(Color.WHITE);
+                if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(Color.WHITE);
+                if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(Color.WHITE);
+                if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(Color.WHITE);
+                if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(Color.WHITE);
+                if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(Color.WHITE);
+                if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(Color.WHITE);
+                if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(Color.WHITE);
+                if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.WHITE);
                 break;
             case "white":
             default:
@@ -310,27 +353,116 @@ public class ProductListActivity extends AppCompatActivity {
                 textColor = getResources().getColor(R.color.color_text_white);
                 backgroundColor = getResources().getColor(R.color.color_background_white);
                 fabBackgroundColor = getResources().getColor(R.color.color_fab_white);
+                fabIconColor = getResources().getColor(R.color.color_fab_icon_white);
                 break;
         }
 
         Log.d(TAG, "Theme: " + theme);
         Log.d(TAG, "Background Color: " + String.format("#%08X", backgroundColor));
         Log.d(TAG, "FAB Color: " + String.format("#%08X", fabBackgroundColor));
+        Log.d(TAG, "FAB Icon Color: " + String.format("#%08X", fabIconColor));
 
+        // Save BOTH background and icon colors
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("fab_background_color", fabBackgroundColor);
+        editor.putInt("fab_icon_color", fabIconColor);
         editor.apply();
 
-        if (hiUserTextView != null) {
-            hiUserTextView.setTextColor(fabBackgroundColor);
-        }
+        // ✅ FIXED: Set text colors based on theme
+        if (theme.equals("green") || theme.equals("blue") || theme.equals("pink") || theme.equals("purple")) {
+            // For colored themes (light background) - use dark colored text
+            if (hiUserTextView != null) {
+                hiUserTextView.setTextColor(textColor); // Dark green/blue/pink/purple
+            }
+            if (welcomeDescriptionTextView != null) {
+                welcomeDescriptionTextView.setTextColor(textColor);
+            }
+            if (categoryLabelTextView != null) {
+                categoryLabelTextView.setTextColor(textColor);
+            }
+            // Category icons and text - use dark colored text
+            int categoryTextColor = textColor;
+            if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(categoryTextColor);
+            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(categoryTextColor);
+            if (categoryDairyCount != null) categoryDairyCount.setTextColor(categoryTextColor);
 
-        if (welcomeDescriptionTextView != null) {
-            welcomeDescriptionTextView.setTextColor(fabBackgroundColor);
-        }
+            if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(categoryTextColor);
+            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(categoryTextColor);
+            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(categoryTextColor);
 
-        if (categoryLabelTextView != null) {
-            categoryLabelTextView.setTextColor(fabBackgroundColor);
+            if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(categoryTextColor);
+            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(categoryTextColor);
+            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(categoryTextColor);
+
+            if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(categoryTextColor);
+            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(categoryTextColor);
+            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(categoryTextColor);
+
+            if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(categoryTextColor);
+            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(categoryTextColor);
+            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(categoryTextColor);
+
+            if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(categoryTextColor);
+            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(categoryTextColor);
+            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(categoryTextColor);
+
+            if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(categoryTextColor);
+            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(categoryTextColor);
+            if (categoryOtherCount != null) categoryOtherCount.setTextColor(categoryTextColor);
+
+        } else if (theme.equals("black")) {
+            // For black theme - text already set to WHITE in switch case
+            // Just set header texts to white
+            if (hiUserTextView != null) {
+                hiUserTextView.setTextColor(Color.WHITE);
+            }
+            if (welcomeDescriptionTextView != null) {
+                welcomeDescriptionTextView.setTextColor(Color.WHITE);
+            }
+            if (categoryLabelTextView != null) {
+                categoryLabelTextView.setTextColor(Color.WHITE);
+            }
+        } else {
+            // For white theme - use fabIconColor
+            if (hiUserTextView != null) {
+                hiUserTextView.setTextColor(fabIconColor);
+            }
+            if (welcomeDescriptionTextView != null) {
+                welcomeDescriptionTextView.setTextColor(fabIconColor);
+            }
+            if (categoryLabelTextView != null) {
+                categoryLabelTextView.setTextColor(fabIconColor);
+            }
+
+            // Category icons and text - use fabIconColor
+            int categoryTextColor = fabIconColor;
+            if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(categoryTextColor);
+            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(categoryTextColor);
+            if (categoryDairyCount != null) categoryDairyCount.setTextColor(categoryTextColor);
+
+            if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(categoryTextColor);
+            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(categoryTextColor);
+            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(categoryTextColor);
+
+            if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(categoryTextColor);
+            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(categoryTextColor);
+            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(categoryTextColor);
+
+            if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(categoryTextColor);
+            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(categoryTextColor);
+            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(categoryTextColor);
+
+            if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(categoryTextColor);
+            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(categoryTextColor);
+            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(categoryTextColor);
+
+            if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(categoryTextColor);
+            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(categoryTextColor);
+            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(categoryTextColor);
+
+            if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(categoryTextColor);
+            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(categoryTextColor);
+            if (categoryOtherCount != null) categoryOtherCount.setTextColor(categoryTextColor);
         }
 
         if (productCountText != null) {
@@ -367,33 +499,113 @@ public class ProductListActivity extends AppCompatActivity {
     private void setCategoryButtonColors(int fabColor) {
         float[] hsv = new float[3];
         Color.colorToHSV(fabColor, hsv);
-        hsv[2] = 0.8f;
-        int lighterFabColor = Color.HSVToColor(hsv);
 
-        if (categoryAllButton != null) {
-            categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+        // Check if it's black/dark theme
+        boolean isDarkTheme = (fabColor == getResources().getColor(R.color.color_fab_black));
+
+        if (isDarkTheme) {
+            // For black theme, use a lighter gray for inactive buttons
+            if (categoryAllButton != null) {
+                categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#666666")));
+            }
+            if (categoryDairyButton != null) {
+                categoryDairyButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#666666")));
+            }
+            if (categoryVegetablesButton != null) {
+                categoryVegetablesButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#666666")));
+            }
+            if (categoryFruitsButton != null) {
+                categoryFruitsButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#666666")));
+            }
+            if (categoryMeatsButton != null) {
+                categoryMeatsButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#666666")));
+            }
+            if (categoryBeveragesButton != null) {
+                categoryBeveragesButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#666666")));
+            }
+            if (categoryMedicineButton != null) {
+                categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#666666")));
+            }
+            if (categoryOtherButton != null) {
+                categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#666666")));
+            }
+        } else {
+            // For other themes, use lighter version of FAB color
+            hsv[2] = 0.8f;
+            int lighterFabColor = Color.HSVToColor(hsv);
+
+            if (categoryAllButton != null) {
+                categoryAllButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            }
+            if (categoryDairyButton != null) {
+                categoryDairyButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            }
+            if (categoryVegetablesButton != null) {
+                categoryVegetablesButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            }
+            if (categoryFruitsButton != null) {
+                categoryFruitsButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            }
+            if (categoryMeatsButton != null) {
+                categoryMeatsButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            }
+            if (categoryBeveragesButton != null) {
+                categoryBeveragesButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            }
+            if (categoryMedicineButton != null) {
+                categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            }
+            if (categoryOtherButton != null) {
+                categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+            }
         }
-        if (categoryDairyButton != null) {
-            categoryDairyButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
+    }
+
+    private void setActiveCategoryButton(LinearLayout activeButton, int fabColor) {
+        // Check if it's black/dark theme
+        boolean isDarkTheme = (fabColor == getResources().getColor(R.color.color_fab_black));
+
+        // First reset all buttons to inactive state
+        setCategoryButtonColors(fabColor);
+
+        // Set active button to solid FAB color (or brighter for black theme)
+        if (activeButton != null) {
+            if (isDarkTheme) {
+                // ✅ CHANGED: Use LIGHT GRAY instead of BLUE for black theme
+                activeButton.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(Color.parseColor("#CCCCCC"))); // Light gray
+            } else {
+                activeButton.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(fabColor));
+            }
         }
-        if (categoryVegetablesButton != null) {
-            categoryVegetablesButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryFruitsButton != null) {
-            categoryFruitsButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryMeatsButton != null) {
-            categoryMeatsButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryBeveragesButton != null) {
-            categoryBeveragesButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryMedicineButton != null) {
-            categoryMedicineButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryOtherButton != null) {
-            categoryOtherButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
+    }
+
+    // Helper method to set category text colors
+    private void setCategoryTextColor(int color) {
+        if (categoryAllTitle != null) categoryAllTitle.setTextColor(color);
+        if (categoryAllCount != null) categoryAllCount.setTextColor(color);
+        if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(color);
+        if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(color);
+        if (categoryDairyCount != null) categoryDairyCount.setTextColor(color);
+        if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(color);
+        if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(color);
+        if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(color);
+        if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(color);
+        if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(color);
+        if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(color);
+        if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(color);
+        if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(color);
+        if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(color);
+        if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(color);
+        if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(color);
+        if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(color);
+        if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(color);
+        if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(color);
+        if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(color);
+        if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(color);
+        if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(color);
+        if (categoryOtherCount != null) categoryOtherCount.setTextColor(color);
     }
 
     private void applyFABAndBottomNavColors() {
@@ -413,34 +625,49 @@ public class ProductListActivity extends AppCompatActivity {
             bottomNavigation.setBackgroundColor(fabBackgroundColor);
         }
 
-        int whiteColor = Color.WHITE;
+        // ✅ DEFINE navIconColor HERE!
+        int navIconColor = fabIconColor; // Use the saved icon color from preferences
 
+        // Bottom Navigation Icons and Text
         if (navProfileIcon != null) {
-            navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+            navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
         }
         if (navProfileText != null) {
-            navProfileText.setTextColor(whiteColor);
+            navProfileText.setTextColor(navIconColor);
         }
         if (navProductsIcon != null) {
-            navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+            navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
         }
         if (navProductsText != null) {
-            navProductsText.setTextColor(whiteColor);
+            navProductsText.setTextColor(navIconColor);
         }
         if (navSettingsIcon != null) {
-            navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+            navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
         }
         if (navSettingsText != null) {
-            navSettingsText.setTextColor(whiteColor);
+            navSettingsText.setTextColor(navIconColor);
         }
 
+        // ✅ INDICATOR COLORS
+        if (navProfileIndicator != null) {
+            navProfileIndicator.setBackgroundColor(navIconColor);
+        }
+        if (navProductsIndicator != null) {
+            navProductsIndicator.setBackgroundColor(navIconColor);
+        }
+        if (navSettingsIndicator != null) {
+            navSettingsIndicator.setBackgroundColor(navIconColor);
+        }
+
+        // Search emoji and clear button
         if (searchEmoji != null) {
-            searchEmoji.setTextColor(whiteColor);
+            searchEmoji.setTextColor(navIconColor);
         }
         if (clearSearchButton != null) {
-            clearSearchButton.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+            clearSearchButton.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
         }
     }
+
 
     private void initializeViews() {
         Log.d(TAG, "Starting initializeViews");
@@ -487,6 +714,8 @@ public class ProductListActivity extends AppCompatActivity {
         categoryMedicineCount = findViewById(R.id.categoryMedicineCount);
         categoryOtherCount = findViewById(R.id.categoryOtherCount);
 
+        // ✅ FIRST SET - Keep this one
+        categoryAllTitle = findViewById(R.id.categoryAllTitle);
         categoryDairyTitle = findViewById(R.id.categoryDairyTitle);
         categoryVegetablesTitle = findViewById(R.id.categoryVegetablesTitle);
         categoryFruitsTitle = findViewById(R.id.categoryFruitsTitle);
@@ -503,9 +732,20 @@ public class ProductListActivity extends AppCompatActivity {
         categoryMedicineIcon = findViewById(R.id.categoryMedicineIcon);
         categoryOtherIcon = findViewById(R.id.categoryOtherIcon);
 
+        // ❌ REMOVE THIS DUPLICATE SECTION
+    /*
+    categoryAllTitle = findViewById(R.id.categoryAllTitle);
+    categoryDairyTitle = findViewById(R.id.categoryDairyTitle);
+    categoryVegetablesTitle = findViewById(R.id.categoryVegetablesTitle);
+    categoryFruitsTitle = findViewById(R.id.categoryFruitsTitle);
+    categoryMeatsTitle = findViewById(R.id.categoryMeatsTitle);
+    categoryBeveragesTitle = findViewById(R.id.categoryBeveragesTitle);
+    categoryMedicineTitle = findViewById(R.id.categoryMedicineTitle);
+    categoryOtherTitle = findViewById(R.id.categoryOtherTitle);
+    */
+
         Log.d(TAG, "Category buttons initialized with food-specific categories");
     }
-
     private void initializeBottomNavigation() {
         navProfile = findViewById(R.id.navProfile);
         navProducts = findViewById(R.id.navProducts);
@@ -518,6 +758,11 @@ public class ProductListActivity extends AppCompatActivity {
         navProfileText = findViewById(R.id.navProfileText);
         navProductsText = findViewById(R.id.navProductsText);
         navSettingsText = findViewById(R.id.navSettingsText);
+
+        // ✅ ADD THESE LINES - INITIALIZE INDICATORS
+        navProfileIndicator = findViewById(R.id.navProfileIndicator);
+        navProductsIndicator = findViewById(R.id.navProductsIndicator);
+        navSettingsIndicator = findViewById(R.id.navSettingsIndicator);
 
         Log.d(TAG, "Bottom navigation initialized");
     }
@@ -780,51 +1025,6 @@ public class ProductListActivity extends AppCompatActivity {
                     Log.d(TAG, "Item long clicked and removed from database: " + product.getName());
                 }
             });
-        }
-    }
-
-    private void setActiveCategoryButton(LinearLayout activeButton, int fabColor) {
-        float[] hsv = new float[3];
-        Color.colorToHSV(fabColor, hsv);
-        hsv[2] = 0.8f;
-        int lighterFabColor = Color.HSVToColor(hsv);
-
-        if (categoryAllButton != null) {
-            categoryAllButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryDairyButton != null) {
-            categoryDairyButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryVegetablesButton != null) {
-            categoryVegetablesButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryFruitsButton != null) {
-            categoryFruitsButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryMeatsButton != null) {
-            categoryMeatsButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryBeveragesButton != null) {
-            categoryBeveragesButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryMedicineButton != null) {
-            categoryMedicineButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-        if (categoryOtherButton != null) {
-            categoryOtherButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(lighterFabColor));
-        }
-
-        if (activeButton != null) {
-            activeButton.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(fabColor));
         }
     }
 
