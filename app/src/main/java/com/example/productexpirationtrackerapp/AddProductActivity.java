@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.ViewGroup;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -55,6 +57,7 @@ public class AddProductActivity extends AppCompatActivity {
     private TextView quantityLabel;
     private TextView notesLabel;
     private ImageView productPhotoPreview;
+    private View mainLayout;
 
     private ProductViewModel productViewModel;
     private UserRepository userRepository;
@@ -64,6 +67,7 @@ public class AddProductActivity extends AppCompatActivity {
     private static final int CAMERA_REQUEST_CODE = 100;
     private static final int GALLERY_REQUEST_CODE = 101;
     private static final int CAMERA_PERMISSION_CODE = 102;
+    private static final String TAG = "AddProductTheme";
 
     private Bitmap productPhotoBitmap;
     private String productPhotoPath;
@@ -110,6 +114,7 @@ public class AddProductActivity extends AppCompatActivity {
 
         if (user != null) {
             String theme = user.getColorTheme();
+            Log.d(TAG, "Applying theme: " + theme);
 
             // Apply theme using ThemeUtils
             ThemeUtils.applyTheme(this, theme);
@@ -118,6 +123,7 @@ public class AddProductActivity extends AppCompatActivity {
             applyCustomThemeColors(theme);
         } else {
             // Fallback to default theme
+            Log.d(TAG, "No user found, using white theme");
             ThemeUtils.applyTheme(this, "white");
             applyCustomThemeColors("white");
         }
@@ -135,7 +141,7 @@ public class AddProductActivity extends AppCompatActivity {
                 primaryColor = getResources().getColor(R.color.color_primary_green);
                 textColor = getResources().getColor(R.color.color_text_green);
                 backgroundColor = getResources().getColor(R.color.color_background_green);
-                hintColor = Color.parseColor("#80FFFFFF"); // Semi-transparent white
+                hintColor = Color.parseColor("#80FFFFFF");
                 break;
             case "blue":
                 primaryColor = getResources().getColor(R.color.color_primary_blue);
@@ -171,7 +177,7 @@ public class AddProductActivity extends AppCompatActivity {
         }
 
         // Apply background color to main layout
-        View mainLayout = findViewById(R.id.mainLayout);
+        mainLayout = findViewById(R.id.mainLayout);
         if (mainLayout != null) {
             mainLayout.setBackgroundColor(backgroundColor);
         }
@@ -217,12 +223,6 @@ public class AddProductActivity extends AppCompatActivity {
             notesEditText.setHintTextColor(hintColor);
         }
 
-        // Set text color for spinner
-        if (categorySpinner != null) {
-            // This requires custom adapter for spinner text color
-            // For now, we'll handle it in the spinner setup
-        }
-
         // Apply button background colors
         if (saveButton != null) {
             saveButton.setBackgroundColor(primaryColor);
@@ -258,6 +258,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
+        mainLayout = findViewById(R.id.mainLayout);
         productNameEditText = findViewById(R.id.productNameEditText);
         expiryDateEditText = findViewById(R.id.expiryDateEditText);
         categorySpinner = findViewById(R.id.categorySpinner);
@@ -287,7 +288,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void setupCategorySpinner() {
-        // UPDATED: Food-specific categories
+        // Food-specific categories
         String[] categories = {
                 "Select a category",
                 "Dairy",
@@ -299,36 +300,58 @@ public class AddProductActivity extends AppCompatActivity {
                 "Other"
         };
 
-        // Create ArrayAdapter with the food-specific categories
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        // Create custom adapter for spinner with theme support
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_spinner_item,
                 categories
-        );
+        ) {
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView textView = (TextView) view;
 
-        // Specify the layout to use when the list of choices appears
+                // Get current theme
+                User user = userRepository.getUserSync();
+                String theme = user != null ? user.getColorTheme() : "white";
+
+                // Set text color based on theme
+                if (theme.equals("black")) {
+                    textView.setTextColor(Color.WHITE);
+                    textView.setBackgroundColor(Color.parseColor("#333333"));
+                } else {
+                    textView.setTextColor(Color.BLACK);
+                    textView.setBackgroundColor(Color.WHITE);
+                }
+                return view;
+            }
+        };
+
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // Apply the adapter to the spinner
         categorySpinner.setAdapter(adapter);
 
         // Set selection listener
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Get selected category
                 String category = parent.getItemAtPosition(position).toString();
 
-                // Only set selectedCategory if it's not the default "Select a category" option
                 if (position > 0) {
                     selectedCategory = category;
                 } else {
                     selectedCategory = "";
                 }
 
-                // Change spinner text color based on theme
+                // Change spinner selected item text color based on theme
                 if (view != null && view instanceof TextView) {
-                    ((TextView) view).setTextColor(Color.WHITE);
+                    User user = userRepository.getUserSync();
+                    String theme = user != null ? user.getColorTheme() : "white";
+
+                    if (theme.equals("black")) {
+                        ((TextView) view).setTextColor(Color.WHITE);
+                    } else {
+                        ((TextView) view).setTextColor(Color.BLACK);
+                    }
                 }
             }
 
@@ -438,10 +461,9 @@ public class AddProductActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error loading camera photo", Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == GALLERY_REQUEST_CODE && data != null) {
-                // Handle gallery photo with better error handling
+                // Handle gallery photo
                 Uri selectedImage = data.getData();
                 try {
-                    // Load image with options to prevent memory issues
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inSampleSize = 4;
 

@@ -40,6 +40,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private TextView categoryLabel, quantityLabel, notesLabel;
 
     private ProductViewModel productViewModel;
+    private ConsumedProductViewModel consumedProductViewModel; // ADDED
     private UserRepository userRepository;
 
     private int productId;
@@ -60,8 +61,9 @@ public class ProductDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Initialize ViewModel
+        // Initialize ViewModels
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+        consumedProductViewModel = new ViewModelProvider(this).get(ConsumedProductViewModel.class); // ADDED
 
         // Initialize UserRepository for theme
         userRepository = new UserRepository(getApplication());
@@ -293,7 +295,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         quantityText.setText(product.hasQuantity() ? product.getQuantity() : "Not specified");
         notesText.setText(product.hasNotes() ? product.getNotes() : "No notes");
 
-        // ✅ Update consume button based on expiry status
+        // Update consume button based on expiry status
         updateConsumeButton(daysLeft);
     }
 
@@ -319,10 +321,9 @@ public class ProductDetailActivity extends AppCompatActivity {
             daysLeftText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
         }
 
-        return days; // Return days left for consume button logic
+        return days;
     }
 
-    // ✅ NEW: Update consume button based on expiry status
     private void updateConsumeButton(long daysLeft) {
         if (consumeButton == null) return;
 
@@ -331,7 +332,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             consumeButton.setText("🗑️ Discard");
             consumeButton.setBackgroundColor(0xFF757575); // Gray
             consumeButton.setOnClickListener(v -> {
-                // For expired, just delete directly without asking "Did you consume?"
+                // For expired, just delete directly without asking
                 deleteProduct();
             });
         } else {
@@ -385,8 +386,13 @@ public class ProductDetailActivity extends AppCompatActivity {
                 .show();
     }
 
+    // ✅ UPDATED: Save to history before consuming
     private void consumeProduct() {
         if (currentProduct != null) {
+            // Save to history first
+            saveToHistory("CONSUMED");
+
+            // Then delete from products table
             productViewModel.delete(currentProduct);
 
             Intent resultIntent = new Intent();
@@ -396,6 +402,27 @@ public class ProductDetailActivity extends AppCompatActivity {
 
             Toast.makeText(this, "✓ " + currentProduct.getName() + " consumed!", Toast.LENGTH_SHORT).show();
             finish();
+        }
+    }
+
+    // ✅ NEW: Helper method to save to history
+    private void saveToHistory(String actionType) {
+        if (currentProduct != null) {
+            // Create ConsumedProduct object
+            ConsumedProduct consumedProduct = new ConsumedProduct(
+                    currentProduct.getId(),
+                    currentProduct.getName(),
+                    currentProduct.getCategory(),
+                    currentProduct.getQuantity(),
+                    currentProduct.getExpiryDate(),
+                    actionType,
+                    currentProduct.getPhoto()
+            );
+
+            // Save to database
+            consumedProductViewModel.insert(consumedProduct);
+
+            Log.d("HISTORY", "✅ Saved to history: " + currentProduct.getName() + " - " + actionType);
         }
     }
 
@@ -417,8 +444,13 @@ public class ProductDetailActivity extends AppCompatActivity {
                 .show();
     }
 
+    // ✅ UPDATED: Save to history before deleting
     private void deleteProduct() {
         if (currentProduct != null) {
+            // Save to history first (as DISCARDED)
+            saveToHistory("DISCARDED");
+
+            // Then delete from products table
             productViewModel.delete(currentProduct);
 
             Intent resultIntent = new Intent();

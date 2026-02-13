@@ -6,11 +6,12 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import android.content.Context;
 
-@Database(entities = {Product.class, User.class}, version = 2, exportSchema = false)  // Version increased to 2
+@Database(entities = {Product.class, User.class, ConsumedProduct.class}, version = 3, exportSchema = false)  // Version increased to 3
 @TypeConverters({DateConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
     public abstract ProductDao productDao();
-    public abstract UserDao userDao();  // Added
+    public abstract UserDao userDao();
+    public abstract ConsumedProductDao consumedProductDao();  // ADDED
 
     private static volatile AppDatabase INSTANCE;
 
@@ -21,7 +22,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     INSTANCE = Room.databaseBuilder(
                                     context.getApplicationContext(),
                                     AppDatabase.class,
-                                    "app_database"  // Changed name
+                                    "app_database"
                             ).fallbackToDestructiveMigration()  // This will delete old data on version change
                             .build();
                 }

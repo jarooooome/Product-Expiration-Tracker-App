@@ -505,7 +505,67 @@
                 </HorizontalScrollView>
             </LinearLayout>
 
-            <!-- Product Count with modern styling -->
+            <!-- BULK ACTION BAR - ADDED HERE -->
+            <LinearLayout
+                android:id="@+id/bulkActionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:background="#2196F3"
+                android:visibility="gone"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:id="@+id/bulkActionTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 item(s) selected"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/bulkSelectAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select All"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/bulkDiscard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Discard"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginHorizontal="8dp" />
+
+                <TextView
+                    android:id="@+id/bulkCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </LinearLayout>
+
+            <!-- Product Count with modern styling and History Button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -529,6 +589,18 @@
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.02" />
+
+                <!-- History Button - Right side of product count -->
+                <ImageView
+                    android:id="@+id/historyButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_history"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="History"
+                    android:layout_marginStart="8dp" />
+
             </LinearLayout>
 
             <!-- Product List with RecyclerView -->

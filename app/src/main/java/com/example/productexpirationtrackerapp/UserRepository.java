@@ -78,20 +78,31 @@ public class UserRepository {
         });
     }
 
-    // ✅ ADD THIS METHOD - Para i-update lang ang theme
+    // ✅ UPDATED: Enhanced logging for updateTheme
     public void updateTheme(String theme) {
+        Log.d("REPO_UPDATE", "🔵 updateTheme called with theme: " + theme);
+
         executorService.execute(() -> {
             try {
+                Log.d("REPO_UPDATE", "🟡 Executing in background thread");
+
                 User user = userDao.getUser();
                 if (user != null) {
+                    Log.d("REPO_UPDATE", "Found user with current theme: " + user.getColorTheme() + ", ID: " + user.getId());
+
                     user.setColorTheme(theme);
                     userDao.update(user);
-                    Log.d(TAG, "Theme updated to: " + theme);
+                    Log.d("REPO_UPDATE", "✅ Theme updated to: " + theme);
+
+                    // Verify after update
+                    User afterUpdate = userDao.getUser();
+                    Log.d("REPO_UPDATE", "🟢 After update - User theme: " + afterUpdate.getColorTheme() + ", ID: " + afterUpdate.getId());
                 } else {
-                    Log.e(TAG, "No user found to update theme");
+                    Log.e("REPO_UPDATE", "❌ No user found to update theme");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error updating theme: " + e.getMessage());
+                Log.e("REPO_UPDATE", "❌ Error updating theme: " + e.getMessage());
+                e.printStackTrace();
             }
         });
     }

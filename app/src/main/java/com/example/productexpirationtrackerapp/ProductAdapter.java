@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +27,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     private ArrayList<Product> productList;
     private OnItemClickListener listener;
+    private List<Integer> selectedPositions = new ArrayList<>();
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -34,6 +36,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setSelectedPositions(List<Integer> positions) {
+        if (positions == null) {
+            this.selectedPositions.clear();
+        } else {
+            this.selectedPositions = positions;
+        }
+        notifyDataSetChanged();
     }
 
     public ProductAdapter(ArrayList<Product> productList) {
@@ -80,18 +91,30 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         Product product = productList.get(position);
         Context context = holder.itemView.getContext();
 
-        // ✅ LOAD THEME HERE - EVERY TIME!
+        // LOAD THEME HERE - EVERY TIME!
         SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
         String theme = prefs.getString("color_theme", "white");
 
         // Get theme background color
         int themeBackgroundColor = getThemeBackgroundColor(context, theme);
 
-        // ✅ Make product background DARKER (70% of original)
+        // Make product background DARKER (70% of original)
         int productBackgroundColor = darkenColor(themeBackgroundColor, 0.7f);
 
-        // Set product background to DARKER shade
+        // Set product background
         holder.itemLayout.setBackgroundColor(productBackgroundColor);
+
+        // Check if this item is selected
+        boolean isSelected = selectedPositions.contains(position);
+
+        // Set selection overlay
+        if (isSelected) {
+            // Selected state - highlight with semi-transparent overlay
+            holder.itemLayout.setBackgroundColor(Color.parseColor("#805A9DFF")); // Light blue with transparency
+        } else {
+            // Normal state - use theme background
+            holder.itemLayout.setBackgroundColor(productBackgroundColor);
+        }
 
         // Text colors based on theme
         boolean isBlackTheme = theme.equals("black");
