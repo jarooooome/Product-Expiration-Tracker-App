@@ -14,6 +14,11 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.content.Intent;
+import android.graphics.Color;
+import android.util.Log;  // ← THIS WAS MISSING - NOW ADDED
 import java.util.Calendar;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -25,6 +30,20 @@ public class SettingsActivity extends AppCompatActivity {
     private Button notificationTimeButton;
     private Button saveButton;
     private Button cancelButton;
+
+    // Bottom Navigation
+    private LinearLayout navProfile;
+    private LinearLayout navProducts;
+    private LinearLayout navSettings;
+    private ImageView navProfileIcon;
+    private ImageView navProductsIcon;
+    private ImageView navSettingsIcon;
+    private TextView navProfileText;
+    private TextView navProductsText;
+    private TextView navSettingsText;
+    private View navProfileIndicator;
+    private View navProductsIndicator;
+    private View navSettingsIndicator;
 
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
@@ -51,6 +70,8 @@ public class SettingsActivity extends AppCompatActivity {
         editor = preferences.edit();
 
         initializeViews();
+        initializeBottomNavigation();
+        setupBottomNavigation();
         setupSeekBar();
         setupTimePicker();
         loadCurrentSettings();
@@ -65,6 +86,95 @@ public class SettingsActivity extends AppCompatActivity {
         notificationTimeButton = findViewById(R.id.notificationTimeButton);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
+    }
+
+    private void initializeBottomNavigation() {
+        try {
+            navProfile = findViewById(R.id.navProfile);
+            navProducts = findViewById(R.id.navProducts);
+            navSettings = findViewById(R.id.navSettings);
+
+            navProfileIcon = findViewById(R.id.navProfileIcon);
+            navProductsIcon = findViewById(R.id.navProductsIcon);
+            navSettingsIcon = findViewById(R.id.navSettingsIcon);
+
+            navProfileText = findViewById(R.id.navProfileText);
+            navProductsText = findViewById(R.id.navProductsText);
+            navSettingsText = findViewById(R.id.navSettingsText);
+
+            navProfileIndicator = findViewById(R.id.navProfileIndicator);
+            navProductsIndicator = findViewById(R.id.navProductsIndicator);
+            navSettingsIndicator = findViewById(R.id.navSettingsIndicator);
+
+            Log.d("SettingsActivity", "Bottom navigation initialized");
+        } catch (Exception e) {
+            Log.e("SettingsActivity", "Error initializing bottom nav: " + e.getMessage());
+        }
+    }
+
+    private void setupBottomNavigation() {
+        // Set Settings as active
+        setActiveNavItem(navSettings, navSettingsIcon, navSettingsText, navSettingsIndicator);
+
+        // Set Profile and Products as inactive
+        setInactiveNavItem(navProfile, navProfileIcon, navProfileText, navProfileIndicator);
+        setInactiveNavItem(navProducts, navProductsIcon, navProductsText, navProductsIndicator);
+
+        // Profile click listener
+        if (navProfile != null) {
+            navProfile.setOnClickListener(v -> {
+                Log.d("SettingsActivity", "Profile navigation clicked");
+                Intent intent = new Intent(SettingsActivity.this, ProfileActivity.class);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
+            });
+        }
+
+        // Products click listener
+        if (navProducts != null) {
+            navProducts.setOnClickListener(v -> {
+                Log.d("SettingsActivity", "Products navigation clicked");
+                Intent intent = new Intent(SettingsActivity.this, ProductListActivity.class);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
+            });
+        }
+
+        // Settings click listener (already on this screen)
+        if (navSettings != null) {
+            navSettings.setOnClickListener(v -> {
+                Log.d("SettingsActivity", "Settings navigation clicked - already on this screen");
+            });
+        }
+    }
+
+    private void setActiveNavItem(LinearLayout navItem, ImageView icon, TextView text, View indicator) {
+        if (icon != null) {
+            icon.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
+        }
+        if (text != null) {
+            text.setTextColor(Color.WHITE);
+            text.setTypeface(null, android.graphics.Typeface.BOLD);
+        }
+        if (indicator != null) {
+            indicator.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setInactiveNavItem(LinearLayout navItem, ImageView icon, TextView text, View indicator) {
+        if (icon != null) {
+            icon.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
+        }
+        if (text != null) {
+            text.setTextColor(Color.WHITE);
+            text.setAlpha(0.8f);
+            text.setTypeface(null, android.graphics.Typeface.NORMAL);
+        }
+        if (indicator != null) {
+            indicator.setVisibility(View.GONE);
+        }
     }
 
     private void setupSeekBar() {
