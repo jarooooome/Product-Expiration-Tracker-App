@@ -215,7 +215,7 @@
                             android:id="@+id/theme_white"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="White Theme"
+                            android:text="White"
                             android:textSize="16sp"
                             android:checked="true"
                             android:paddingVertical="8dp" />
@@ -224,7 +224,7 @@
                             android:id="@+id/theme_green"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Green Theme"
+                            android:text="Green"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
 
@@ -232,7 +232,7 @@
                             android:id="@+id/theme_blue"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Blue Theme"
+                            android:text="Blue"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
 
@@ -240,7 +240,7 @@
                             android:id="@+id/theme_pink"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Pink Theme"
+                            android:text="Pink"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
 
@@ -248,7 +248,7 @@
                             android:id="@+id/theme_purple"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Purple Theme"
+                            android:text="Purple"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
 
@@ -256,7 +256,7 @@
                             android:id="@+id/theme_black"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Black Theme"
+                            android:text="Black"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
 

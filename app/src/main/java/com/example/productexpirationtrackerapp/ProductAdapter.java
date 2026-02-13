@@ -40,6 +40,33 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         this.productList = productList;
     }
 
+    // Helper method to darken a color
+    private int darkenColor(int color, float factor) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        hsv[2] = hsv[2] * factor;
+        return Color.HSVToColor(hsv);
+    }
+
+    // Helper method to get theme background color
+    private int getThemeBackgroundColor(Context context, String theme) {
+        switch (theme) {
+            case "green":
+                return ContextCompat.getColor(context, R.color.color_background_green);
+            case "blue":
+                return ContextCompat.getColor(context, R.color.color_background_blue);
+            case "pink":
+                return ContextCompat.getColor(context, R.color.color_background_pink);
+            case "purple":
+                return ContextCompat.getColor(context, R.color.color_background_purple);
+            case "black":
+                return ContextCompat.getColor(context, R.color.color_background_black);
+            case "white":
+            default:
+                return ContextCompat.getColor(context, R.color.color_background_white);
+        }
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,39 +80,46 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         Product product = productList.get(position);
         Context context = holder.itemView.getContext();
 
-        // ✅ CHECK CURRENT THEME EVERY TIME!
+        // ✅ LOAD THEME HERE - EVERY TIME!
         SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
         String theme = prefs.getString("color_theme", "white");
-        boolean isBlackTheme = theme.equals("black");
 
-        // Set text colors based on current theme
+        // Get theme background color
+        int themeBackgroundColor = getThemeBackgroundColor(context, theme);
+
+        // ✅ Make product background DARKER (70% of original)
+        int productBackgroundColor = darkenColor(themeBackgroundColor, 0.7f);
+
+        // Set product background to DARKER shade
+        holder.itemLayout.setBackgroundColor(productBackgroundColor);
+
+        // Text colors based on theme
+        boolean isBlackTheme = theme.equals("black");
         int textColor;
         int secondaryTextColor;
 
         if (isBlackTheme) {
-            textColor = Color.WHITE;           // Primary text: WHITE
-            secondaryTextColor = Color.LTGRAY;  // Secondary text: LIGHT GRAY
+            textColor = Color.WHITE;
+            secondaryTextColor = Color.LTGRAY;
         } else {
-            textColor = Color.parseColor("#333333");  // Dark gray for light themes
-            secondaryTextColor = Color.parseColor("#666666"); // Medium gray
+            textColor = Color.parseColor("#333333");
+            secondaryTextColor = Color.parseColor("#666666");
         }
 
-        // Set product data with theme-aware colors
+        // Set product data
         holder.productName.setText(product.getName());
         holder.productName.setTextColor(textColor);
 
         holder.productExpiry.setText("Expires: " + product.getFormattedExpiryDate());
         holder.productExpiry.setTextColor(secondaryTextColor);
 
-        // Load product image from byte array
+        // Load product image
         if (product.hasPhoto()) {
-            // Convert byte array to Bitmap
             byte[] photoBytes = product.getPhoto();
             Bitmap bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
             holder.productImage.setImageBitmap(bitmap);
             holder.productImage.setVisibility(View.VISIBLE);
         } else {
-            // If no image, show category-based placeholder
             String category = product.getCategory();
             int placeholderRes = R.drawable.ic_default_product;
 
@@ -117,45 +151,39 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         long timeDiff = product.getExpiryDate().getTime() - now.getTime();
         long daysLeft = TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
 
-        // Set days left text and color (these stay the same for all themes)
+        // Set days left text and color
         if (daysLeft < 0) {
             holder.productDaysLeft.setText("EXPIRED");
-            holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_dark));
-            holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_light));
-            holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_dark));
+            holder.productDaysLeft.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
+            holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_red_light));
+            holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
         } else if (daysLeft <= 3) {
             holder.productDaysLeft.setText(daysLeft + " days left ⚠️");
-            holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_dark));
-            holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_light));
-            holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_orange_dark));
+            holder.productDaysLeft.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
+            holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_orange_light));
+            holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
         } else {
             holder.productDaysLeft.setText(daysLeft + " days left");
-            holder.productDaysLeft.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_dark));
-            holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_light));
-            holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_dark));
+            holder.productDaysLeft.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
+            holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_green_light));
+            holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
         }
 
-        // FIXED: Use getAdapterPosition() instead of storing position
-        holder.itemLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int adapterPosition = holder.getAdapterPosition();
-                if (listener != null && adapterPosition != RecyclerView.NO_POSITION) {
-                    listener.onItemClick(adapterPosition);
-                }
+        // Click listeners
+        holder.itemLayout.setOnClickListener(v -> {
+            int adapterPosition = holder.getAdapterPosition();
+            if (listener != null && adapterPosition != RecyclerView.NO_POSITION) {
+                listener.onItemClick(adapterPosition);
             }
         });
 
-        holder.itemLayout.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                int adapterPosition = holder.getAdapterPosition();
-                if (listener != null && adapterPosition != RecyclerView.NO_POSITION) {
-                    listener.onItemLongClick(adapterPosition);
-                    return true;
-                }
-                return false;
+        holder.itemLayout.setOnLongClickListener(v -> {
+            int adapterPosition = holder.getAdapterPosition();
+            if (listener != null && adapterPosition != RecyclerView.NO_POSITION) {
+                listener.onItemLongClick(adapterPosition);
+                return true;
             }
+            return false;
         });
     }
 

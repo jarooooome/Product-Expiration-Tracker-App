@@ -565,22 +565,43 @@ public class ProductListActivity extends AppCompatActivity {
         // Check if it's black/dark theme
         boolean isDarkTheme = (fabColor == getResources().getColor(R.color.color_fab_black));
 
+        // Check if it's white theme
+        boolean isWhiteTheme = (fabColor == getResources().getColor(R.color.color_fab_white));
+
         // First reset all buttons to inactive state
         setCategoryButtonColors(fabColor);
 
-        // Set active button to solid FAB color (or brighter for black theme)
+        // Set active button
         if (activeButton != null) {
             if (isDarkTheme) {
-                // ✅ CHANGED: Use LIGHT GRAY instead of BLUE for black theme
+                // For black theme: use light gray
                 activeButton.setBackgroundTintList(
-                        android.content.res.ColorStateList.valueOf(Color.parseColor("#CCCCCC"))); // Light gray
+                        android.content.res.ColorStateList.valueOf(Color.parseColor("#CCCCCC")));
+
+                // Text color for black theme active button
+                setCategoryTextColor(Color.BLACK);
+
+            } else if (isWhiteTheme) {
+                // ✅ FOR WHITE THEME: Use a darker color so it's visible!
+                activeButton.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(Color.parseColor("#A9A9A9"))); // Purple
+                // Or use theme accent color
+                // activeButton.setBackgroundTintList(
+                //         android.content.res.ColorStateList.valueOf(Color.parseColor("#2196F3"))); // Blue
+
+                // Text color for white theme active button
+                setCategoryTextColor(Color.WHITE);
+
             } else {
+                // For other colored themes (green, blue, pink, purple)
                 activeButton.setBackgroundTintList(
                         android.content.res.ColorStateList.valueOf(fabColor));
+
+                // Text color for colored themes
+                setCategoryTextColor(Color.WHITE);
             }
         }
     }
-
     // Helper method to set category text colors
     private void setCategoryTextColor(int color) {
         if (categoryAllTitle != null) categoryAllTitle.setTextColor(color);

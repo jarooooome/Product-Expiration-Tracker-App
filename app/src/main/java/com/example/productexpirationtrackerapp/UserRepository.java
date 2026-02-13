@@ -24,25 +24,57 @@ public class UserRepository {
         mainHandler = new Handler(Looper.getMainLooper());
     }
 
-    public void insertOrUpdate(User user) {
+    public interface RepositoryCallback {
+        void onComplete(boolean success);
+    }
+
+    public void insertOrUpdate(User user, RepositoryCallback callback) {
+        Log.d("REPO", "🔵 insertOrUpdate called with user theme: " + user.getColorTheme());
+
         executorService.execute(() -> {
+            boolean success = false;
             try {
+                Log.d("REPO", "🟡 Executing in background thread");
+
                 // Check if user exists
                 User existingUser = userDao.getUser();
+                Log.d("REPO", "Existing user: " + (existingUser != null ? existingUser.getColorTheme() : "null"));
+
                 if (existingUser == null) {
                     // Insert new user
                     long id = userDao.insert(user);
                     user.setId((int) id);
-                    Log.d(TAG, "New user inserted with ID: " + id);
+                    Log.d("REPO", "✅ New user inserted with ID: " + id + ", Theme: " + user.getColorTheme());
+                    success = true;
                 } else {
                     // Update existing user
                     user.setId(existingUser.getId());
                     userDao.update(user);
-                    Log.d(TAG, "User updated successfully");
+                    Log.d("REPO", "✅ User updated successfully, Theme: " + user.getColorTheme());
+                    success = true;
                 }
+
+                // Verify after operation
+                User afterOp = userDao.getUser();
+                Log.d("REPO", "🟢 After operation - User in DB: " + (afterOp != null ? afterOp.getColorTheme() : "null"));
+
             } catch (Exception e) {
-                Log.e(TAG, "Error in insertOrUpdate: " + e.getMessage());
+                Log.e("REPO", "❌ Error in insertOrUpdate: " + e.getMessage());
+                e.printStackTrace();
+                success = false;
             }
+
+            final boolean finalSuccess = success;
+            mainHandler.post(() -> {
+                callback.onComplete(finalSuccess);
+            });
+        });
+    }
+
+    // Keep old method for backward compatibility
+    public void insertOrUpdate(User user) {
+        insertOrUpdate(user, success -> {
+            Log.d("REPO", "Insert/Update completed with success: " + success);
         });
     }
 
