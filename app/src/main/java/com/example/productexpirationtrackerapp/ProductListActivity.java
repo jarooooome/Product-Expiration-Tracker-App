@@ -718,11 +718,10 @@ public class ProductListActivity extends AppCompatActivity {
             navProfile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "Profile navigation clicked");
-                    Intent intent = new Intent(ProductListActivity.this, MainActivity.class);
+                    Log.d(TAG, "Profile navigation clicked - opening ProfileActivity");
+                    Intent intent = new Intent(ProductListActivity.this, ProfileActivity.class);
                     startActivity(intent);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    finish();
                 }
             });
         }

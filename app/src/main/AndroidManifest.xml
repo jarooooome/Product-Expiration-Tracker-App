@@ -59,9 +59,10 @@
             android:theme="@style/Theme.ProductExpirationTrackerApp"
             android:exported="false" />
 
+        <!-- ADD PROFILE ACTIVITY HERE -->
         <activity
-            android:name=".SettingsActivity"
-            android:theme="@style/Theme.ProductExpirationTrackerApp"
+            android:name=".ProfileActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="false" />
 
         <!-- Receivers -->
