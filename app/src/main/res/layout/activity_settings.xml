@@ -43,7 +43,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="⏰ Reminder Frequency"
+                        android:text="Reminder Frequency"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp" />
@@ -126,7 +126,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="📳 Vibration Pattern"
+                        android:text="Vibration Pattern"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
@@ -200,7 +200,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="🎨 App Theme"
+                        android:text="App Theme"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
@@ -290,7 +290,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="⏰ Notification Time"
+                        android:text="Notification Time"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp" />
@@ -307,7 +307,7 @@
                         android:id="@+id/notificationTimeText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="⏰ 9:00 AM"
+                        android:text="9:00 AM"
                         android:textSize="24sp"
                         android:textStyle="bold"
                         android:gravity="center"

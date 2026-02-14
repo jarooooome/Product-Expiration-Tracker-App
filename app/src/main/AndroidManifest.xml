@@ -59,9 +59,21 @@
             android:theme="@style/Theme.ProductExpirationTrackerApp"
             android:exported="false" />
 
-        <!-- ADD PROFILE ACTIVITY HERE -->
+        <!-- Profile Activity -->
         <activity
             android:name=".ProfileActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="false" />
+
+        <!-- Category Detail Activity -->
+        <activity
+            android:name=".CategoryDetailActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="false" />
+
+        <!-- Edit Product Activity (NEW) -->
+        <activity
+            android:name=".EditProductActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="false" />
 

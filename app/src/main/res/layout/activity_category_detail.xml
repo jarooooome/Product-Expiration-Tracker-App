@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F7FA"
+    tools:context=".CategoryDetailActivity">
+
+    <!-- Scrollable Content - ONLY ONE CHILD -->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomNavigation"
+        android:fillViewport="true">
+
+        <!-- ONLY ONE DIRECT CHILD - LinearLayout -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:paddingBottom="80dp">
+
+            <!-- Back Button and Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp"
+                android:gravity="center_vertical">
+
+                <!-- Back Icon -->
+                <TextView
+                    android:id="@+id/backButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="←"
+                    android:textSize="28sp"
+                    android:textColor="#1A1E2C"
+                    android:gravity="center"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Go back" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+
+                    <TextView
+                        android:id="@+id/categoryTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Category"
+                        android:textSize="28sp"
+                        android:textColor="#1A1E2C"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <TextView
+                        android:id="@+id/categoryItemCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 items"
+                        android:textSize="14sp"
+                        android:textColor="#8A8F9E"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Stats Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/stats_background"
+                android:padding="16dp"
+                android:elevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/safeCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="24sp"
+                        android:textColor="#4CAF50"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Safe"
+                        android:textSize="12sp"
+                        android:textColor="#8A8F9E" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/expiringSoonCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="24sp"
+                        android:textColor="#FF9800"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Soon"
+                        android:textSize="12sp"
+                        android:textColor="#8A8F9E" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/expiredCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="24sp"
+                        android:textColor="#F44336"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Expired"
+                        android:textSize="12sp"
+                        android:textColor="#8A8F9E" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Filter and View Toggle Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Filter:"
+                    android:textSize="16sp"
+                    android:textColor="#1A1E2C"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="16dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <!-- All Filter -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/filterAll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="48dp"
+                            android:text="All"
+                            android:textSize="14sp"
+                            android:textColor="#4361EE"
+                            android:background="@null"
+                            android:textStyle="bold"
+                            android:padding="8dp" />
+
+                        <View
+                            android:id="@+id/filterAllIndicator"
+                            android:layout_width="30dp"
+                            android:layout_height="3dp"
+                            android:background="#4361EE"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+
+                    <!-- Safe Filter -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/filterSafe"
+                            android:layout_width="wrap_content"
+                            android:layout_height="48dp"
+                            android:text="Safe"
+                            android:textSize="14sp"
+                            android:textColor="#999999"
+                            android:background="@null"
+                            android:padding="8dp" />
+
+                        <View
+                            android:id="@+id/filterSafeIndicator"
+                            android:layout_width="30dp"
+                            android:layout_height="3dp"
+                            android:background="#4CAF50"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <!-- Soon Filter -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/filterSoon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="48dp"
+                            android:text="Soon"
+                            android:textSize="14sp"
+                            android:textColor="#999999"
+                            android:background="@null"
+                            android:padding="8dp" />
+
+                        <View
+                            android:id="@+id/filterSoonIndicator"
+                            android:layout_width="30dp"
+                            android:layout_height="3dp"
+                            android:background="#FF9800"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <!-- Expired Filter -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/filterExpired"
+                            android:layout_width="wrap_content"
+                            android:layout_height="48dp"
+                            android:text="Expired"
+                            android:textSize="14sp"
+                            android:textColor="#999999"
+                            android:background="@null"
+                            android:padding="8dp" />
+
+                        <View
+                            android:id="@+id/filterExpiredIndicator"
+                            android:layout_width="30dp"
+                            android:layout_height="3dp"
+                            android:background="#F44336"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- View Toggle Icons -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/view_toggle_background"
+                    android:padding="4dp"
+                    android:layout_marginStart="16dp">
+
+                    <!-- List View Icon -->
+                    <ImageView
+                        android:id="@+id/listViewButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_list_view"
+                        android:padding="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        app:tint="#4361EE"
+                        android:contentDescription="List view" />
+
+                    <!-- Grid View Icon -->
+                    <ImageView
+                        android:id="@+id/gridViewButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_grid_view"
+                        android:padding="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        app:tint="#999999"
+                        android:contentDescription="Grid view" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Products RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/productsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation Bar - MOVED OUTSIDE ScrollView -->
+    <LinearLayout
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="@drawable/bottom_nav_gradient"
+        android:elevation="12dp"
+        android:paddingVertical="8dp">
+
+        <!-- Profile Button -->
+        <LinearLayout
+            android:id="@+id/navProfile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/navProfileIcon"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@android:drawable/ic_menu_myplaces"
+                app:tint="#FFFFFF"
+                android:contentDescription="Profile" />
+
+            <TextView
+                android:id="@+id/navProfileText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profile"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="4dp"
+                android:letterSpacing="0.05" />
+
+            <View
+                android:id="@+id/navProfileIndicator"
+                android:layout_width="30dp"
+                android:layout_height="3dp"
+                android:background="#FFFFFF"
+                android:layout_marginTop="4dp"
+                android:alpha="0.8"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Products Button -->
+        <LinearLayout
+            android:id="@+id/navProducts"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/navProductsIcon"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@android:drawable/ic_menu_view"
+                app:tint="#FFFFFF"
+                android:contentDescription="Products" />
+
+            <TextView
+                android:id="@+id/navProductsText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Products"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="4dp"
+                android:letterSpacing="0.05" />
+
+            <View
+                android:id="@+id/navProductsIndicator"
+                android:layout_width="30dp"
+                android:layout_height="3dp"
+                android:background="#FFFFFF"
+                android:layout_marginTop="4dp"
+                android:alpha="0.8"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Settings Button -->
+        <LinearLayout
+            android:id="@+id/navSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/navSettingsIcon"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@android:drawable/ic_menu_preferences"
+                app:tint="#FFFFFF"
+                android:contentDescription="Settings" />
+
+            <TextView
+                android:id="@+id/navSettingsText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Settings"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="4dp"
+                android:letterSpacing="0.05" />
+
+            <View
+                android:id="@+id/navSettingsIndicator"
+                android:layout_width="30dp"
+                android:layout_height="3dp"
+                android:background="#FFFFFF"
+                android:layout_marginTop="4dp"
+                android:alpha="0.8"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
