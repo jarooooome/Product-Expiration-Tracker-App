@@ -32,10 +32,11 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Activity Stat Cards
     private CardView totalItemsCard;
+    private CardView safeCard; // NEW
     private CardView expiringSoonCard;
     private CardView expiredCard;
 
-    // Category Cards - UPDATED with 7 categories
+    // Category Cards
     private CardView dairyCard;
     private CardView vegetablesCard;
     private CardView fruitsCard;
@@ -44,7 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
     private CardView medicineCard;
     private CardView otherCard;
 
-    // Category Item Count TextViews - UPDATED with 7 categories
+    // Category Item Count TextViews
     private TextView dairyCount;
     private TextView vegetablesCount;
     private TextView fruitsCount;
@@ -55,6 +56,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Stat Count TextViews
     private TextView totalItemsCount;
+    private TextView safeCount; // NEW
     private TextView expiringSoonCount;
     private TextView expiredCount;
 
@@ -125,15 +127,17 @@ public class ProfileActivity extends AppCompatActivity {
 
             // Activity Stat Cards
             totalItemsCard = findViewById(R.id.total_items_card);
+            safeCard = findViewById(R.id.safe_card); // NEW
             expiringSoonCard = findViewById(R.id.expiring_soon_card);
             expiredCard = findViewById(R.id.expired_card);
 
             // Stat Count TextViews
             totalItemsCount = findViewById(R.id.total_items_count);
+            safeCount = findViewById(R.id.safe_count); // NEW
             expiringSoonCount = findViewById(R.id.expiring_soon_count);
             expiredCount = findViewById(R.id.expired_count);
 
-            // Category Cards - UPDATED with 7 categories
+            // Category Cards
             dairyCard = findViewById(R.id.dairy_card);
             vegetablesCard = findViewById(R.id.vegetables_card);
             fruitsCard = findViewById(R.id.fruits_card);
@@ -142,7 +146,7 @@ public class ProfileActivity extends AppCompatActivity {
             medicineCard = findViewById(R.id.medicine_card);
             otherCard = findViewById(R.id.other_card);
 
-            // Category Count TextViews - UPDATED with 7 categories
+            // Category Count TextViews
             dairyCount = findViewById(R.id.dairy_count);
             vegetablesCount = findViewById(R.id.vegetables_count);
             fruitsCount = findViewById(R.id.fruits_count);
@@ -228,6 +232,13 @@ public class ProfileActivity extends AppCompatActivity {
             });
         }
 
+        if (safeCard != null) { // NEW
+            safeCard.setOnClickListener(v -> {
+                String count = safeCount != null ? safeCount.getText().toString() : "0";
+                Toast.makeText(ProfileActivity.this, "Safe Items: " + count, Toast.LENGTH_SHORT).show();
+            });
+        }
+
         if (expiringSoonCard != null) {
             expiringSoonCard.setOnClickListener(v -> {
                 String count = expiringSoonCount != null ? expiringSoonCount.getText().toString() : "0";
@@ -242,53 +253,53 @@ public class ProfileActivity extends AppCompatActivity {
             });
         }
 
-        // Category cards - UPDATED with 7 categories
+        // Category cards - OPEN CategoryDetailActivity with filter
         if (dairyCard != null) {
             dairyCard.setOnClickListener(v -> {
                 String count = dairyCount != null ? dairyCount.getText().toString() : "0 items";
-                Toast.makeText(ProfileActivity.this, "Dairy: " + count, Toast.LENGTH_SHORT).show();
+                openCategoryDetail("Dairy", count);
             });
         }
 
         if (vegetablesCard != null) {
             vegetablesCard.setOnClickListener(v -> {
                 String count = vegetablesCount != null ? vegetablesCount.getText().toString() : "0 items";
-                Toast.makeText(ProfileActivity.this, "Vegetables: " + count, Toast.LENGTH_SHORT).show();
+                openCategoryDetail("Vegetables", count);
             });
         }
 
         if (fruitsCard != null) {
             fruitsCard.setOnClickListener(v -> {
                 String count = fruitsCount != null ? fruitsCount.getText().toString() : "0 items";
-                Toast.makeText(ProfileActivity.this, "Fruits: " + count, Toast.LENGTH_SHORT).show();
+                openCategoryDetail("Fruits", count);
             });
         }
 
         if (meatsCard != null) {
             meatsCard.setOnClickListener(v -> {
                 String count = meatsCount != null ? meatsCount.getText().toString() : "0 items";
-                Toast.makeText(ProfileActivity.this, "Meats: " + count, Toast.LENGTH_SHORT).show();
+                openCategoryDetail("Meats", count);
             });
         }
 
         if (beveragesCard != null) {
             beveragesCard.setOnClickListener(v -> {
                 String count = beveragesCount != null ? beveragesCount.getText().toString() : "0 items";
-                Toast.makeText(ProfileActivity.this, "Beverages: " + count, Toast.LENGTH_SHORT).show();
+                openCategoryDetail("Beverages", count);
             });
         }
 
         if (medicineCard != null) {
             medicineCard.setOnClickListener(v -> {
                 String count = medicineCount != null ? medicineCount.getText().toString() : "0 items";
-                Toast.makeText(ProfileActivity.this, "Medicine: " + count, Toast.LENGTH_SHORT).show();
+                openCategoryDetail("Medicine", count);
             });
         }
 
         if (otherCard != null) {
             otherCard.setOnClickListener(v -> {
                 String count = otherCount != null ? otherCount.getText().toString() : "0 items";
-                Toast.makeText(ProfileActivity.this, "Other: " + count, Toast.LENGTH_SHORT).show();
+                openCategoryDetail("Other", count);
             });
         }
 
@@ -330,6 +341,16 @@ public class ProfileActivity extends AppCompatActivity {
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
+    }
+
+    // NEW - Open category detail activity
+    private void openCategoryDetail(String categoryName, String itemCount) {
+        Log.d(TAG, "Opening category: " + categoryName);
+        Intent intent = new Intent(ProfileActivity.this, CategoryDetailActivity.class);
+        intent.putExtra("category_name", categoryName);
+        intent.putExtra("category_count", itemCount);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void applyTheme() {
@@ -383,6 +404,8 @@ public class ProfileActivity extends AppCompatActivity {
                     int expiredItems = 0;
                     // Calculate expiring soon items (within 7 days)
                     int expiringSoonItems = 0;
+                    // Calculate safe items (more than 7 days away)
+                    int safeItems = 0;
 
                     // Category counts
                     int dairyCount = 0;
@@ -425,16 +448,16 @@ public class ProfileActivity extends AppCompatActivity {
                             }
                         }
 
-                        // Count expired items
+                        // Count expired, expiring soon, and safe items
                         Date expiryDate = product.getExpiryDate();
-                        if (expiryDate != null && expiryDate.before(today)) {
-                            expiredItems++;
-                        }
-
-                        // Count expiring soon items (within 7 days and not expired)
-                        if (expiryDate != null && !expiryDate.before(today) &&
-                                expiryDate.getTime() - today.getTime() <= sevenDaysInMillis) {
-                            expiringSoonItems++;
+                        if (expiryDate != null) {
+                            if (expiryDate.before(today)) {
+                                expiredItems++;
+                            } else if (expiryDate.getTime() - today.getTime() <= sevenDaysInMillis) {
+                                expiringSoonItems++;
+                            } else {
+                                safeItems++;
+                            }
                         }
                     }
 
@@ -448,7 +471,12 @@ public class ProfileActivity extends AppCompatActivity {
                         expiringSoonCount.setText(String.valueOf(expiringSoonItems));
                     }
 
-                    // Update category counts - UPDATED with 7 categories
+                    // Update safe count (NEW)
+                    if (safeCount != null) {
+                        safeCount.setText(String.valueOf(safeItems));
+                    }
+
+                    // Update category counts
                     if (ProfileActivity.this.dairyCount != null) {
                         ProfileActivity.this.dairyCount.setText(dairyCount + " items");
                     }
@@ -472,8 +500,9 @@ public class ProfileActivity extends AppCompatActivity {
                     }
 
                     Log.d(TAG, "Profile data loaded - Total: " + totalItems +
-                            ", Expired: " + expiredItems +
-                            ", Expiring Soon: " + expiringSoonItems);
+                            ", Safe: " + safeItems +
+                            ", Expiring Soon: " + expiringSoonItems +
+                            ", Expired: " + expiredItems);
                 }
             }
         });
