@@ -789,21 +789,17 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
-    // Theme methods
+    // Theme methods - SIMPLIFIED to only Light and Dark
     private void applyThemeFromDatabase() {
         User user = userRepository.getUserSync();
 
         if (user != null) {
             String theme = user.getColorTheme();
             Log.d(TAG, "Applying theme from database: " + theme);
-
-            ThemeUtils.applyTheme(this, theme);
             applyCustomThemeColors(theme);
         } else {
-            String theme = preferences.getString("color_theme", "white");
+            String theme = preferences.getString("color_theme", "light");
             Log.d(TAG, "No user in DB, applying theme from SharedPreferences: " + theme);
-
-            ThemeUtils.applyTheme(this, theme);
             applyCustomThemeColors(theme);
         }
     }
@@ -812,127 +808,70 @@ public class ProductListActivity extends AppCompatActivity {
         int primaryColor;
         int textColor;
         int backgroundColor;
-        int fabBackgroundColor = 0;
-        int fabIconColor = Color.WHITE;
+        int fabBackgroundColor;
+        int fabIconColor;
+        boolean isDarkTheme = theme.equals("black") || theme.equals("dark");
 
-        switch (theme) {
-            case "green":
-                primaryColor = getResources().getColor(R.color.color_primary_green);
-                textColor = getResources().getColor(R.color.color_text_green);
-                backgroundColor = getResources().getColor(R.color.color_background_green);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_green);
-                fabIconColor = getResources().getColor(R.color.color_fab_icon_green);
-                break;
-            case "blue":
-                primaryColor = getResources().getColor(R.color.color_primary_blue);
-                textColor = getResources().getColor(R.color.color_text_blue);
-                backgroundColor = getResources().getColor(R.color.color_background_blue);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_blue);
-                fabIconColor = getResources().getColor(R.color.color_fab_icon_blue);
-                break;
-            case "pink":
-                primaryColor = getResources().getColor(R.color.color_primary_pink);
-                textColor = getResources().getColor(R.color.color_text_pink);
-                backgroundColor = getResources().getColor(R.color.color_background_pink);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_pink);
-                fabIconColor = getResources().getColor(R.color.color_fab_icon_pink);
-                break;
-            case "purple":
-                primaryColor = getResources().getColor(R.color.color_primary_purple);
-                textColor = getResources().getColor(R.color.color_text_purple);
-                backgroundColor = getResources().getColor(R.color.color_background_purple);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_purple);
-                fabIconColor = getResources().getColor(R.color.color_fab_icon_purple);
-                break;
-            case "black":
-                primaryColor = getResources().getColor(R.color.color_primary_black);
-                textColor = getResources().getColor(R.color.color_text_black);
-                backgroundColor = getResources().getColor(R.color.color_background_black);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_black);
-                fabIconColor = getResources().getColor(R.color.color_fab_icon_black);
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+            textColor = ContextCompat.getColor(this, R.color.color_text_dark);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_dark);
+            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_dark);
+            fabIconColor = ContextCompat.getColor(this, R.color.color_fab_icon_dark);
 
-                if (categoryAllTitle != null) categoryAllTitle.setTextColor(Color.WHITE);
-                if (categoryAllCount != null) categoryAllCount.setTextColor(Color.WHITE);
-                if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(Color.WHITE);
-                if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(Color.WHITE);
-                if (categoryDairyCount != null) categoryDairyCount.setTextColor(Color.WHITE);
-                if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(Color.WHITE);
-                if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(Color.WHITE);
-                if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(Color.WHITE);
-                if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(Color.WHITE);
-                if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(Color.WHITE);
-                if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(Color.WHITE);
-                if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(Color.WHITE);
-                if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(Color.WHITE);
-                if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(Color.WHITE);
-                if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(Color.WHITE);
-                if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(Color.WHITE);
-                if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(Color.WHITE);
-                if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(Color.WHITE);
-                if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(Color.WHITE);
-                if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(Color.WHITE);
-                if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(Color.WHITE);
-                if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(Color.WHITE);
-                if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.WHITE);
-                break;
-            case "white":
-            default:
-                primaryColor = getResources().getColor(R.color.color_primary_white);
-                textColor = getResources().getColor(R.color.color_text_white);
-                backgroundColor = getResources().getColor(R.color.color_background_white);
-                fabBackgroundColor = getResources().getColor(R.color.color_fab_white);
-                fabIconColor = getResources().getColor(R.color.color_fab_icon_white);
-                break;
+            // Set category text to WHITE for dark theme
+            if (categoryAllTitle != null) categoryAllTitle.setTextColor(Color.WHITE);
+            if (categoryAllCount != null) categoryAllCount.setTextColor(Color.WHITE);
+            if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(Color.WHITE);
+            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(Color.WHITE);
+            if (categoryDairyCount != null) categoryDairyCount.setTextColor(Color.WHITE);
+            if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(Color.WHITE);
+            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(Color.WHITE);
+            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(Color.WHITE);
+            if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(Color.WHITE);
+            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(Color.WHITE);
+            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(Color.WHITE);
+            if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(Color.WHITE);
+            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(Color.WHITE);
+            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(Color.WHITE);
+            if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(Color.WHITE);
+            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(Color.WHITE);
+            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(Color.WHITE);
+            if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(Color.WHITE);
+            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(Color.WHITE);
+            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(Color.WHITE);
+            if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(Color.WHITE);
+            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(Color.WHITE);
+            if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.WHITE);
+        } else {
+            // Light theme colors (default)
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            textColor = ContextCompat.getColor(this, R.color.color_text_light);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_light);
+            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_light);
+            fabIconColor = ContextCompat.getColor(this, R.color.color_fab_icon_light);
         }
 
-        Log.d(TAG, "Theme: " + theme);
+        Log.d(TAG, "Theme: " + (isDarkTheme ? "DARK" : "LIGHT"));
         Log.d(TAG, "Background Color: " + String.format("#%08X", backgroundColor));
         Log.d(TAG, "FAB Color: " + String.format("#%08X", fabBackgroundColor));
-        Log.d(TAG, "FAB Icon Color: " + String.format("#%08X", fabIconColor));
 
+        // Save FAB colors to preferences
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("fab_background_color", fabBackgroundColor);
         editor.putInt("fab_icon_color", fabIconColor);
         editor.apply();
 
-        if (theme.equals("green") || theme.equals("blue") || theme.equals("pink") || theme.equals("purple")) {
-            if (hiUserTextView != null) hiUserTextView.setTextColor(textColor);
-            if (welcomeDescriptionTextView != null) welcomeDescriptionTextView.setTextColor(textColor);
-            if (categoryLabelTextView != null) categoryLabelTextView.setTextColor(textColor);
+        // Set header text colors
+        // Set header text colors
+        if (hiUserTextView != null) hiUserTextView.setTextColor(isDarkTheme ? Color.WHITE : textColor);
+        if (welcomeDescriptionTextView != null) welcomeDescriptionTextView.setTextColor(isDarkTheme ? Color.WHITE : textColor);
+        if (categoryLabelTextView != null) categoryLabelTextView.setTextColor(isDarkTheme ? Color.WHITE : textColor);
 
-            int categoryTextColor = textColor;
-            if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(categoryTextColor);
-            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(categoryTextColor);
-            if (categoryDairyCount != null) categoryDairyCount.setTextColor(categoryTextColor);
-            if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(categoryTextColor);
-            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(categoryTextColor);
-            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(categoryTextColor);
-            if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(categoryTextColor);
-            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(categoryTextColor);
-            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(categoryTextColor);
-            if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(categoryTextColor);
-            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(categoryTextColor);
-            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(categoryTextColor);
-            if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(categoryTextColor);
-            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(categoryTextColor);
-            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(categoryTextColor);
-            if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(categoryTextColor);
-            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(categoryTextColor);
-            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(categoryTextColor);
-            if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(categoryTextColor);
-            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(categoryTextColor);
-            if (categoryOtherCount != null) categoryOtherCount.setTextColor(categoryTextColor);
-
-        } else if (theme.equals("black")) {
-            if (hiUserTextView != null) hiUserTextView.setTextColor(Color.WHITE);
-            if (welcomeDescriptionTextView != null) welcomeDescriptionTextView.setTextColor(Color.WHITE);
-            if (categoryLabelTextView != null) categoryLabelTextView.setTextColor(Color.WHITE);
-        } else {
-            if (hiUserTextView != null) hiUserTextView.setTextColor(fabIconColor);
-            if (welcomeDescriptionTextView != null) welcomeDescriptionTextView.setTextColor(fabIconColor);
-            if (categoryLabelTextView != null) categoryLabelTextView.setTextColor(fabIconColor);
-
-            int categoryTextColor = fabIconColor;
+        // Set category text colors for light theme (dark theme already set above)
+        if (!isDarkTheme) {
+            int categoryTextColor = textColor; // ← Use textColor which is dark gray (#333333)
             if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(categoryTextColor);
             if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(categoryTextColor);
             if (categoryDairyCount != null) categoryDairyCount.setTextColor(categoryTextColor);
@@ -974,7 +913,7 @@ public class ProductListActivity extends AppCompatActivity {
         float[] hsv = new float[3];
         Color.colorToHSV(fabColor, hsv);
 
-        boolean isDarkTheme = (fabColor == getResources().getColor(R.color.color_fab_black));
+        boolean isDarkTheme = (fabColor == ContextCompat.getColor(this, R.color.color_fab_dark));
 
         if (isDarkTheme) {
             int grayColor = Color.parseColor("#666666");
@@ -1001,8 +940,7 @@ public class ProductListActivity extends AppCompatActivity {
     }
 
     private void setActiveCategoryButton(LinearLayout activeButton, int fabColor) {
-        boolean isDarkTheme = (fabColor == getResources().getColor(R.color.color_fab_black));
-        boolean isWhiteTheme = (fabColor == getResources().getColor(R.color.color_fab_white));
+        boolean isDarkTheme = (fabColor == ContextCompat.getColor(this, R.color.color_fab_dark));
 
         setCategoryButtonColors(fabColor);
 
@@ -1010,10 +948,8 @@ public class ProductListActivity extends AppCompatActivity {
             if (isDarkTheme) {
                 activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#CCCCCC")));
                 setCategoryTextColor(Color.BLACK);
-            } else if (isWhiteTheme) {
-                activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#A9A9A9")));
-                setCategoryTextColor(Color.WHITE);
             } else {
+                // USE fabColor INSTEAD OF HARDCODED BLUE!
                 activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fabColor));
                 setCategoryTextColor(Color.WHITE);
             }
@@ -1050,9 +986,9 @@ public class ProductListActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
         int fabBackgroundColor = prefs.getInt("fab_background_color",
-                getResources().getColor(R.color.color_fab_white));
+                ContextCompat.getColor(this, R.color.color_fab_light));
         int fabIconColor = prefs.getInt("fab_icon_color",
-                getResources().getColor(R.color.color_fab_icon_white));
+                ContextCompat.getColor(this, R.color.color_fab_icon_light));
 
         if (addButton != null) {
             addButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fabBackgroundColor));
@@ -1083,7 +1019,7 @@ public class ProductListActivity extends AppCompatActivity {
     private int getFabColorFromPreferences() {
         SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         return prefs.getInt("fab_background_color",
-                getResources().getColor(R.color.color_fab_white));
+                ContextCompat.getColor(this, R.color.color_fab_light));
     }
 
     private void updateCategoryCounts() {

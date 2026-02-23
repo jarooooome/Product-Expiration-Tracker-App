@@ -1,6 +1,7 @@
 package com.example.productexpirationtrackerapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
@@ -24,6 +26,7 @@ public class ConsumedHistoryAdapter extends RecyclerView.Adapter<ConsumedHistory
     private Context context;
     private OnItemClickListener listener;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+    private boolean isDarkTheme = false;
 
     public interface OnItemClickListener {
         void onItemClick(ConsumedProduct product);
@@ -35,6 +38,10 @@ public class ConsumedHistoryAdapter extends RecyclerView.Adapter<ConsumedHistory
 
     public ConsumedHistoryAdapter(Context context) {
         this.context = context;
+        // Load theme preference
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        String theme = prefs.getString("color_theme", "light");
+        isDarkTheme = theme.equals("dark") || theme.equals("black");
     }
 
     @NonNull
@@ -49,36 +56,54 @@ public class ConsumedHistoryAdapter extends RecyclerView.Adapter<ConsumedHistory
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ConsumedProduct product = consumedProducts.get(position);
 
-        // Set product name
-        holder.productName.setText(product.getProductName());
+        // Set text colors based on theme
+        int primaryTextColor;
+        int secondaryTextColor;
 
-        // Set category
+        if (isDarkTheme) {
+            primaryTextColor = Color.WHITE;
+            secondaryTextColor = Color.LTGRAY;
+        } else {
+            primaryTextColor = Color.parseColor("#333333");
+            secondaryTextColor = Color.parseColor("#666666");
+        }
+
+        // Set product name with theme color
+        holder.productName.setText(product.getProductName());
+        holder.productName.setTextColor(primaryTextColor);
+
+        // Set category with theme color
         String category = product.getCategory();
         holder.category.setText(category != null && !category.isEmpty() ? category : "No category");
+        holder.category.setTextColor(secondaryTextColor);
 
         // Set quantity
         String quantity = product.getQuantity();
         if (quantity != null && !quantity.isEmpty()) {
             holder.quantity.setVisibility(View.VISIBLE);
             holder.quantity.setText("Qty: " + quantity);
+            holder.quantity.setTextColor(secondaryTextColor);
         } else {
             holder.quantity.setVisibility(View.GONE);
         }
 
-        // Set action type with color
+        // Set action type with color (stays green/red regardless of theme)
         String actionType = product.getActionType();
         holder.actionType.setText(actionType);
 
-        // Set background color based on action type
         if ("CONSUMED".equals(actionType)) {
-            holder.actionType.setBackgroundColor(Color.parseColor("#4CAF50")); // Green
+            holder.actionType.setBackgroundColor(Color.parseColor("#4CAF50")); // Green stays green
         } else {
-            holder.actionType.setBackgroundColor(Color.parseColor("#F44336")); // Red
+            holder.actionType.setBackgroundColor(Color.parseColor("#F44336")); // Red stays red
         }
+        holder.actionType.setTextColor(Color.WHITE);
 
-        // Set dates
+        // Set dates with theme colors
         holder.actionDate.setText("Action: " + dateFormat.format(product.getActionDate()));
+        holder.actionDate.setTextColor(secondaryTextColor);
+
         holder.expiryDate.setText("Expired: " + dateFormat.format(product.getExpiryDate()));
+        holder.expiryDate.setTextColor(secondaryTextColor);
 
         // Set product image
         if (product.hasPhoto()) {
@@ -89,6 +114,13 @@ public class ConsumedHistoryAdapter extends RecyclerView.Adapter<ConsumedHistory
             // Set placeholder based on category
             int placeholderRes = getPlaceholderForCategory(product.getCategory());
             holder.productImage.setImageResource(placeholderRes);
+        }
+
+        // Set card background based on theme (light or dark)
+        if (isDarkTheme) {
+            holder.itemView.setBackgroundColor(Color.parseColor("#2D2D2D")); // Dark gray for dark theme
+        } else {
+            holder.itemView.setBackgroundColor(Color.WHITE); // White for light theme
         }
 
         // Set click listener

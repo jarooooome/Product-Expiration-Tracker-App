@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- BASIC COLORS -->
-    <color name="white">#FFFFFFFF</color>
-    <color name="black">#FF000000</color>
-    <color name="color_primary">#2196F3</color>
-    <color name="color_gray">#E0E0E0</color>
 
-    <!-- White/Light Theme -->
-    <color name="color_primary_white">#4CAF50</color>
-    <color name="color_primary_light">#F5F5F5</color>
-    <color name="color_text_white">#333333</color>
-    <color name="color_accent_white">#FF9800</color>
-    <color name="color_background_white">#FFFFFF</color>
 
     <!-- Green Theme -->
     <color name="color_primary_green">#4CAF50</color>
@@ -73,4 +62,28 @@
     <color name="color_fab_icon_white">#333333</color> <!-- DARK GRAY para kita sa white -->
     <color name="color_nav_background_white">#FFFFFF</color>
     <color name="color_nav_inactive_white">#757575</color>
+
+    <!-- BASIC COLORS -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="color_primary">#2196F3</color>
+    <color name="color_gray">#E0E0E0</color>
+
+    <!-- Light Theme (White) -->
+    <color name="color_primary_light">#88E788</color> <!-- Light green -->
+    <color name="color_text_light">#333333</color>
+    <color name="color_background_light">#F5F5F5</color>
+    <color name="color_fab_light">#88E788</color>     <!-- Same green as primary -->
+    <color name="color_fab_icon_light">#FFFFFF</color>
+
+    <!-- Dark Theme (Black) -->
+    <color name="color_primary_dark">#212121</color>
+    <color name="color_text_dark">#FFFFFF</color>
+    <color name="color_background_dark">#303030</color>
+    <color name="color_fab_dark">#212121</color>
+    <color name="color_fab_icon_dark">#FFFFFF</color>
+
+    <color name="color_card_light">#FFFFFF</color>
+    <color name="color_card_dark">#2C2C2C</color>
+    <color name="color_button_secondary">#757575</color>
 </resources>

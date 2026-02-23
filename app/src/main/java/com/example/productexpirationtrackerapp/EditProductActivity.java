@@ -2,16 +2,22 @@ package com.example.productexpirationtrackerapp;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.text.SimpleDateFormat;
@@ -27,6 +33,11 @@ public class EditProductActivity extends AppCompatActivity {
     private EditText notesEdit;
     private Button saveButton;
     private Button cancelButton;
+    private TextView titleTextView;
+    private LinearLayout mainLayout;
+
+    // Labels
+    private TextView productNameLabel, expiryDateLabel, categoryLabel, quantityLabel, notesLabel;
 
     private int productId;
     private String originalName;
@@ -36,6 +47,7 @@ public class EditProductActivity extends AppCompatActivity {
     private String originalNotes;
 
     private ProductViewModel productViewModel;
+    private UserRepository userRepository;
     private Calendar calendar;
 
     @Override
@@ -43,11 +55,17 @@ public class EditProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_product);
 
+        // Initialize UserRepository for theme
+        userRepository = new UserRepository(getApplication());
+
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
         // Initialize views
         initializeViews();
+
+        // Apply theme
+        applyThemeFromDatabase();
 
         // Get intent data
         getIntentData();
@@ -62,7 +80,17 @@ public class EditProductActivity extends AppCompatActivity {
         setupClickListeners();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reapply theme when returning
+        applyThemeFromDatabase();
+    }
+
     private void initializeViews() {
+        mainLayout = findViewById(R.id.mainLayout);
+        titleTextView = findViewById(R.id.titleTextView);
+
         productNameEdit = findViewById(R.id.productNameEdit);
         expiryDateEdit = findViewById(R.id.expiryDateEdit);
         categorySpinner = findViewById(R.id.categorySpinner);
@@ -71,7 +99,98 @@ public class EditProductActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
 
+        // Initialize labels
+        productNameLabel = findViewById(R.id.productNameLabel);
+        expiryDateLabel = findViewById(R.id.expiryDateLabel);
+        categoryLabel = findViewById(R.id.categoryLabel);
+        quantityLabel = findViewById(R.id.quantityLabel);
+        notesLabel = findViewById(R.id.notesLabel);
+
         calendar = Calendar.getInstance();
+    }
+
+    // ========== THEME METHODS ==========
+
+    private void applyThemeFromDatabase() {
+        User user = userRepository.getUserSync();
+
+        if (user != null) {
+            String theme = user.getColorTheme();
+            applyThemeColors(theme);
+        } else {
+            SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+            String theme = prefs.getString("color_theme", "light");
+            applyThemeColors(theme);
+        }
+    }
+
+    private void applyThemeColors(String theme) {
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
+
+        int primaryColor;
+        int backgroundColor;
+        int textColor;
+        int hintColor;
+
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_dark);
+            textColor = ContextCompat.getColor(this, R.color.color_text_dark);
+            hintColor = Color.parseColor("#80FFFFFF"); // Semi-transparent white
+        } else {
+            // Light theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_light);
+            textColor = ContextCompat.getColor(this, R.color.color_text_light);
+            hintColor = Color.parseColor("#80000000"); // Semi-transparent black
+        }
+
+        // Apply background color to main layout
+        if (mainLayout != null) {
+            mainLayout.setBackgroundColor(backgroundColor);
+        }
+
+        // Set title color
+        if (titleTextView != null) {
+            titleTextView.setTextColor(textColor);
+        }
+
+        // Set label colors
+        if (productNameLabel != null) productNameLabel.setTextColor(textColor);
+        if (expiryDateLabel != null) expiryDateLabel.setTextColor(textColor);
+        if (categoryLabel != null) categoryLabel.setTextColor(textColor);
+        if (quantityLabel != null) quantityLabel.setTextColor(textColor);
+        if (notesLabel != null) notesLabel.setTextColor(textColor);
+
+        // Set EditText colors
+        if (productNameEdit != null) {
+            productNameEdit.setTextColor(textColor);
+            productNameEdit.setHintTextColor(hintColor);
+        }
+        if (expiryDateEdit != null) {
+            expiryDateEdit.setTextColor(textColor);
+            expiryDateEdit.setHintTextColor(hintColor);
+        }
+        if (quantityEdit != null) {
+            quantityEdit.setTextColor(textColor);
+            quantityEdit.setHintTextColor(hintColor);
+        }
+        if (notesEdit != null) {
+            notesEdit.setTextColor(textColor);
+            notesEdit.setHintTextColor(hintColor);
+        }
+
+        // Set button colors
+        if (saveButton != null) {
+            saveButton.setBackgroundColor(primaryColor);
+            saveButton.setTextColor(Color.WHITE);
+        }
+
+        if (cancelButton != null) {
+            cancelButton.setBackgroundColor(Color.parseColor("#757575"));
+            cancelButton.setTextColor(Color.WHITE);
+        }
     }
 
     private void getIntentData() {
@@ -93,12 +212,42 @@ public class EditProductActivity extends AppCompatActivity {
     private void setupSpinner() {
         // Create array of categories
         String[] categories = {"Dairy", "Vegetables", "Fruits", "Meats", "Beverages", "Medicine", "Other"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+
+        // Create custom adapter for spinner with theme support
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_spinner_item,
+                categories
+        ) {
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                if (view instanceof TextView) {
+                    TextView textView = (TextView) view;
+
+                    // Get current theme
+                    User user = userRepository.getUserSync();
+                    boolean isDarkTheme = user != null ?
+                            (user.getColorTheme().equals("dark") || user.getColorTheme().equals("black")) : false;
+
+                    // Set text color based on theme
+                    if (isDarkTheme) {
+                        textView.setTextColor(Color.WHITE);
+                        textView.setBackgroundColor(Color.parseColor("#333333"));
+                    } else {
+                        textView.setTextColor(Color.BLACK);
+                        textView.setBackgroundColor(Color.WHITE);
+                    }
+                }
+                return view;
+            }
+        };
+
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categorySpinner.setAdapter(adapter);
 
         // Set selected category
-        if (originalCategory != null && !originalCategory.equals("Not specified")) {
+        if (originalCategory != null && !originalCategory.equals("Not specified") && !originalCategory.equals("Category")) {
             for (int i = 0; i < categories.length; i++) {
                 if (categories[i].equals(originalCategory)) {
                     categorySpinner.setSelection(i);

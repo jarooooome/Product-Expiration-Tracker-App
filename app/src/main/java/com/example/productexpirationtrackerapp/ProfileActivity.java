@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -32,7 +33,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Activity Stat Cards
     private CardView totalItemsCard;
-    private CardView safeCard; // NEW
+    private CardView safeCard;
     private CardView expiringSoonCard;
     private CardView expiredCard;
 
@@ -56,7 +57,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Stat Count TextViews
     private TextView totalItemsCount;
-    private TextView safeCount; // NEW
+    private TextView safeCount;
     private TextView expiringSoonCount;
     private TextView expiredCount;
 
@@ -77,9 +78,12 @@ public class ProfileActivity extends AppCompatActivity {
     private View navProductsIndicator;
     private View navSettingsIndicator;
 
+    // Main Layout - CHANGED: from LinearLayout to View to avoid ClassCastException
+    private View mainLayout;
     private ScrollView scrollView;
     private SharedPreferences preferences;
     private ProductViewModel productViewModel;
+    private UserRepository userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +92,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+
+        // Initialize UserRepository for theme
+        userRepository = new UserRepository(getApplication());
 
         // Initialize preferences
         preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
@@ -102,7 +109,7 @@ public class ProfileActivity extends AppCompatActivity {
         setupClickListeners();
 
         // Apply theme
-        applyTheme();
+        applyThemeFromDatabase();
 
         // Load real data from database
         loadProfileData();
@@ -114,26 +121,29 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Reapply theme when returning to this activity
-        applyTheme();
+        applyThemeFromDatabase();
         // Refresh data when returning to profile
         loadProfileData();
     }
 
     private void initializeViews() {
         try {
+            // Main layout - CHANGED: using View type
+            mainLayout = findViewById(R.id.mainLayout);
+
             // Header
             profileTitle = findViewById(R.id.profileTitle);
             profileSubtitle = findViewById(R.id.profileSubtitle);
 
             // Activity Stat Cards
             totalItemsCard = findViewById(R.id.total_items_card);
-            safeCard = findViewById(R.id.safe_card); // NEW
+            safeCard = findViewById(R.id.safe_card);
             expiringSoonCard = findViewById(R.id.expiring_soon_card);
             expiredCard = findViewById(R.id.expired_card);
 
             // Stat Count TextViews
             totalItemsCount = findViewById(R.id.total_items_count);
-            safeCount = findViewById(R.id.safe_count); // NEW
+            safeCount = findViewById(R.id.safe_count);
             expiringSoonCount = findViewById(R.id.expiring_soon_count);
             expiredCount = findViewById(R.id.expired_count);
 
@@ -232,7 +242,7 @@ public class ProfileActivity extends AppCompatActivity {
             });
         }
 
-        if (safeCard != null) { // NEW
+        if (safeCard != null) {
             safeCard.setOnClickListener(v -> {
                 String count = safeCount != null ? safeCount.getText().toString() : "0";
                 Toast.makeText(ProfileActivity.this, "Safe Items: " + count, Toast.LENGTH_SHORT).show();
@@ -253,7 +263,7 @@ public class ProfileActivity extends AppCompatActivity {
             });
         }
 
-        // Category cards - OPEN CategoryDetailActivity with filter
+        // Category cards
         if (dairyCard != null) {
             dairyCard.setOnClickListener(v -> {
                 String count = dairyCount != null ? dairyCount.getText().toString() : "0 items";
@@ -343,7 +353,6 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    // NEW - Open category detail activity
     private void openCategoryDetail(String categoryName, String itemCount) {
         Log.d(TAG, "Opening category: " + categoryName);
         Intent intent = new Intent(ProfileActivity.this, CategoryDetailActivity.class);
@@ -353,10 +362,53 @@ public class ProfileActivity extends AppCompatActivity {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
-    private void applyTheme() {
-        // Get theme color from preferences
-        int fabBackgroundColor = preferences.getInt("fab_background_color",
-                getResources().getColor(R.color.color_fab_white));
+    // ========== THEME METHODS ==========
+
+    private void applyThemeFromDatabase() {
+        User user = userRepository.getUserSync();
+
+        if (user != null) {
+            String theme = user.getColorTheme();
+            Log.d(TAG, "Applying theme: " + theme);
+            applyThemeColors(theme);
+        } else {
+            String theme = preferences.getString("color_theme", "light");
+            Log.d(TAG, "No user, applying theme from prefs: " + theme);
+            applyThemeColors(theme);
+        }
+    }
+
+    private void applyThemeColors(String theme) {
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
+
+        int primaryColor;
+        int backgroundColor;
+        int textColor;
+        int fabBackgroundColor;
+        int fabIconColor;
+
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_dark);
+            textColor = ContextCompat.getColor(this, R.color.color_text_dark);
+            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_dark);
+            fabIconColor = ContextCompat.getColor(this, R.color.color_fab_icon_dark);
+        } else {
+            // Light theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_light);
+            textColor = ContextCompat.getColor(this, R.color.color_text_light);
+            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_light);
+            fabIconColor = ContextCompat.getColor(this, R.color.color_fab_icon_light);
+        }
+
+        Log.d(TAG, "Theme: " + (isDarkTheme ? "DARK" : "LIGHT"));
+
+        // Apply to main layout background - FIXED: using View type
+        if (mainLayout != null) {
+            mainLayout.setBackgroundColor(backgroundColor);
+        }
 
         // Apply to bottom navigation
         LinearLayout bottomNavigation = findViewById(R.id.bottomNavigation);
@@ -367,23 +419,27 @@ public class ProfileActivity extends AppCompatActivity {
         // Apply to FAB
         if (addButton != null) {
             addButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fabBackgroundColor));
-            addButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
+            addButton.setImageTintList(android.content.res.ColorStateList.valueOf(fabIconColor));
         }
 
+        // Set text colors
+        if (profileTitle != null) profileTitle.setTextColor(textColor);
+        if (profileSubtitle != null) profileSubtitle.setTextColor(textColor);
+
         // Bottom navigation icons and text colors
-        int whiteColor = Color.WHITE;
+        int navIconColor = fabIconColor;
 
-        if (navProfileIcon != null) navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
-        if (navProductsIcon != null) navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
-        if (navSettingsIcon != null) navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        if (navProfileIcon != null) navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
+        if (navProductsIcon != null) navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
+        if (navSettingsIcon != null) navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
 
-        if (navProfileText != null) navProfileText.setTextColor(whiteColor);
-        if (navProductsText != null) navProductsText.setTextColor(whiteColor);
-        if (navSettingsText != null) navSettingsText.setTextColor(whiteColor);
+        if (navProfileText != null) navProfileText.setTextColor(navIconColor);
+        if (navProductsText != null) navProductsText.setTextColor(navIconColor);
+        if (navSettingsText != null) navSettingsText.setTextColor(navIconColor);
 
-        if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(whiteColor);
-        if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(whiteColor);
-        if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(whiteColor);
+        if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(navIconColor);
+        if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(navIconColor);
+        if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(navIconColor);
 
         Log.d(TAG, "Theme applied to profile activity");
     }
@@ -471,7 +527,7 @@ public class ProfileActivity extends AppCompatActivity {
                         expiringSoonCount.setText(String.valueOf(expiringSoonItems));
                     }
 
-                    // Update safe count (NEW)
+                    // Update safe count
                     if (safeCount != null) {
                         safeCount.setText(String.valueOf(safeItems));
                     }

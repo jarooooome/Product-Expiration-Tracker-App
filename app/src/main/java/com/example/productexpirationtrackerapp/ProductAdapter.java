@@ -59,22 +59,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         return Color.HSVToColor(hsv);
     }
 
-    // Helper method to get theme background color
-    private int getThemeBackgroundColor(Context context, String theme) {
-        switch (theme) {
-            case "green":
-                return ContextCompat.getColor(context, R.color.color_background_green);
-            case "blue":
-                return ContextCompat.getColor(context, R.color.color_background_blue);
-            case "pink":
-                return ContextCompat.getColor(context, R.color.color_background_pink);
-            case "purple":
-                return ContextCompat.getColor(context, R.color.color_background_purple);
-            case "black":
-                return ContextCompat.getColor(context, R.color.color_background_black);
-            case "white":
-            default:
-                return ContextCompat.getColor(context, R.color.color_background_white);
+    // Helper method to get theme background color - SIMPLIFIED to light/dark only
+    private int getThemeBackgroundColor(Context context, boolean isDarkTheme) {
+        if (isDarkTheme) {
+            return ContextCompat.getColor(context, R.color.color_background_dark);
+        } else {
+            return ContextCompat.getColor(context, R.color.color_background_light);
         }
     }
 
@@ -93,35 +83,32 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         // LOAD THEME HERE - EVERY TIME!
         SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
-        String theme = prefs.getString("color_theme", "white");
+        String theme = prefs.getString("color_theme", "light");
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
 
         // Get theme background color
-        int themeBackgroundColor = getThemeBackgroundColor(context, theme);
+        int themeBackgroundColor = getThemeBackgroundColor(context, isDarkTheme);
 
         // Make product background DARKER (70% of original)
         int productBackgroundColor = darkenColor(themeBackgroundColor, 0.7f);
-
-        // Set product background
-        holder.itemLayout.setBackgroundColor(productBackgroundColor);
 
         // Check if this item is selected
         boolean isSelected = selectedPositions.contains(position);
 
         // Set selection overlay
         if (isSelected) {
-            // Selected state - highlight with semi-transparent overlay
-            holder.itemLayout.setBackgroundColor(Color.parseColor("#805A9DFF")); // Light blue with transparency
+            // Selected state - highlight with semi-transparent blue
+            holder.itemLayout.setBackgroundColor(Color.parseColor("#805A9DFF"));
         } else {
-            // Normal state - use theme background
+            // Normal state - use darkened theme background
             holder.itemLayout.setBackgroundColor(productBackgroundColor);
         }
 
         // Text colors based on theme
-        boolean isBlackTheme = theme.equals("black");
         int textColor;
         int secondaryTextColor;
 
-        if (isBlackTheme) {
+        if (isDarkTheme) {
             textColor = Color.WHITE;
             secondaryTextColor = Color.LTGRAY;
         } else {

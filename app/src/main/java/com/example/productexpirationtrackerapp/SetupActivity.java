@@ -2,6 +2,8 @@ package com.example.productexpirationtrackerapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -29,13 +31,13 @@ public class SetupActivity extends AppCompatActivity {
     private UserRepository userRepository;
 
     // Theme preview views
-    private CardView headerCard;  // CHANGED: Now referencing CardView instead of LinearLayout
+    private CardView headerCard;
     private LinearLayout headerLayout;
     private TextView titleTextView;
     private TextView subtitleTextView;
     private LinearLayout mainLayout;
 
-    // ADD THIS CONSTANT (must match MainActivity and ThemeUtils)
+    // Constants
     private static final String PREFS_NAME = "AppPrefs";
     private static final String PREF_SETUP_COMPLETED = "setup_completed";
 
@@ -62,7 +64,7 @@ public class SetupActivity extends AppCompatActivity {
         mainLayout = findViewById(R.id.mainLayout);
 
         // Initialize theme preview views
-        headerCard = findViewById(R.id.headerCard);  // NEW: Reference to CardView
+        headerCard = findViewById(R.id.headerCard);
         headerLayout = findViewById(R.id.headerLayout);
         titleTextView = findViewById(R.id.titleTextView);
         subtitleTextView = findViewById(R.id.subtitleTextView);
@@ -70,7 +72,7 @@ public class SetupActivity extends AppCompatActivity {
         // Load saved preferences
         loadSavedPreferences();
 
-        // FIX: Set up radio button selection (since RadioGroup doesn't work with wrapped RadioButtons)
+        // Set up radio button selection
         setupRadioButtonSelection();
 
         // Apply initial theme preview
@@ -101,16 +103,12 @@ public class SetupActivity extends AppCompatActivity {
         ThemeUtils.applyTheme(this);
     }
 
-    // FIX: Add this method to handle radio button single selection
+    // Handle radio button single selection
     private void setupRadioButtonSelection() {
-        // Get all radio buttons
+        // Get all radio buttons (only light and dark now)
         RadioButton[] radioButtons = {
-                findViewById(R.id.themeWhite),
-                findViewById(R.id.themeGreen),
-                findViewById(R.id.themeBlue),
-                findViewById(R.id.themePink),
-                findViewById(R.id.themePurple),
-                findViewById(R.id.themeBlack)
+                findViewById(R.id.themeLight),
+                findViewById(R.id.themeDark)
         };
 
         // Set click listener for each radio button
@@ -155,7 +153,7 @@ public class SetupActivity extends AppCompatActivity {
         } else {
             Log.d("SETUP", "No data in Room database, loading from SharedPreferences");
             // Fall back to SharedPreferences
-            String savedTheme = preferences.getString("color_theme", "white");
+            String savedTheme = preferences.getString("color_theme", "light");
             setThemeSelection(savedTheme);
 
             boolean notifications = preferences.getBoolean("notifications", true);
@@ -174,25 +172,10 @@ public class SetupActivity extends AppCompatActivity {
     private void setThemeSelection(String theme) {
         RadioButton selectedButton = null;
 
-        switch (theme) {
-            case "white":
-                selectedButton = findViewById(R.id.themeWhite);
-                break;
-            case "green":
-                selectedButton = findViewById(R.id.themeGreen);
-                break;
-            case "blue":
-                selectedButton = findViewById(R.id.themeBlue);
-                break;
-            case "pink":
-                selectedButton = findViewById(R.id.themePink);
-                break;
-            case "purple":
-                selectedButton = findViewById(R.id.themePurple);
-                break;
-            case "black":
-                selectedButton = findViewById(R.id.themeBlack);
-                break;
+        if (theme.equals("dark") || theme.equals("black")) {
+            selectedButton = findViewById(R.id.themeDark);
+        } else {
+            selectedButton = findViewById(R.id.themeLight);
         }
 
         if (selectedButton != null) {
@@ -201,93 +184,53 @@ public class SetupActivity extends AppCompatActivity {
     }
 
     private String getSelectedTheme() {
-        // FIX: Check each radio button directly since RadioGroup won't work with wrapped RadioButtons
-        RadioButton themeWhite = findViewById(R.id.themeWhite);
-        RadioButton themeGreen = findViewById(R.id.themeGreen);
-        RadioButton themeBlue = findViewById(R.id.themeBlue);
-        RadioButton themePink = findViewById(R.id.themePink);
-        RadioButton themePurple = findViewById(R.id.themePurple);
-        RadioButton themeBlack = findViewById(R.id.themeBlack);
+        RadioButton themeLight = findViewById(R.id.themeLight);
+        RadioButton themeDark = findViewById(R.id.themeDark);
 
-        if (themeWhite != null && themeWhite.isChecked()) {
-            return "white";
-        } else if (themeGreen != null && themeGreen.isChecked()) {
-            return "green";
-        } else if (themeBlue != null && themeBlue.isChecked()) {
-            return "blue";
-        } else if (themePink != null && themePink.isChecked()) {
-            return "pink";
-        } else if (themePurple != null && themePurple.isChecked()) {
-            return "purple";
-        } else if (themeBlack != null && themeBlack.isChecked()) {
-            return "black";
+        if (themeDark != null && themeDark.isChecked()) {
+            return "dark";
+        } else {
+            return "light"; // Default to light
         }
-
-        return "white"; // WHITE is now default
     }
 
     private void applyThemePreview(String theme) {
-        // Use ThemeUtils to get colors
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
+
         int primaryColor;
         int lightColor;
         int textColor;
         int backgroundColor;
 
-        switch (theme) {
-            case "green":
-                primaryColor = getResources().getColor(R.color.color_primary_green);
-                lightColor = getResources().getColor(R.color.color_primary_light_green);
-                textColor = getResources().getColor(R.color.color_text_green);
-                backgroundColor = getResources().getColor(R.color.color_background_green);
-                break;
-            case "blue":
-                primaryColor = getResources().getColor(R.color.color_primary_blue);
-                lightColor = getResources().getColor(R.color.color_primary_light_blue);
-                textColor = getResources().getColor(R.color.color_text_blue);
-                backgroundColor = getResources().getColor(R.color.color_background_blue);
-                break;
-            case "pink":
-                primaryColor = getResources().getColor(R.color.color_primary_pink);
-                lightColor = getResources().getColor(R.color.color_primary_light_pink);
-                textColor = getResources().getColor(R.color.color_text_pink);
-                backgroundColor = getResources().getColor(R.color.color_background_pink);
-                break;
-            case "purple":
-                primaryColor = getResources().getColor(R.color.color_primary_purple);
-                lightColor = getResources().getColor(R.color.color_primary_light_purple);
-                textColor = getResources().getColor(R.color.color_text_purple);
-                backgroundColor = getResources().getColor(R.color.color_background_purple);
-                break;
-            case "black":
-                primaryColor = getResources().getColor(R.color.color_primary_black);
-                lightColor = getResources().getColor(R.color.color_primary_light_black);
-                textColor = getResources().getColor(R.color.color_text_black);
-                backgroundColor = getResources().getColor(R.color.color_background_black);
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+            lightColor = ContextCompat.getColor(this, R.color.color_primary_light_black);
+            textColor = ContextCompat.getColor(this, R.color.color_text_dark);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_dark);
 
-                // Safety check: Ensure text is light enough for dark background
-                float[] hsv = new float[3];
-                Color.colorToHSV(textColor, hsv);
-                float brightness = hsv[2];
+            // Ensure text is light enough for dark background
+            float[] hsv = new float[3];
+            Color.colorToHSV(textColor, hsv);
+            float brightness = hsv[2];
 
-                if (brightness < 0.5f) {
-                    textColor = Color.LTGRAY;
-                }
-                break;
-            case "white":
-            default:
-                primaryColor = getResources().getColor(R.color.color_primary_white);
-                lightColor = getResources().getColor(R.color.color_primary_light);
-                textColor = getResources().getColor(R.color.color_text_white);
-                backgroundColor = getResources().getColor(R.color.color_background_white);
-                break;
+            if (brightness < 0.5f) {
+                textColor = Color.LTGRAY;
+            }
+        } else {
+            // Light theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            lightColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            textColor = ContextCompat.getColor(this, R.color.color_text_light);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_light);
         }
 
-        // CHANGED: Apply colors to CardView instead of inner LinearLayout
+        // Apply colors to CardView
         if (headerCard != null) {
             headerCard.setCardBackgroundColor(lightColor);
         }
 
-        // ADDED: Apply colors to ALL CardViews for complete theme consistency
+        // Apply colors to ALL CardViews
         CardView nameCard = findViewById(R.id.nameCard);
         CardView themeCard = findViewById(R.id.themeCard);
         CardView notificationCard = findViewById(R.id.notificationCard);
@@ -314,18 +257,14 @@ public class SetupActivity extends AppCompatActivity {
         finishButton.setTextColor(Color.WHITE);
 
         // Change radio button text colors dynamically
-        updateRadioButtonColors(theme, textColor);
+        updateRadioButtonColors(isDarkTheme, textColor);
     }
 
-    private void updateRadioButtonColors(String theme, int textColor) {
+    private void updateRadioButtonColors(boolean isDarkTheme, int textColor) {
         // Get all radio buttons and update their text color
         RadioButton[] radioButtons = {
-                findViewById(R.id.themeWhite),
-                findViewById(R.id.themeGreen),
-                findViewById(R.id.themeBlue),
-                findViewById(R.id.themePink),
-                findViewById(R.id.themePurple),
-                findViewById(R.id.themeBlack)
+                findViewById(R.id.themeLight),
+                findViewById(R.id.themeDark)
         };
 
         for (RadioButton rb : radioButtons) {
@@ -336,22 +275,18 @@ public class SetupActivity extends AppCompatActivity {
 
         // Get all option layout containers
         LinearLayout[] optionLayouts = {
-                findViewById(R.id.optionWhiteLayout),
-                findViewById(R.id.optionGreenLayout),
-                findViewById(R.id.optionBlueLayout),
-                findViewById(R.id.optionPinkLayout),
-                findViewById(R.id.optionPurpleLayout),
-                findViewById(R.id.optionBlackLayout)
+                findViewById(R.id.optionLightLayout),
+                findViewById(R.id.optionDarkLayout)
         };
 
         // Update the LinearLayout backgrounds based on theme
         for (LinearLayout layout : optionLayouts) {
             if (layout != null) {
-                if (theme.equals("black")) {
-                    // For black theme, use a dark background
-                    layout.setBackgroundColor(Color.parseColor("#2D2D2D")); // Dark gray
+                if (isDarkTheme) {
+                    // For dark theme, use a dark background
+                    layout.setBackgroundColor(Color.parseColor("#2D2D2D"));
                 } else {
-                    // For light themes, use the original drawable
+                    // For light theme, use the original drawable
                     layout.setBackgroundResource(R.drawable.theme_option_background);
                 }
             }
@@ -390,11 +325,11 @@ public class SetupActivity extends AppCompatActivity {
         Log.d("SETUP", "🔵 SAVING to Room database: Name=" + userName +
                 ", Theme=" + selectedTheme + ", Notifications=" + notifications);
 
-        // ✅ CREATE USER OBJECT
+        // CREATE USER OBJECT
         User user = new User(userName, selectedTheme, notifications);
         Log.d("SETUP", "🟡 User object created with theme: " + user.getColorTheme());
 
-        // ✅ USE CALLBACK with lambda
+        // USE CALLBACK with lambda
         userRepository.insertOrUpdate(user, success -> {
             runOnUiThread(() -> {
                 if (success) {
@@ -413,14 +348,16 @@ public class SetupActivity extends AppCompatActivity {
                     editor.apply();
 
                     Toast.makeText(SetupActivity.this, "Settings saved to database!", Toast.LENGTH_SHORT).show();
-                    Toast.makeText(SetupActivity.this, getThemeName(selectedTheme) + " theme selected", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SetupActivity.this, (selectedTheme.equals("dark") ? "Dark" : "Light") + " theme selected", Toast.LENGTH_SHORT).show();
                 } else {
                     Log.e("SETUP", "❌ Database operation failed");
                     Toast.makeText(SetupActivity.this, "Error saving to database", Toast.LENGTH_SHORT).show();
                 }
             });
         });
-    }    private void debugDatabase() {
+    }
+
+    private void debugDatabase() {
         StringBuilder debugInfo = new StringBuilder();
 
         debugInfo.append("📊 ROOM DATABASE DEBUG\n\n");
@@ -453,18 +390,6 @@ public class SetupActivity extends AppCompatActivity {
                 .setMessage(debugInfo.toString())
                 .setPositiveButton("OK", null)
                 .show();
-    }
-
-    private String getThemeName(String theme) {
-        switch (theme) {
-            case "white": return "Light";
-            case "green": return "Green";
-            case "blue": return "Blue";
-            case "pink": return "Pink";
-            case "purple": return "Purple";
-            case "black": return "Dark";
-            default: return "Light";
-        }
     }
 
     private void completeSetup() {

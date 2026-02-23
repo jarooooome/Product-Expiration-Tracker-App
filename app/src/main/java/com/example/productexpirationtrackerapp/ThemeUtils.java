@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.graphics.Color;
+
+import androidx.core.content.ContextCompat;
 
 public class ThemeUtils {
 
@@ -14,7 +15,7 @@ public class ThemeUtils {
 
     public static String getCurrentTheme(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(PREF_THEME, "white");
+        return prefs.getString(PREF_THEME, "light");
     }
 
     public static void applyTheme(Activity activity) {
@@ -23,6 +24,8 @@ public class ThemeUtils {
     }
 
     public static void applyTheme(Activity activity, String theme) {
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
+
         int primaryColor;
         int lightColor;
         int textColor;
@@ -31,62 +34,24 @@ public class ThemeUtils {
         int navBackgroundColor;
         int navInactiveColor;
 
-        switch (theme) {
-            case "green":
-                primaryColor = activity.getResources().getColor(R.color.color_primary_green);
-                lightColor = activity.getResources().getColor(R.color.color_primary_light_green);
-                textColor = activity.getResources().getColor(R.color.color_text_green);
-                fabBackgroundColor = activity.getResources().getColor(R.color.color_fab_green);
-                fabIconColor = activity.getResources().getColor(R.color.color_fab_icon_green);
-                navBackgroundColor = activity.getResources().getColor(R.color.color_nav_background_green);
-                navInactiveColor = activity.getResources().getColor(R.color.color_nav_inactive_green);
-                break;
-            case "blue":
-                primaryColor = activity.getResources().getColor(R.color.color_primary_blue);
-                lightColor = activity.getResources().getColor(R.color.color_primary_light_blue);
-                textColor = activity.getResources().getColor(R.color.color_text_blue);
-                fabBackgroundColor = activity.getResources().getColor(R.color.color_fab_blue);
-                fabIconColor = activity.getResources().getColor(R.color.color_fab_icon_blue);
-                navBackgroundColor = activity.getResources().getColor(R.color.color_nav_background_blue);
-                navInactiveColor = activity.getResources().getColor(R.color.color_nav_inactive_blue);
-                break;
-            case "pink":
-                primaryColor = activity.getResources().getColor(R.color.color_primary_pink);
-                lightColor = activity.getResources().getColor(R.color.color_primary_light_pink);
-                textColor = activity.getResources().getColor(R.color.color_text_pink);
-                fabBackgroundColor = activity.getResources().getColor(R.color.color_fab_pink);
-                fabIconColor = activity.getResources().getColor(R.color.color_fab_icon_pink);
-                navBackgroundColor = activity.getResources().getColor(R.color.color_nav_background_pink);
-                navInactiveColor = activity.getResources().getColor(R.color.color_nav_inactive_pink);
-                break;
-            case "purple":
-                primaryColor = activity.getResources().getColor(R.color.color_primary_purple);
-                lightColor = activity.getResources().getColor(R.color.color_primary_light_purple);
-                textColor = activity.getResources().getColor(R.color.color_text_purple);
-                fabBackgroundColor = activity.getResources().getColor(R.color.color_fab_purple);
-                fabIconColor = activity.getResources().getColor(R.color.color_fab_icon_purple);
-                navBackgroundColor = activity.getResources().getColor(R.color.color_nav_background_purple);
-                navInactiveColor = activity.getResources().getColor(R.color.color_nav_inactive_purple);
-                break;
-            case "black":
-                primaryColor = activity.getResources().getColor(R.color.color_primary_black);
-                lightColor = activity.getResources().getColor(R.color.color_primary_light_black);
-                textColor = activity.getResources().getColor(R.color.color_text_black);
-                fabBackgroundColor = activity.getResources().getColor(R.color.color_fab_black);
-                fabIconColor = activity.getResources().getColor(R.color.color_fab_icon_black);
-                navBackgroundColor = activity.getResources().getColor(R.color.color_nav_background_black);
-                navInactiveColor = activity.getResources().getColor(R.color.color_nav_inactive_black);
-                break;
-            case "white":
-            default:
-                primaryColor = activity.getResources().getColor(R.color.color_primary_white);
-                lightColor = activity.getResources().getColor(R.color.color_primary_light);
-                textColor = activity.getResources().getColor(R.color.color_text_white);
-                fabBackgroundColor = activity.getResources().getColor(R.color.color_fab_white);
-                fabIconColor = activity.getResources().getColor(R.color.color_fab_icon_white);
-                navBackgroundColor = activity.getResources().getColor(R.color.color_nav_background_white);
-                navInactiveColor = activity.getResources().getColor(R.color.color_nav_inactive_white);
-                break;
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(activity, R.color.color_primary_dark);
+            lightColor = ContextCompat.getColor(activity, R.color.color_primary_light_black);
+            textColor = ContextCompat.getColor(activity, R.color.color_text_dark);
+            fabBackgroundColor = ContextCompat.getColor(activity, R.color.color_fab_dark);
+            fabIconColor = ContextCompat.getColor(activity, R.color.color_fab_icon_dark);
+            navBackgroundColor = ContextCompat.getColor(activity, R.color.color_primary_dark);
+            navInactiveColor = Color.parseColor("#757575");
+        } else {
+            // Light theme colors
+            primaryColor = ContextCompat.getColor(activity, R.color.color_primary_light);
+            lightColor = ContextCompat.getColor(activity, R.color.color_background_light);
+            textColor = ContextCompat.getColor(activity, R.color.color_text_light);
+            fabBackgroundColor = ContextCompat.getColor(activity, R.color.color_fab_light);
+            fabIconColor = ContextCompat.getColor(activity, R.color.color_fab_icon_light);
+            navBackgroundColor = ContextCompat.getColor(activity, R.color.color_primary_light);
+            navInactiveColor = Color.parseColor("#757575");
         }
 
         // Apply background to the main layout
@@ -100,6 +65,7 @@ public class ThemeUtils {
         editor.putInt("fab_icon_color", fabIconColor);
         editor.putInt("nav_background_color", navBackgroundColor);
         editor.putInt("nav_inactive_color", navInactiveColor);
+        editor.putString(PREF_THEME, theme);
         editor.apply();
     }
 }
