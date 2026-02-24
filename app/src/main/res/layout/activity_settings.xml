@@ -5,6 +5,7 @@
     android:layout_height="match_parent">
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bottomNavigation"
@@ -12,12 +13,14 @@
         android:padding="20dp">
 
         <LinearLayout
+            android:id="@+id/mainLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <!-- Header -->
             <TextView
+                android:id="@+id/settingsTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="⚙️ Settings"
@@ -25,6 +28,7 @@
                 android:textStyle="bold"
                 android:gravity="center"
                 android:layout_marginBottom="32dp" />
+            <!-- REMOVED: android:textColor - will be set in Java -->
 
             <!-- Reminder Frequency Card -->
             <androidx.cardview.widget.CardView
@@ -41,20 +45,23 @@
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/frequencyLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Reminder Frequency"
+                        android:text="⏰ Reminder Frequency"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp" />
+                    <!-- REMOVED: android:textColor -->
 
                     <TextView
+                        android:id="@+id/frequencyDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="How many days before expiry should we notify you?"
                         android:textSize="14sp"
-                        android:textColor="#666666"
                         android:layout_marginBottom="16dp" />
+                    <!-- REMOVED: android:textColor="#666666" -->
 
                     <TextView
                         android:id="@+id/frequencyValueText"
@@ -65,6 +72,7 @@
                         android:textStyle="bold"
                         android:gravity="center"
                         android:layout_marginBottom="16dp" />
+                    <!-- REMOVED: android:textColor -->
 
                     <SeekBar
                         android:id="@+id/reminderFrequencySeekBar"
@@ -72,8 +80,8 @@
                         android:layout_height="wrap_content"
                         android:max="30"
                         android:progress="3"
-                        android:progressTint="@color/color_primary_blue"
-                        android:thumbTint="@color/color_primary_blue" />
+                        android:progressTint="@color/color_primary_light"
+                        android:thumbTint="@color/color_primary_light" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -82,28 +90,31 @@
                         android:layout_marginTop="8dp">
 
                         <TextView
+                            android:id="@+id/sameDayText"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Same day"
-                            android:textSize="12sp"
-                            android:textColor="#999999" />
+                            android:textSize="12sp" />
+                        <!-- REMOVED: android:textColor="#999999" -->
 
                         <TextView
+                            android:id="@+id/fifteenDaysText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="15 days"
-                            android:textSize="12sp"
-                            android:textColor="#999999" />
+                            android:textSize="12sp" />
+                        <!-- REMOVED: android:textColor="#999999" -->
 
                         <TextView
+                            android:id="@+id/thirtyDaysText"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="30 days"
                             android:textSize="12sp"
-                            android:textColor="#999999"
                             android:gravity="right" />
+                        <!-- REMOVED: android:textColor="#999999" -->
                     </LinearLayout>
 
                 </LinearLayout>
@@ -124,12 +135,14 @@
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/vibrationLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Vibration Pattern"
+                        android:text="📳 Vibration Pattern"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
+                    <!-- REMOVED: android:textColor -->
 
                     <RadioGroup
                         android:id="@+id/vibrationRadioGroup"
@@ -145,6 +158,7 @@
                             android:textSize="16sp"
                             android:checked="true"
                             android:paddingVertical="8dp" />
+                        <!-- REMOVED: android:textColor -->
 
                         <RadioButton
                             android:id="@+id/vibration_short"
@@ -153,6 +167,7 @@
                             android:text="Short pulse"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
+                        <!-- REMOVED: android:textColor -->
 
                         <RadioButton
                             android:id="@+id/vibration_long"
@@ -161,6 +176,7 @@
                             android:text="Long pulse"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
+                        <!-- REMOVED: android:textColor -->
 
                         <RadioButton
                             android:id="@+id/vibration_none"
@@ -169,21 +185,23 @@
                             android:text="No vibration"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
+                        <!-- REMOVED: android:textColor -->
 
                     </RadioGroup>
 
                     <TextView
+                        android:id="@+id/vibrationDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Choose how your device vibrates when you receive expiry notifications"
                         android:textSize="12sp"
-                        android:textColor="#666666"
                         android:layout_marginTop="12dp" />
+                    <!-- REMOVED: android:textColor="#666666" -->
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Theme Selection Card - ADD THIS -->
+            <!-- Theme Selection Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -198,12 +216,14 @@
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/themeLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="App Theme"
+                        android:text="🎨 App Theme"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
+                    <!-- REMOVED: android:textColor -->
 
                     <RadioGroup
                         android:id="@+id/themeRadioGroup"
@@ -212,63 +232,34 @@
                         android:orientation="vertical">
 
                         <RadioButton
-                            android:id="@+id/theme_white"
+                            android:id="@+id/theme_light"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="White"
+                            android:text="Light Theme"
                             android:textSize="16sp"
                             android:checked="true"
                             android:paddingVertical="8dp" />
+                        <!-- REMOVED: android:textColor -->
 
                         <RadioButton
-                            android:id="@+id/theme_green"
+                            android:id="@+id/theme_dark"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Green"
+                            android:text="Dark Theme"
                             android:textSize="16sp"
                             android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_blue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Blue"
-                            android:textSize="16sp"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_pink"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Pink"
-                            android:textSize="16sp"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_purple"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Purple"
-                            android:textSize="16sp"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_black"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Black"
-                            android:textSize="16sp"
-                            android:paddingVertical="8dp" />
+                        <!-- REMOVED: android:textColor -->
 
                     </RadioGroup>
 
                     <TextView
+                        android:id="@+id/themeDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Choose your preferred app color theme"
                         android:textSize="12sp"
-                        android:textColor="#666666"
                         android:layout_marginTop="12dp" />
+                    <!-- REMOVED: android:textColor="#666666" -->
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -288,30 +279,34 @@
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/notificationLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Notification Time"
+                        android:text="⏰ Notification Time"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp" />
+                    <!-- REMOVED: android:textColor -->
 
                     <TextView
+                        android:id="@+id/notificationDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="What time should we notify you?"
                         android:textSize="14sp"
-                        android:textColor="#666666"
                         android:layout_marginBottom="16dp" />
+                    <!-- REMOVED: android:textColor="#666666" -->
 
                     <TextView
                         android:id="@+id/notificationTimeText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="9:00 AM"
+                        android:text="⏰ 9:00 AM"
                         android:textSize="24sp"
                         android:textStyle="bold"
                         android:gravity="center"
                         android:layout_marginBottom="16dp" />
+                    <!-- REMOVED: android:textColor -->
 
                     <Button
                         android:id="@+id/notificationTimeButton"
@@ -320,7 +315,7 @@
                         android:text="Change Time"
                         android:textSize="16sp"
                         android:textColor="#FFFFFF"
-                        android:backgroundTint="@color/color_primary_blue" />
+                        android:backgroundTint="@color/color_primary_light" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -342,8 +337,8 @@
                     android:text="Cancel"
                     android:textSize="16sp"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="#757575"
                     android:layout_marginEnd="8dp" />
+                <!-- REMOVED: android:backgroundTint="#757575" - will be set in Java -->
 
                 <Button
                     android:id="@+id/saveButton"
@@ -353,20 +348,21 @@
                     android:text="Save Settings"
                     android:textSize="16sp"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="@color/color_primary_blue"
                     android:layout_marginStart="8dp" />
+                <!-- REMOVED: android:backgroundTint="@color/color_primary_light" - will be set in Java -->
 
             </LinearLayout>
 
             <!-- Version Info -->
             <TextView
+                android:id="@+id/versionText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Version 1.0.0"
                 android:textSize="12sp"
-                android:textColor="#999999"
                 android:gravity="center"
                 android:layout_marginBottom="20dp" />
+            <!-- REMOVED: android:textColor="#999999" -->
 
         </LinearLayout>
     </ScrollView>
@@ -378,9 +374,8 @@
         android:layout_height="70dp"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:background="@drawable/bottom_nav_gradient"
-        android:elevation="12dp"
         android:paddingVertical="8dp">
+        <!-- REMOVED: android:background="@drawable/bottom_nav_gradient" - will be set in Java -->
 
         <!-- Profile Button -->
         <LinearLayout
@@ -398,8 +393,8 @@
                 android:id="@+id/navProfileIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="#FFFFFF" />
+                android:src="@android:drawable/ic_menu_myplaces" />
+            <!-- REMOVED: app:tint="#FFFFFF" - will be set in Java -->
 
             <TextView
                 android:id="@+id/navProfileText"
@@ -407,18 +402,18 @@
                 android:layout_height="wrap_content"
                 android:text="Profile"
                 android:textSize="12sp"
-                android:textColor="#FFFFFF"
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
+            <!-- REMOVED: android:textColor="#FFFFFF" - will be set in Java -->
 
             <View
                 android:id="@+id/navProfileIndicator"
                 android:layout_width="30dp"
                 android:layout_height="3dp"
-                android:background="#FFFFFF"
                 android:layout_marginTop="4dp"
                 android:alpha="0.8"
                 android:visibility="gone" />
+            <!-- REMOVED: android:background="#FFFFFF" - will be set in Java -->
         </LinearLayout>
 
         <!-- Products Button -->
@@ -437,8 +432,8 @@
                 android:id="@+id/navProductsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_view"
-                app:tint="#FFFFFF" />
+                android:src="@android:drawable/ic_menu_view" />
+            <!-- REMOVED: app:tint="#FFFFFF" - will be set in Java -->
 
             <TextView
                 android:id="@+id/navProductsText"
@@ -446,18 +441,18 @@
                 android:layout_height="wrap_content"
                 android:text="Products"
                 android:textSize="12sp"
-                android:textColor="#FFFFFF"
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
+            <!-- REMOVED: android:textColor="#FFFFFF" - will be set in Java -->
 
             <View
                 android:id="@+id/navProductsIndicator"
                 android:layout_width="30dp"
                 android:layout_height="3dp"
-                android:background="#FFFFFF"
                 android:layout_marginTop="4dp"
                 android:alpha="0.8"
                 android:visibility="gone" />
+            <!-- REMOVED: android:background="#FFFFFF" - will be set in Java -->
         </LinearLayout>
 
         <!-- Settings Button (Active) -->
@@ -476,8 +471,8 @@
                 android:id="@+id/navSettingsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_preferences"
-                app:tint="#FFFFFF" />
+                android:src="@android:drawable/ic_menu_preferences" />
+            <!-- REMOVED: app:tint="#FFFFFF" - will be set in Java -->
 
             <TextView
                 android:id="@+id/navSettingsText"
@@ -485,18 +480,18 @@
                 android:layout_height="wrap_content"
                 android:text="Settings"
                 android:textSize="12sp"
-                android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:layout_marginTop="4dp"
                 android:letterSpacing="0.05" />
+            <!-- REMOVED: android:textColor="#FFFFFF" - will be set in Java -->
 
             <View
                 android:id="@+id/navSettingsIndicator"
                 android:layout_width="30dp"
                 android:layout_height="3dp"
-                android:background="#FFFFFF"
                 android:layout_marginTop="4dp"
                 android:alpha="0.8" />
+            <!-- REMOVED: android:background="#FFFFFF" - will be set in Java -->
         </LinearLayout>
     </LinearLayout>
 

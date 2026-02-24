@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -35,16 +36,19 @@ public class CategoryDetailActivity extends AppCompatActivity {
     private TextView expiringSoonCount;
     private TextView expiredCount;
     private TextView safeCount;
+    private TextView backButton;
+    private LinearLayout mainLayout;
+    private LinearLayout headerLayout;
 
-    // Filter Buttons - UPDATED: changed filterUrgent to filterExpired
+    // Filter Buttons
     private Button filterAll;
     private Button filterSafe;
     private Button filterSoon;
-    private Button filterExpired;  // CHANGED from filterUrgent
+    private Button filterExpired;
     private View filterAllIndicator;
     private View filterSafeIndicator;
     private View filterSoonIndicator;
-    private View filterExpiredIndicator;  // CHANGED from filterUrgentIndicator
+    private View filterExpiredIndicator;
 
     // View Toggle Icons
     private ImageView listViewButton;
@@ -75,7 +79,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
     private String categoryName;
     private String categoryCount;
     private ProductViewModel productViewModel;
-    private SharedPreferences preferences;
+    private UserRepository userRepository;
 
     // Current filter
     private String currentFilter = "All";
@@ -92,8 +96,8 @@ public class CategoryDetailActivity extends AppCompatActivity {
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
-        // Initialize preferences
-        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        // Initialize UserRepository for theme
+        userRepository = new UserRepository(getApplication());
 
         // Initialize views
         initializeViews();
@@ -111,7 +115,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
         setupRecyclerView();
 
         // Apply theme
-        applyTheme();
+        applyThemeFromDatabase();
 
         // Load category products
         loadCategoryProducts();
@@ -119,7 +123,18 @@ public class CategoryDetailActivity extends AppCompatActivity {
         Log.d(TAG, "CategoryDetailActivity created for: " + categoryName);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reapply theme when returning
+        applyThemeFromDatabase();
+    }
+
     private void initializeViews() {
+        mainLayout = findViewById(R.id.mainLayout);
+        headerLayout = findViewById(R.id.headerLayout);
+        backButton = findViewById(R.id.backButton);
+
         // Header
         categoryTitle = findViewById(R.id.categoryTitle);
         categoryItemCount = findViewById(R.id.categoryItemCount);
@@ -136,20 +151,19 @@ public class CategoryDetailActivity extends AppCompatActivity {
         }
 
         // Back button click listener
-        TextView backButton = findViewById(R.id.backButton);
         if (backButton != null) {
             backButton.setOnClickListener(v -> finish());
         }
 
-        // Filter Buttons - UPDATED: changed filterUrgent to filterExpired
+        // Filter Buttons
         filterAll = findViewById(R.id.filterAll);
         filterSafe = findViewById(R.id.filterSafe);
         filterSoon = findViewById(R.id.filterSoon);
-        filterExpired = findViewById(R.id.filterExpired);  // CHANGED
+        filterExpired = findViewById(R.id.filterExpired);
         filterAllIndicator = findViewById(R.id.filterAllIndicator);
         filterSafeIndicator = findViewById(R.id.filterSafeIndicator);
         filterSoonIndicator = findViewById(R.id.filterSoonIndicator);
-        filterExpiredIndicator = findViewById(R.id.filterExpiredIndicator);  // CHANGED
+        filterExpiredIndicator = findViewById(R.id.filterExpiredIndicator);
 
         // View Toggle Icons
         listViewButton = findViewById(R.id.listViewButton);
@@ -176,60 +190,214 @@ public class CategoryDetailActivity extends AppCompatActivity {
         navSettingsIndicator = findViewById(R.id.navSettingsIndicator);
     }
 
-    private void setupFilterButtons() {
-        // Set All as active by default
-        setActiveFilter(filterAll, filterAllIndicator);
+    // ========== THEME METHODS ==========
 
-        filterAll.setOnClickListener(v -> {
-            setActiveFilter(filterAll, filterAllIndicator);
-            currentFilter = "All";
-            applyFilter();
-        });
+    private void applyThemeFromDatabase() {
+        User user = userRepository.getUserSync();
 
-        filterSafe.setOnClickListener(v -> {
-            setActiveFilter(filterSafe, filterSafeIndicator);
-            currentFilter = "Safe";
-            applyFilter();
-        });
-
-        filterSoon.setOnClickListener(v -> {
-            setActiveFilter(filterSoon, filterSoonIndicator);
-            currentFilter = "Soon";
-            applyFilter();
-        });
-
-        // UPDATED: Changed from filterUrgent to filterExpired
-        filterExpired.setOnClickListener(v -> {
-            setActiveFilter(filterExpired, filterExpiredIndicator);
-            currentFilter = "Expired";  // CHANGED from "Urgent"
-            applyFilter();
-        });
-    }
-
-    private void setActiveFilter(Button activeButton, View activeIndicator) {
-        // Reset all - UPDATED: changed filterUrgent to filterExpired
-        resetFilterButton(filterAll, filterAllIndicator);
-        resetFilterButton(filterSafe, filterSafeIndicator);
-        resetFilterButton(filterSoon, filterSoonIndicator);
-        resetFilterButton(filterExpired, filterExpiredIndicator);  // CHANGED
-
-        // Set active
-        if (activeButton != null) {
-            activeButton.setTextColor(Color.parseColor("#4361EE"));
-            activeButton.setTypeface(null, android.graphics.Typeface.BOLD);
-        }
-        if (activeIndicator != null) {
-            activeIndicator.setVisibility(View.VISIBLE);
+        if (user != null) {
+            String theme = user.getColorTheme();
+            applyThemeColors(theme);
+        } else {
+            SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+            String theme = prefs.getString("color_theme", "light");
+            applyThemeColors(theme);
         }
     }
 
-    private void resetFilterButton(Button button, View indicator) {
+    private void applyThemeColors(String theme) {
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
+
+        int primaryColor;
+        int backgroundColor;
+        int textColor;
+        int accentColor;
+
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_dark);
+            textColor = ContextCompat.getColor(this, R.color.color_text_dark);
+            accentColor = Color.parseColor("#64B5F6"); // Light blue for active filter
+        } else {
+            // Light theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_light);
+            textColor = ContextCompat.getColor(this, R.color.color_text_light);
+            accentColor = Color.parseColor("#4361EE"); // Original blue for active filter
+        }
+
+        // Apply background to main layout
+        if (mainLayout != null) {
+            mainLayout.setBackgroundColor(backgroundColor);
+        }
+
+        // Apply header background
+        if (headerLayout != null) {
+            headerLayout.setBackgroundColor(primaryColor);
+        }
+
+        // Set text colors for header
+        if (categoryTitle != null) categoryTitle.setTextColor(textColor);
+        if (categoryItemCount != null) categoryItemCount.setTextColor(textColor);
+        if (backButton != null) backButton.setTextColor(textColor);
+
+        // Set count text colors
+        if (safeCount != null) safeCount.setTextColor(textColor);
+        if (expiringSoonCount != null) expiringSoonCount.setTextColor(textColor);
+        if (expiredCount != null) expiredCount.setTextColor(textColor);
+
+        // Update filter button colors
+        updateFilterButtonColors(isDarkTheme, accentColor);
+
+        // Update view toggle icon colors
+        updateViewToggleColors(isDarkTheme, accentColor);
+
+        // Apply to bottom navigation
+        LinearLayout bottomNavigation = findViewById(R.id.bottomNavigation);
+        if (bottomNavigation != null) {
+            bottomNavigation.setBackgroundColor(primaryColor);
+        }
+
+        // Bottom navigation icons and text colors
+        int navIconColor = Color.WHITE; // Bottom nav icons are always white
+
+        if (navProfileIcon != null) navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
+        if (navProductsIcon != null) navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
+        if (navSettingsIcon != null) navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
+
+        if (navProfileText != null) navProfileText.setTextColor(navIconColor);
+        if (navProductsText != null) navProductsText.setTextColor(navIconColor);
+        if (navSettingsText != null) navSettingsText.setTextColor(navIconColor);
+
+        if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(navIconColor);
+        if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(navIconColor);
+        if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(navIconColor);
+
+        // Reapply active filter to update its color
+        setActiveFilter(currentFilter);
+    }
+
+    private void updateFilterButtonColors(boolean isDarkTheme, int accentColor) {
+        // Reset filter button colors
+        resetFilterButton(filterAll, filterAllIndicator, isDarkTheme);
+        resetFilterButton(filterSafe, filterSafeIndicator, isDarkTheme);
+        resetFilterButton(filterSoon, filterSoonIndicator, isDarkTheme);
+        resetFilterButton(filterExpired, filterExpiredIndicator, isDarkTheme);
+
+        // Reapply active filter
+        setActiveFilter(currentFilter);
+    }
+
+    private void resetFilterButton(Button button, View indicator, boolean isDarkTheme) {
         if (button != null) {
-            button.setTextColor(Color.parseColor("#999999"));
+            if (isDarkTheme) {
+                button.setTextColor(Color.LTGRAY);
+            } else {
+                button.setTextColor(Color.parseColor("#999999"));
+            }
             button.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
         if (indicator != null) {
             indicator.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateViewToggleColors(boolean isDarkTheme, int accentColor) {
+        if (listViewButton != null) {
+            if (isListView) {
+                listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(accentColor));
+                if (gridViewButton != null) {
+                    gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(isDarkTheme ? Color.LTGRAY : Color.parseColor("#999999")));
+                }
+            } else {
+                if (gridViewButton != null) {
+                    gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(accentColor));
+                }
+                listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(isDarkTheme ? Color.LTGRAY : Color.parseColor("#999999")));
+            }
+        }
+    }
+
+    private void setupFilterButtons() {
+        // Set All as active by default
+        setActiveFilter("All");
+
+        filterAll.setOnClickListener(v -> {
+            currentFilter = "All";
+            setActiveFilter("All");
+            applyFilter();
+        });
+
+        filterSafe.setOnClickListener(v -> {
+            currentFilter = "Safe";
+            setActiveFilter("Safe");
+            applyFilter();
+        });
+
+        filterSoon.setOnClickListener(v -> {
+            currentFilter = "Soon";
+            setActiveFilter("Soon");
+            applyFilter();
+        });
+
+        filterExpired.setOnClickListener(v -> {
+            currentFilter = "Expired";
+            setActiveFilter("Expired");
+            applyFilter();
+        });
+    }
+
+    private void setActiveFilter(String filter) {
+        // Get current theme
+        boolean isDarkTheme = false;
+        User user = userRepository.getUserSync();
+        if (user != null) {
+            isDarkTheme = user.getColorTheme().equals("dark") || user.getColorTheme().equals("black");
+        }
+
+        int activeColor;
+        if (isDarkTheme) {
+            activeColor = Color.parseColor("#64B5F6"); // Light blue for dark theme
+        } else {
+            activeColor = Color.parseColor("#4361EE"); // Original blue for light theme
+        }
+
+        // Reset all filters
+        resetFilterButton(filterAll, filterAllIndicator, isDarkTheme);
+        resetFilterButton(filterSafe, filterSafeIndicator, isDarkTheme);
+        resetFilterButton(filterSoon, filterSoonIndicator, isDarkTheme);
+        resetFilterButton(filterExpired, filterExpiredIndicator, isDarkTheme);
+
+        // Set active filter based on filter name
+        Button activeButton = null;
+        View activeIndicator = null;
+
+        switch (filter) {
+            case "All":
+                activeButton = filterAll;
+                activeIndicator = filterAllIndicator;
+                break;
+            case "Safe":
+                activeButton = filterSafe;
+                activeIndicator = filterSafeIndicator;
+                break;
+            case "Soon":
+                activeButton = filterSoon;
+                activeIndicator = filterSoonIndicator;
+                break;
+            case "Expired":
+                activeButton = filterExpired;
+                activeIndicator = filterExpiredIndicator;
+                break;
+        }
+
+        if (activeButton != null) {
+            activeButton.setTextColor(activeColor);
+            activeButton.setTypeface(null, android.graphics.Typeface.BOLD);
+        }
+        if (activeIndicator != null) {
+            activeIndicator.setVisibility(View.VISIBLE);
         }
     }
 
@@ -239,9 +407,18 @@ public class CategoryDetailActivity extends AppCompatActivity {
             listViewButton.setOnClickListener(v -> {
                 if (!isListView) {
                     isListView = true;
+                    // Get current theme for icon color
+                    boolean isDarkTheme = false;
+                    User user = userRepository.getUserSync();
+                    if (user != null) {
+                        isDarkTheme = user.getColorTheme().equals("dark") || user.getColorTheme().equals("black");
+                    }
+                    int accentColor = isDarkTheme ? Color.parseColor("#64B5F6") : Color.parseColor("#4361EE");
+
                     // Update icon colors
-                    listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#4361EE")));
-                    gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#999999")));
+                    listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(accentColor));
+                    gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(isDarkTheme ? Color.LTGRAY : Color.parseColor("#999999")));
+
                     // Change layout manager to LinearLayout (list)
                     LinearLayoutManager layoutManager = new LinearLayoutManager(CategoryDetailActivity.this);
                     productsRecyclerView.setLayoutManager(layoutManager);
@@ -254,9 +431,18 @@ public class CategoryDetailActivity extends AppCompatActivity {
             gridViewButton.setOnClickListener(v -> {
                 if (isListView) {
                     isListView = false;
+                    // Get current theme for icon color
+                    boolean isDarkTheme = false;
+                    User user = userRepository.getUserSync();
+                    if (user != null) {
+                        isDarkTheme = user.getColorTheme().equals("dark") || user.getColorTheme().equals("black");
+                    }
+                    int accentColor = isDarkTheme ? Color.parseColor("#64B5F6") : Color.parseColor("#4361EE");
+
                     // Update icon colors
-                    gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#4361EE")));
-                    listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#999999")));
+                    gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(accentColor));
+                    listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(isDarkTheme ? Color.LTGRAY : Color.parseColor("#999999")));
+
                     // Change layout manager to GridLayout (2 columns)
                     GridLayoutManager gridLayoutManager = new GridLayoutManager(CategoryDetailActivity.this, 2);
                     productsRecyclerView.setLayoutManager(gridLayoutManager);
@@ -420,18 +606,18 @@ public class CategoryDetailActivity extends AppCompatActivity {
                     break;
                 case "Safe":
                     if (expiryDate != null && expiryDate.getTime() - today.getTime() > sevenDaysInMillis) {
-                        filteredProducts.add(product);  // 8+ days left
+                        filteredProducts.add(product);
                     }
                     break;
                 case "Soon":
                     if (expiryDate != null && !expiryDate.before(today) &&
                             expiryDate.getTime() - today.getTime() <= sevenDaysInMillis) {
-                        filteredProducts.add(product);  // 1-7 days left
+                        filteredProducts.add(product);
                     }
                     break;
-                case "Expired":  // CHANGED from "Urgent"
+                case "Expired":
                     if (expiryDate != null && expiryDate.before(today)) {
-                        filteredProducts.add(product);  // Past expiry date
+                        filteredProducts.add(product);
                     }
                     break;
             }
@@ -439,15 +625,5 @@ public class CategoryDetailActivity extends AppCompatActivity {
 
         adapter.updateData(filteredProducts);
         Log.d(TAG, "Filter '" + currentFilter + "' applied - showing " + filteredProducts.size() + " products");
-    }
-
-    private void applyTheme() {
-        int fabBackgroundColor = preferences.getInt("fab_background_color",
-                getResources().getColor(R.color.color_fab_white));
-
-        LinearLayout bottomNavigation = findViewById(R.id.bottomNavigation);
-        if (bottomNavigation != null) {
-            bottomNavigation.setBackgroundColor(fabBackgroundColor);
-        }
     }
 }

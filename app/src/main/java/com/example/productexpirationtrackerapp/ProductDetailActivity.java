@@ -1,15 +1,19 @@
 package com.example.productexpirationtrackerapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.text.SimpleDateFormat;
@@ -21,6 +25,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private static final String TAG = "ProductDetail";
 
     // UI Components
+    private LinearLayout mainLayout;
     private Button backButton;
     private TextView titleTextView;
     private ImageView productPhoto;
@@ -34,22 +39,33 @@ public class ProductDetailActivity extends AppCompatActivity {
     private Button editButton;
     private Button deleteButton;
 
+    // Labels
+    private TextView photoLabel, productNameLabel, expiryDateLabel, daysLeftLabel;
+    private TextView categoryLabel, quantityLabel, notesLabel;
+
     // Data
     private int productId;
     private String productName;
     private String expiryDate;
     private ProductViewModel productViewModel;
+    private UserRepository userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
 
+        // Initialize UserRepository for theme
+        userRepository = new UserRepository(getApplication());
+
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
         // Initialize views
         initializeViews();
+
+        // Apply theme
+        applyThemeFromDatabase();
 
         // Get intent data
         getIntentData();
@@ -61,7 +77,15 @@ public class ProductDetailActivity extends AppCompatActivity {
         displayProductDetails();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reapply theme when returning
+        applyThemeFromDatabase();
+    }
+
     private void initializeViews() {
+        mainLayout = findViewById(R.id.mainLayout);
         backButton = findViewById(R.id.backButton);
         titleTextView = findViewById(R.id.titleTextView);
         productPhoto = findViewById(R.id.productPhoto);
@@ -74,6 +98,15 @@ public class ProductDetailActivity extends AppCompatActivity {
         notesText = findViewById(R.id.notesText);
         editButton = findViewById(R.id.editButton);
         deleteButton = findViewById(R.id.deleteButton);
+
+        // Initialize labels
+        photoLabel = findViewById(R.id.photoLabel);
+        productNameLabel = findViewById(R.id.productNameLabel);
+        expiryDateLabel = findViewById(R.id.expiryDateLabel);
+        daysLeftLabel = findViewById(R.id.daysLeftLabel);
+        categoryLabel = findViewById(R.id.categoryLabel);
+        quantityLabel = findViewById(R.id.quantityLabel);
+        notesLabel = findViewById(R.id.notesLabel);
     }
 
     private void getIntentData() {
@@ -91,7 +124,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         // Back button
         backButton.setOnClickListener(v -> finish());
 
-        // Edit button - NEW FUNCTIONALITY
+        // Edit button
         editButton.setOnClickListener(v -> {
             if (productId != -1) {
                 Intent intent = new Intent(ProductDetailActivity.this, EditProductActivity.class);
@@ -110,7 +143,6 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         // Delete button
         deleteButton.setOnClickListener(v -> {
-            // Show confirmation dialog
             new androidx.appcompat.app.AlertDialog.Builder(this)
                     .setTitle("Delete Product")
                     .setMessage("Are you sure you want to delete this product?")
@@ -129,7 +161,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                     .show();
         });
 
-        // Consume button (optional - you can add functionality later)
+        // Consume button
         consumeButton.setOnClickListener(v -> {
             Toast.makeText(this, "Consume feature coming soon", Toast.LENGTH_SHORT).show();
         });
@@ -149,10 +181,9 @@ public class ProductDetailActivity extends AppCompatActivity {
         }
 
         // For now, we're using dummy data since we only passed basic info
-        // In a real app, you would fetch full product details from ViewModel
-        categoryText.setText("Category"); // This would come from database
-        quantityText.setText("1"); // This would come from database
-        notesText.setText("No notes"); // This would come from database
+        categoryText.setText("Category");
+        quantityText.setText("1");
+        notesText.setText("No notes");
     }
 
     private void calculateAndDisplayDaysLeft(String dateString) {
@@ -178,6 +209,97 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             daysLeftText.setText("Unknown");
+        }
+    }
+
+    // ========== THEME METHODS ==========
+
+    private void applyThemeFromDatabase() {
+        User user = userRepository.getUserSync();
+
+        if (user != null) {
+            String theme = user.getColorTheme();
+            Log.d(TAG, "Applying theme: " + theme);
+            applyThemeColors(theme);
+        } else {
+            // Fallback to SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+            String theme = prefs.getString("color_theme", "light");
+            Log.d(TAG, "No user, applying theme from prefs: " + theme);
+            applyThemeColors(theme);
+        }
+    }
+
+    private void applyThemeColors(String theme) {
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
+
+        int primaryColor;
+        int backgroundColor;
+        int textColor;
+        int labelColor;
+        int consumeButtonColor;
+
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_dark);
+            textColor = ContextCompat.getColor(this, R.color.color_text_dark);
+            labelColor = Color.WHITE;
+            consumeButtonColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+        } else {
+            // Light theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_light);
+            textColor = ContextCompat.getColor(this, R.color.color_text_light);
+            labelColor = textColor;
+            consumeButtonColor = ContextCompat.getColor(this, R.color.color_primary_light);
+        }
+
+        Log.d(TAG, "Theme: " + (isDarkTheme ? "DARK" : "LIGHT"));
+
+        // Apply background color
+        if (mainLayout != null) {
+            mainLayout.setBackgroundColor(backgroundColor);
+        }
+
+        // Apply text colors to labels
+        if (photoLabel != null) photoLabel.setTextColor(labelColor);
+        if (productNameLabel != null) productNameLabel.setTextColor(labelColor);
+        if (expiryDateLabel != null) expiryDateLabel.setTextColor(labelColor);
+        if (daysLeftLabel != null) daysLeftLabel.setTextColor(labelColor);
+        if (categoryLabel != null) categoryLabel.setTextColor(labelColor);
+        if (quantityLabel != null) quantityLabel.setTextColor(labelColor);
+        if (notesLabel != null) notesLabel.setTextColor(labelColor);
+
+        // Apply title color
+        if (titleTextView != null) titleTextView.setTextColor(labelColor);
+
+        // Apply text colors to data fields (daysLeftText is handled separately)
+        if (productNameText != null) productNameText.setTextColor(textColor);
+        if (expiryDateText != null) expiryDateText.setTextColor(textColor);
+        if (categoryText != null) categoryText.setTextColor(textColor);
+        if (quantityText != null) quantityText.setTextColor(textColor);
+        if (notesText != null) notesText.setTextColor(textColor);
+
+        // Apply button colors
+        if (backButton != null) {
+            backButton.setBackgroundColor(primaryColor);
+            backButton.setTextColor(Color.WHITE);
+        }
+
+        if (consumeButton != null) {
+            consumeButton.setBackgroundColor(consumeButtonColor);
+            consumeButton.setTextColor(Color.WHITE);
+        }
+
+        if (editButton != null) {
+            editButton.setBackgroundColor(primaryColor);
+            editButton.setTextColor(Color.WHITE);
+        }
+
+        if (deleteButton != null) {
+            deleteButton.setBackgroundColor(Color.parseColor("#F44336")); // Red stays red
+            deleteButton.setTextColor(Color.WHITE);
         }
     }
 

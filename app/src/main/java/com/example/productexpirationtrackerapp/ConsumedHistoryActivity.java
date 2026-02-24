@@ -1,14 +1,17 @@
 package com.example.productexpirationtrackerapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -45,7 +48,7 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
         // Initialize views
         initializeViews();
 
-        // ✅ Apply theme with delay
+        // Apply theme with delay
         applyThemeFromDatabase();
 
         // Setup RecyclerView
@@ -91,13 +94,12 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
         indicatorAll = findViewById(R.id.indicatorAll);
     }
 
-    // Apply theme from database - USING SYNC
+    // Apply theme from database
     private void applyThemeFromDatabase() {
         Log.d(TAG, "applyThemeFromDatabase called");
 
-        // Ipagpaliban ng konti para matapos ang database operations
-        new android.os.Handler().postDelayed(() -> {
-            // Use sync after delay
+        // Add delay to ensure database is ready
+        new Handler().postDelayed(() -> {
             User user = userRepository.getUserSync();
 
             if (user != null) {
@@ -105,53 +107,38 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
                 Log.d(TAG, "✅ Theme from database after delay: " + theme);
                 runOnUiThread(() -> applyThemeColors(theme));
             } else {
-                Log.d(TAG, "❌ Still no user found after delay");
-                runOnUiThread(() -> applyThemeColors("white"));
+                // Fallback to SharedPreferences
+                SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+                String theme = prefs.getString("color_theme", "light");
+                Log.d(TAG, "❌ No user found, using theme from prefs: " + theme);
+                runOnUiThread(() -> applyThemeColors(theme));
             }
-        }, 500); // 500ms delay
+        }, 500);
     }
-    // Apply theme colors
+
+    // Apply theme colors - SIMPLIFIED to only light/dark
     private void applyThemeColors(String theme) {
         Log.d(TAG, "applyThemeColors called with theme: " + theme);
+
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
 
         int primaryColor;
         int backgroundColor;
         int textColor;
 
-        switch (theme) {
-            case "green":
-                primaryColor = getResources().getColor(R.color.color_primary_green);
-                backgroundColor = getResources().getColor(R.color.color_background_green);
-                textColor = getResources().getColor(R.color.color_text_green);
-                break;
-            case "blue":
-                primaryColor = getResources().getColor(R.color.color_primary_blue);
-                backgroundColor = getResources().getColor(R.color.color_background_blue);
-                textColor = getResources().getColor(R.color.color_text_blue);
-                break;
-            case "pink":
-                primaryColor = getResources().getColor(R.color.color_primary_pink);
-                backgroundColor = getResources().getColor(R.color.color_background_pink);
-                textColor = getResources().getColor(R.color.color_text_pink);
-                break;
-            case "purple":
-                primaryColor = getResources().getColor(R.color.color_primary_purple);
-                backgroundColor = getResources().getColor(R.color.color_background_purple);
-                textColor = getResources().getColor(R.color.color_text_purple);
-                break;
-            case "black":
-                primaryColor = getResources().getColor(R.color.color_primary_black);
-                backgroundColor = getResources().getColor(R.color.color_background_black);
-                textColor = getResources().getColor(R.color.color_text_black);
-                break;
-            case "white":
-            default:
-                primaryColor = getResources().getColor(R.color.color_primary_white);
-                backgroundColor = getResources().getColor(R.color.color_background_white);
-                textColor = getResources().getColor(R.color.color_text_white);
-                break;
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_dark);
+            textColor = ContextCompat.getColor(this, R.color.color_text_dark);
+        } else {
+            // Light theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_light);
+            textColor = ContextCompat.getColor(this, R.color.color_text_light);
         }
 
+        Log.d(TAG, "Theme: " + (isDarkTheme ? "DARK" : "LIGHT"));
         Log.d(TAG, "Colors - Primary: " + primaryColor + ", BG: " + backgroundColor + ", Text: " + textColor);
 
         // Apply background to main layout
@@ -171,11 +158,11 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
         }
 
         // Update filter tab colors
-        updateFilterTabColors(theme, primaryColor, textColor);
+        updateFilterTabColors(isDarkTheme, primaryColor, textColor);
     }
 
-    // Update filter tab colors
-    private void updateFilterTabColors(String theme, int primaryColor, int textColor) {
+    // Update filter tab colors - SIMPLIFIED
+    private void updateFilterTabColors(boolean isDarkTheme, int primaryColor, int textColor) {
         // Update text colors for filter tabs
         if (btnAll != null && btnAll.getChildAt(0) instanceof TextView) {
             ((TextView) btnAll.getChildAt(0)).setTextColor(textColor);

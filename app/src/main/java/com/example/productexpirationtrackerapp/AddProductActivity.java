@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +19,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -26,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.view.ViewGroup;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -115,66 +116,39 @@ public class AddProductActivity extends AppCompatActivity {
         if (user != null) {
             String theme = user.getColorTheme();
             Log.d(TAG, "Applying theme: " + theme);
-
-            // Apply theme using ThemeUtils
-            ThemeUtils.applyTheme(this, theme);
-
-            // Apply additional custom theme colors
             applyCustomThemeColors(theme);
         } else {
-            // Fallback to default theme
-            Log.d(TAG, "No user found, using white theme");
-            ThemeUtils.applyTheme(this, "white");
-            applyCustomThemeColors("white");
+            // Fallback to SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+            String theme = prefs.getString("color_theme", "light");
+            Log.d(TAG, "No user found, applying theme: " + theme);
+            applyCustomThemeColors(theme);
         }
     }
 
     private void applyCustomThemeColors(String theme) {
+        boolean isDarkTheme = theme.equals("dark") || theme.equals("black");
+
         int primaryColor;
         int textColor;
         int backgroundColor;
         int hintColor;
 
-        // Get colors based on theme
-        switch (theme) {
-            case "green":
-                primaryColor = getResources().getColor(R.color.color_primary_green);
-                textColor = getResources().getColor(R.color.color_text_green);
-                backgroundColor = getResources().getColor(R.color.color_background_green);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "blue":
-                primaryColor = getResources().getColor(R.color.color_primary_blue);
-                textColor = getResources().getColor(R.color.color_text_blue);
-                backgroundColor = getResources().getColor(R.color.color_background_blue);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "pink":
-                primaryColor = getResources().getColor(R.color.color_primary_pink);
-                textColor = getResources().getColor(R.color.color_text_pink);
-                backgroundColor = getResources().getColor(R.color.color_background_pink);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "purple":
-                primaryColor = getResources().getColor(R.color.color_primary_purple);
-                textColor = getResources().getColor(R.color.color_text_purple);
-                backgroundColor = getResources().getColor(R.color.color_background_purple);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "black":
-                primaryColor = getResources().getColor(R.color.color_primary_black);
-                textColor = getResources().getColor(R.color.color_text_black);
-                backgroundColor = getResources().getColor(R.color.color_background_black);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "white":
-            default:
-                primaryColor = getResources().getColor(R.color.color_primary_white);
-                textColor = getResources().getColor(R.color.color_text_white);
-                backgroundColor = getResources().getColor(R.color.color_background_white);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
+        if (isDarkTheme) {
+            // Dark theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_dark);
+            textColor = ContextCompat.getColor(this, R.color.color_text_dark);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_dark);
+            hintColor = Color.parseColor("#80FFFFFF"); // Semi-transparent white
+        } else {
+            // Light theme colors
+            primaryColor = ContextCompat.getColor(this, R.color.color_primary_light);
+            textColor = ContextCompat.getColor(this, R.color.color_text_light);
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_light);
+            hintColor = Color.parseColor("#80000000"); // Semi-transparent black
         }
+
+        Log.d(TAG, "Theme: " + (isDarkTheme ? "DARK" : "LIGHT"));
 
         // Apply background color to main layout
         mainLayout = findViewById(R.id.mainLayout);
@@ -309,19 +283,22 @@ public class AddProductActivity extends AppCompatActivity {
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
-                TextView textView = (TextView) view;
+                if (view instanceof TextView) {
+                    TextView textView = (TextView) view;
 
-                // Get current theme
-                User user = userRepository.getUserSync();
-                String theme = user != null ? user.getColorTheme() : "white";
+                    // Get current theme
+                    User user = userRepository.getUserSync();
+                    boolean isDarkTheme = user != null ?
+                            (user.getColorTheme().equals("dark") || user.getColorTheme().equals("black")) : false;
 
-                // Set text color based on theme
-                if (theme.equals("black")) {
-                    textView.setTextColor(Color.WHITE);
-                    textView.setBackgroundColor(Color.parseColor("#333333"));
-                } else {
-                    textView.setTextColor(Color.BLACK);
-                    textView.setBackgroundColor(Color.WHITE);
+                    // Set text color based on theme
+                    if (isDarkTheme) {
+                        textView.setTextColor(Color.WHITE);
+                        textView.setBackgroundColor(Color.parseColor("#333333"));
+                    } else {
+                        textView.setTextColor(Color.BLACK);
+                        textView.setBackgroundColor(Color.WHITE);
+                    }
                 }
                 return view;
             }
@@ -345,9 +322,10 @@ public class AddProductActivity extends AppCompatActivity {
                 // Change spinner selected item text color based on theme
                 if (view != null && view instanceof TextView) {
                     User user = userRepository.getUserSync();
-                    String theme = user != null ? user.getColorTheme() : "white";
+                    boolean isDarkTheme = user != null ?
+                            (user.getColorTheme().equals("dark") || user.getColorTheme().equals("black")) : false;
 
-                    if (theme.equals("black")) {
+                    if (isDarkTheme) {
                         ((TextView) view).setTextColor(Color.WHITE);
                     } else {
                         ((TextView) view).setTextColor(Color.BLACK);
