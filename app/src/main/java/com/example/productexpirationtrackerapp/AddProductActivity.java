@@ -49,6 +49,8 @@ public class AddProductActivity extends AppCompatActivity {
     private Button takePhotoButton;
     private Button choosePhotoButton;
     private Button removePhotoButton;
+    // NEW: Add scan button variable
+    private Button scanProductButton;
     private TextView titleTextView;
     private TextView photoLabel;
     private TextView productNameLabel;
@@ -67,6 +69,8 @@ public class AddProductActivity extends AppCompatActivity {
     private static final int CAMERA_REQUEST_CODE = 100;
     private static final int GALLERY_REQUEST_CODE = 101;
     private static final int CAMERA_PERMISSION_CODE = 102;
+    // NEW: Constant for scanner request
+    private static final int SCAN_PRODUCT_REQUEST_CODE = 103;
     private static final String TAG = "AddProductTheme";
 
     private Bitmap productPhotoBitmap;
@@ -224,6 +228,12 @@ public class AddProductActivity extends AppCompatActivity {
             removePhotoButton.setTextColor(Color.WHITE);
         }
 
+        // NEW: Apply color to scan button
+        if (scanProductButton != null) {
+            scanProductButton.setBackgroundColor(primaryColor);
+            scanProductButton.setTextColor(Color.WHITE);
+        }
+
         // Set date picker button color
         if (datePickerButton != null) {
             datePickerButton.setBackgroundColor(primaryColor);
@@ -244,6 +254,8 @@ public class AddProductActivity extends AppCompatActivity {
         takePhotoButton = findViewById(R.id.takePhotoButton);
         choosePhotoButton = findViewById(R.id.choosePhotoButton);
         removePhotoButton = findViewById(R.id.removePhotoButton);
+        // NEW: Initialize scan button
+        scanProductButton = findViewById(R.id.btnScanProduct);
         titleTextView = findViewById(R.id.titleTextView);
         productPhotoPreview = findViewById(R.id.productPhotoPreview);
 
@@ -384,6 +396,20 @@ public class AddProductActivity extends AppCompatActivity {
                 removePhoto();
             }
         });
+
+        // NEW: Scan product button click listener
+        scanProductButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openProductScanner();
+            }
+        });
+    }
+
+    // NEW: Method to open scanner
+    private void openProductScanner() {
+        Intent intent = new Intent(AddProductActivity.this, ProductScannerActivity.class);
+        startActivityForResult(intent, SCAN_PRODUCT_REQUEST_CODE);
     }
 
     private void openCamera() {
@@ -455,7 +481,73 @@ public class AddProductActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
                 }
             }
+            // NEW: Handle scanner results
+            else if (requestCode == SCAN_PRODUCT_REQUEST_CODE && data != null) {
+                handleScanResult(data);
+            }
         }
+    }
+
+    // NEW: Method to handle scanned data
+    private void handleScanResult(Intent data) {
+        String barcode = data.getStringExtra("barcode");
+        String productName = data.getStringExtra("product_name");
+        String expiryDate = data.getStringExtra("expiry_date");
+        String batchNumber = data.getStringExtra("batch_number");
+
+        // Auto-fill the form
+        if (productName != null && !productName.isEmpty()) {
+            productNameEditText.setText(productName);
+        }
+
+        if (barcode != null && !barcode.isEmpty()) {
+            // You might want to add a barcode field or store in notes temporarily
+            // For now, we'll add it to notes
+            String currentNotes = notesEditText.getText().toString();
+            if (currentNotes.isEmpty()) {
+                notesEditText.setText("Barcode: " + barcode);
+            } else {
+                notesEditText.setText(currentNotes + "\nBarcode: " + barcode);
+            }
+        }
+
+        if (expiryDate != null && !expiryDate.isEmpty()) {
+            // Validate if it's in correct format
+            try {
+                // Try to parse and reformat if needed
+                SimpleDateFormat scanFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date date = scanFormat.parse(expiryDate);
+                if (date != null) {
+                    expiryDateEditText.setText(scanFormat.format(date));
+                }
+            } catch (ParseException e) {
+                // If format is different, still try to use it
+                expiryDateEditText.setText(expiryDate);
+            }
+        }
+
+        if (batchNumber != null && !batchNumber.isEmpty()) {
+            // Add batch to notes if not already there
+            String currentNotes = notesEditText.getText().toString();
+            if (currentNotes.contains("Batch:")) {
+                // Replace existing batch
+                String[] lines = currentNotes.split("\n");
+                StringBuilder newNotes = new StringBuilder();
+                for (String line : lines) {
+                    if (!line.startsWith("Batch:")) {
+                        newNotes.append(line).append("\n");
+                    }
+                }
+                newNotes.append("Batch: ").append(batchNumber);
+                notesEditText.setText(newNotes.toString().trim());
+            } else if (currentNotes.isEmpty()) {
+                notesEditText.setText("Batch: " + batchNumber);
+            } else {
+                notesEditText.setText(currentNotes + "\nBatch: " + batchNumber);
+            }
+        }
+
+        Toast.makeText(this, "Product data scanned successfully!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
