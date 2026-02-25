@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
@@ -169,122 +170,6 @@
                             android:paddingVertical="8dp" />
                     </LinearLayout>
 
-                    <!-- Green Theme -->
-                    <LinearLayout
-                        android:id="@+id/optionGreenLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@drawable/theme_option_background"
-                        android:padding="12dp"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/color_circle"
-                            android:backgroundTint="#4CAF50"
-                            android:layout_marginEnd="12dp" />
-
-                        <RadioButton
-                            android:id="@+id/themeGreen"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Green"
-                            android:textSize="16sp"
-                            android:textColor="#333333"
-                            android:paddingVertical="8dp" />
-                    </LinearLayout>
-
-                    <!-- Blue Theme -->
-                    <LinearLayout
-                        android:id="@+id/optionBlueLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@drawable/theme_option_background"
-                        android:padding="12dp"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/color_circle"
-                            android:backgroundTint="#2196F3"
-                            android:layout_marginEnd="12dp" />
-
-                        <RadioButton
-                            android:id="@+id/themeBlue"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Blue"
-                            android:textSize="16sp"
-                            android:textColor="#333333"
-                            android:paddingVertical="8dp" />
-                    </LinearLayout>
-
-                    <!-- Pink Theme -->
-                    <LinearLayout
-                        android:id="@+id/optionPinkLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@drawable/theme_option_background"
-                        android:padding="12dp"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/color_circle"
-                            android:backgroundTint="#E91E63"
-                            android:layout_marginEnd="12dp" />
-
-                        <RadioButton
-                            android:id="@+id/themePink"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Pink"
-                            android:textSize="16sp"
-                            android:textColor="#333333"
-                            android:paddingVertical="8dp" />
-                    </LinearLayout>
-
-                    <!-- Purple Theme -->
-                    <LinearLayout
-                        android:id="@+id/optionPurpleLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@drawable/theme_option_background"
-                        android:padding="12dp"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/color_circle"
-                            android:backgroundTint="#9C27B0"
-                            android:layout_marginEnd="12dp" />
-
-                        <RadioButton
-                            android:id="@+id/themePurple"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Purple"
-                            android:textSize="16sp"
-                            android:textColor="#333333"
-                            android:paddingVertical="8dp" />
-                    </LinearLayout>
-
                     <!-- Black/Dark Theme -->
                     <LinearLayout
                         android:id="@+id/optionBlackLayout"
@@ -373,7 +258,8 @@
                         android:layout_height="wrap_content"
                         android:checked="true"
                         android:thumbTint="#4CAF50"
-                        android:trackTint="#C8E6C9" />
+                        android:trackTint="#C8E6C9"
+                        tools:ignore="TouchTargetSizeCheck" />
                 </LinearLayout>
 
             </LinearLayout>

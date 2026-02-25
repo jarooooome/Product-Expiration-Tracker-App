@@ -87,6 +87,7 @@
                         android:layout_marginEnd="8dp"
                         android:background="@android:color/transparent"
                         android:hint="Search products..."
+                        android:textColor="#000000"
                         android:textSize="16sp"
                         android:inputType="text"
                         android:imeOptions="actionSearch"
@@ -643,7 +644,7 @@
                 android:id="@+id/navProfileIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_myplaces" />
+                android:src="@drawable/ic_nav_profile" />
 
             <TextView
                 android:id="@+id/navProfileText"
@@ -680,7 +681,7 @@
                 android:id="@+id/navProductsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_view" />
+                android:src="@drawable/ic_nav_products" />
 
             <TextView
                 android:id="@+id/navProductsText"
@@ -717,7 +718,7 @@
                 android:id="@+id/navSettingsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_preferences" />
+                android:src="@drawable/ic_nav_settings" />
 
             <TextView
                 android:id="@+id/navSettingsText"
@@ -748,9 +749,9 @@
         android:layout_above="@id/bottomNavigation"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/ic_fab_add"
         android:contentDescription="Add Product"
-        android:background="@drawable/fab_modern_background"
+        android:background="@drawable/fab_circle_background"
         android:elevation="8dp"
         android:clickable="true"
         android:focusable="true"

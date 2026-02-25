@@ -59,22 +59,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         return Color.HSVToColor(hsv);
     }
 
-    // Helper method to get theme background color
+    // Helper method to get theme background color - UPDATED to only White and Black
     private int getThemeBackgroundColor(Context context, String theme) {
-        switch (theme) {
-            case "green":
-                return ContextCompat.getColor(context, R.color.color_background_green);
-            case "blue":
-                return ContextCompat.getColor(context, R.color.color_background_blue);
-            case "pink":
-                return ContextCompat.getColor(context, R.color.color_background_pink);
-            case "purple":
-                return ContextCompat.getColor(context, R.color.color_background_purple);
-            case "black":
-                return ContextCompat.getColor(context, R.color.color_background_black);
-            case "white":
-            default:
-                return ContextCompat.getColor(context, R.color.color_background_white);
+        if ("black".equals(theme)) {
+            return ContextCompat.getColor(context, R.color.color_background_black);
+        } else {
+            // Default to white
+            return ContextCompat.getColor(context, R.color.color_background_white);
         }
     }
 

@@ -135,45 +135,19 @@ public class AddProductActivity extends AppCompatActivity {
         int backgroundColor;
         int hintColor;
 
-        // Get colors based on theme
-        switch (theme) {
-            case "green":
-                primaryColor = getResources().getColor(R.color.color_primary_green);
-                textColor = getResources().getColor(R.color.color_text_green);
-                backgroundColor = getResources().getColor(R.color.color_background_green);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "blue":
-                primaryColor = getResources().getColor(R.color.color_primary_blue);
-                textColor = getResources().getColor(R.color.color_text_blue);
-                backgroundColor = getResources().getColor(R.color.color_background_blue);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "pink":
-                primaryColor = getResources().getColor(R.color.color_primary_pink);
-                textColor = getResources().getColor(R.color.color_text_pink);
-                backgroundColor = getResources().getColor(R.color.color_background_pink);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "purple":
-                primaryColor = getResources().getColor(R.color.color_primary_purple);
-                textColor = getResources().getColor(R.color.color_text_purple);
-                backgroundColor = getResources().getColor(R.color.color_background_purple);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "black":
-                primaryColor = getResources().getColor(R.color.color_primary_black);
-                textColor = getResources().getColor(R.color.color_text_black);
-                backgroundColor = getResources().getColor(R.color.color_background_black);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
-            case "white":
-            default:
-                primaryColor = getResources().getColor(R.color.color_primary_white);
-                textColor = getResources().getColor(R.color.color_text_white);
-                backgroundColor = getResources().getColor(R.color.color_background_white);
-                hintColor = Color.parseColor("#80FFFFFF");
-                break;
+        // Get colors based on theme - ONLY WHITE AND BLACK
+        if ("black".equals(theme)) {
+            // Black/Dark Theme
+            primaryColor = getResources().getColor(R.color.color_primary_black);
+            textColor = getResources().getColor(R.color.color_text_black);
+            backgroundColor = getResources().getColor(R.color.color_background_black);
+            hintColor = Color.parseColor("#80FFFFFF");
+        } else {
+            // White/Light Theme (Default)
+            primaryColor = getResources().getColor(R.color.color_primary_white);
+            textColor = getResources().getColor(R.color.color_text_white);
+            backgroundColor = getResources().getColor(R.color.color_background_white);
+            hintColor = Color.parseColor("#80000000");
         }
 
         // Apply background color to main layout
