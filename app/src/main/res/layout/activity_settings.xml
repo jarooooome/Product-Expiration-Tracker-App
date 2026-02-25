@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F5F7FA">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -20,11 +22,113 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="⚙️ Settings"
+                android:text="Settings"
                 android:textSize="28sp"
                 android:textStyle="bold"
                 android:gravity="center"
-                android:layout_marginBottom="32dp" />
+                android:layout_marginBottom="32dp"
+                android:textColor="#1A1E2C" />
+
+            <!-- User Profile Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="User Profile"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#1A1E2C"
+                        android:layout_marginBottom="16dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="Name:"
+                            android:textSize="16sp"
+                            android:textColor="#666666" />
+
+                        <TextView
+                            android:id="@+id/userNameText"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Loading..."
+                            android:textSize="16sp"
+                            android:textColor="#1A1E2C"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/editNameButton"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="8dp"
+                            android:backgroundTint="#6200EE"
+                            android:text="edit"
+                            android:textSize="16sp"
+                            tools:ignore="TouchTargetSizeCheck" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/nameEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:hint="Enter your name"
+                        android:padding="16dp"
+                        android:background="#F0F0F0"
+                        android:visibility="gone"
+                        android:layout_marginBottom="8dp" />
+
+                    <LinearLayout
+                        android:id="@+id/nameEditButtons"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <Button
+                            android:id="@+id/saveNameButton"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:text="Save"
+                            android:textSize="14sp"
+                            android:textColor="#FFFFFF"
+                            android:backgroundTint="#4CAF50"
+                            android:layout_marginEnd="4dp" />
+
+                        <Button
+                            android:id="@+id/cancelNameButton"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:text="Cancel"
+                            android:textSize="14sp"
+                            android:textColor="#FFFFFF"
+                            android:backgroundTint="#757575"
+                            android:layout_marginStart="4dp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- Reminder Frequency Card -->
             <androidx.cardview.widget.CardView
@@ -46,6 +150,7 @@
                         android:text="Reminder Frequency"
                         android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="#1A1E2C"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -63,6 +168,7 @@
                         android:text="3 days before"
                         android:textSize="18sp"
                         android:textStyle="bold"
+                        android:textColor="#6200EE"
                         android:gravity="center"
                         android:layout_marginBottom="16dp" />
 
@@ -72,8 +178,8 @@
                         android:layout_height="wrap_content"
                         android:max="30"
                         android:progress="3"
-                        android:progressTint="@color/color_primary_blue"
-                        android:thumbTint="@color/color_primary_blue" />
+                        android:progressTint="#6200EE"
+                        android:thumbTint="#6200EE" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -129,6 +235,7 @@
                         android:text="Vibration Pattern"
                         android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="#1A1E2C"
                         android:layout_marginBottom="16dp" />
 
                     <RadioGroup
@@ -143,6 +250,7 @@
                             android:layout_height="wrap_content"
                             android:text="Default (recommended)"
                             android:textSize="16sp"
+                            android:textColor="#1A1E2C"
                             android:checked="true"
                             android:paddingVertical="8dp" />
 
@@ -152,6 +260,7 @@
                             android:layout_height="wrap_content"
                             android:text="Short pulse"
                             android:textSize="16sp"
+                            android:textColor="#1A1E2C"
                             android:paddingVertical="8dp" />
 
                         <RadioButton
@@ -160,6 +269,7 @@
                             android:layout_height="wrap_content"
                             android:text="Long pulse"
                             android:textSize="16sp"
+                            android:textColor="#1A1E2C"
                             android:paddingVertical="8dp" />
 
                         <RadioButton
@@ -168,6 +278,7 @@
                             android:layout_height="wrap_content"
                             android:text="No vibration"
                             android:textSize="16sp"
+                            android:textColor="#1A1E2C"
                             android:paddingVertical="8dp" />
 
                     </RadioGroup>
@@ -183,7 +294,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Theme Selection Card - ADD THIS -->
+            <!-- Theme Selection Card - UPDATED to only White and Black -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -203,6 +314,7 @@
                         android:text="App Theme"
                         android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="#1A1E2C"
                         android:layout_marginBottom="16dp" />
 
                     <RadioGroup
@@ -215,49 +327,19 @@
                             android:id="@+id/theme_white"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="White"
+                            android:text="☀️ Light (default)"
                             android:textSize="16sp"
+                            android:textColor="#1A1E2C"
                             android:checked="true"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_green"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Green"
-                            android:textSize="16sp"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_blue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Blue"
-                            android:textSize="16sp"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_pink"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Pink"
-                            android:textSize="16sp"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_purple"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Purple"
-                            android:textSize="16sp"
                             android:paddingVertical="8dp" />
 
                         <RadioButton
                             android:id="@+id/theme_black"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Black"
+                            android:text="🌙 Dark"
                             android:textSize="16sp"
+                            android:textColor="#1A1E2C"
                             android:paddingVertical="8dp" />
 
                     </RadioGroup>
@@ -293,6 +375,7 @@
                         android:text="Notification Time"
                         android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="#1A1E2C"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -310,6 +393,7 @@
                         android:text="9:00 AM"
                         android:textSize="24sp"
                         android:textStyle="bold"
+                        android:textColor="#6200EE"
                         android:gravity="center"
                         android:layout_marginBottom="16dp" />
 
@@ -320,7 +404,7 @@
                         android:text="Change Time"
                         android:textSize="16sp"
                         android:textColor="#FFFFFF"
-                        android:backgroundTint="@color/color_primary_blue" />
+                        android:backgroundTint="#6200EE" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -353,7 +437,7 @@
                     android:text="Save Settings"
                     android:textSize="16sp"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="@color/color_primary_blue"
+                    android:backgroundTint="#6200EE"
                     android:layout_marginStart="8dp" />
 
             </LinearLayout>
@@ -398,8 +482,9 @@
                 android:id="@+id/navProfileIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="#FFFFFF" />
+                android:src="@drawable/ic_nav_profile"
+                app:tint="#FFFFFF"
+                android:contentDescription="Profile" />
 
             <TextView
                 android:id="@+id/navProfileText"
@@ -437,8 +522,9 @@
                 android:id="@+id/navProductsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_view"
-                app:tint="#FFFFFF" />
+                android:src="@drawable/ic_nav_products"
+                app:tint="#FFFFFF"
+                android:contentDescription="Products" />
 
             <TextView
                 android:id="@+id/navProductsText"
@@ -476,8 +562,9 @@
                 android:id="@+id/navSettingsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_preferences"
-                app:tint="#FFFFFF" />
+                android:src="@drawable/ic_nav_settings"
+                app:tint="#FFFFFF"
+                android:contentDescription="Settings" />
 
             <TextView
                 android:id="@+id/navSettingsText"

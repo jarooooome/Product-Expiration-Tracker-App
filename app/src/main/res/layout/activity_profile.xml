@@ -711,7 +711,7 @@
                 android:id="@+id/navProfileIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_myplaces"
+                android:src="@drawable/ic_nav_profile"
                 app:tint="#FFFFFF" />
 
             <TextView
@@ -750,7 +750,7 @@
                 android:id="@+id/navProductsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_view"
+                android:src="@drawable/ic_nav_products"
                 app:tint="#FFFFFF" />
 
             <TextView
@@ -789,7 +789,7 @@
                 android:id="@+id/navSettingsIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@android:drawable/ic_menu_preferences"
+                android:src="@drawable/ic_nav_settings"
                 app:tint="#FFFFFF" />
 
             <TextView

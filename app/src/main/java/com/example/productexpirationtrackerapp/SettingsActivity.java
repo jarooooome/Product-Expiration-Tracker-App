@@ -28,7 +28,7 @@ public class SettingsActivity extends AppCompatActivity {
     private SeekBar reminderFrequencySeekBar;
     private TextView frequencyValueText;
     private RadioGroup vibrationRadioGroup;
-    private RadioGroup themeRadioGroup; // ADDED
+    private RadioGroup themeRadioGroup;
     private TextView notificationTimeText;
     private Button notificationTimeButton;
     private Button saveButton;
@@ -53,13 +53,13 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static final String PREF_REMINDER_DAYS = "reminder_days";
     public static final String PREF_VIBRATION_PATTERN = "vibration_pattern";
-    public static final String PREF_THEME = "color_theme"; // ADDED
+    public static final String PREF_THEME = "color_theme";
     public static final String PREF_NOTIFICATION_HOUR = "notification_hour";
     public static final String PREF_NOTIFICATION_MINUTE = "notification_minute";
 
     public static final int DEFAULT_REMINDER_DAYS = 3;
     public static final String DEFAULT_VIBRATION_PATTERN = "default";
-    public static final String DEFAULT_THEME = "white"; // ADDED
+    public static final String DEFAULT_THEME = "white";
     public static final int DEFAULT_NOTIFICATION_HOUR = 9;
     public static final int DEFAULT_NOTIFICATION_MINUTE = 0;
 
@@ -87,7 +87,7 @@ public class SettingsActivity extends AppCompatActivity {
         reminderFrequencySeekBar = findViewById(R.id.reminderFrequencySeekBar);
         frequencyValueText = findViewById(R.id.frequencyValueText);
         vibrationRadioGroup = findViewById(R.id.vibrationRadioGroup);
-        themeRadioGroup = findViewById(R.id.themeRadioGroup); // ADDED
+        themeRadioGroup = findViewById(R.id.themeRadioGroup);
         notificationTimeText = findViewById(R.id.notificationTimeText);
         notificationTimeButton = findViewById(R.id.notificationTimeButton);
         saveButton = findViewById(R.id.saveButton);
@@ -270,23 +270,11 @@ public class SettingsActivity extends AppCompatActivity {
                 break;
         }
 
-        // Load theme preference - ADDED
+        // Load theme preference - UPDATED to only White and Black
         String theme = preferences.getString(PREF_THEME, DEFAULT_THEME);
         switch (theme) {
             case "white":
                 themeRadioGroup.check(R.id.theme_white);
-                break;
-            case "green":
-                themeRadioGroup.check(R.id.theme_green);
-                break;
-            case "blue":
-                themeRadioGroup.check(R.id.theme_blue);
-                break;
-            case "pink":
-                themeRadioGroup.check(R.id.theme_pink);
-                break;
-            case "purple":
-                themeRadioGroup.check(R.id.theme_purple);
                 break;
             case "black":
                 themeRadioGroup.check(R.id.theme_black);
@@ -343,19 +331,11 @@ public class SettingsActivity extends AppCompatActivity {
             vibrationPattern = "default";
         }
 
-        // Get selected theme
+        // Get selected theme - UPDATED to only White and Black
         int selectedThemeId = themeRadioGroup.getCheckedRadioButtonId();
         String theme;
         if (selectedThemeId == R.id.theme_white) {
             theme = "white";
-        } else if (selectedThemeId == R.id.theme_green) {
-            theme = "green";
-        } else if (selectedThemeId == R.id.theme_blue) {
-            theme = "blue";
-        } else if (selectedThemeId == R.id.theme_pink) {
-            theme = "pink";
-        } else if (selectedThemeId == R.id.theme_purple) {
-            theme = "purple";
         } else if (selectedThemeId == R.id.theme_black) {
             theme = "black";
         } else {
@@ -370,7 +350,7 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putInt(PREF_NOTIFICATION_MINUTE, selectedMinute);
         editor.apply();
 
-        // ✅ SAVE THEME TO DATABASE - ADD THIS!
+        // Save theme to database
         UserRepository userRepository = new UserRepository(getApplication());
         userRepository.updateTheme(theme);
 
@@ -382,6 +362,7 @@ public class SettingsActivity extends AppCompatActivity {
         Toast.makeText(this, "Settings saved to database!", Toast.LENGTH_LONG).show();
         finish();
     }
+
     private void recreateNotificationChannel(String vibrationPattern) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = getSystemService(NotificationManager.class);

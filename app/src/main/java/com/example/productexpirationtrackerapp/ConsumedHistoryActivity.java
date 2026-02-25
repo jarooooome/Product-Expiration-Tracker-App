@@ -110,7 +110,8 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
             }
         }, 500); // 500ms delay
     }
-    // Apply theme colors
+
+    // Apply theme colors - UPDATED to only White and Black
     private void applyThemeColors(String theme) {
         Log.d(TAG, "applyThemeColors called with theme: " + theme);
 
@@ -118,38 +119,15 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
         int backgroundColor;
         int textColor;
 
-        switch (theme) {
-            case "green":
-                primaryColor = getResources().getColor(R.color.color_primary_green);
-                backgroundColor = getResources().getColor(R.color.color_background_green);
-                textColor = getResources().getColor(R.color.color_text_green);
-                break;
-            case "blue":
-                primaryColor = getResources().getColor(R.color.color_primary_blue);
-                backgroundColor = getResources().getColor(R.color.color_background_blue);
-                textColor = getResources().getColor(R.color.color_text_blue);
-                break;
-            case "pink":
-                primaryColor = getResources().getColor(R.color.color_primary_pink);
-                backgroundColor = getResources().getColor(R.color.color_background_pink);
-                textColor = getResources().getColor(R.color.color_text_pink);
-                break;
-            case "purple":
-                primaryColor = getResources().getColor(R.color.color_primary_purple);
-                backgroundColor = getResources().getColor(R.color.color_background_purple);
-                textColor = getResources().getColor(R.color.color_text_purple);
-                break;
-            case "black":
-                primaryColor = getResources().getColor(R.color.color_primary_black);
-                backgroundColor = getResources().getColor(R.color.color_background_black);
-                textColor = getResources().getColor(R.color.color_text_black);
-                break;
-            case "white":
-            default:
-                primaryColor = getResources().getColor(R.color.color_primary_white);
-                backgroundColor = getResources().getColor(R.color.color_background_white);
-                textColor = getResources().getColor(R.color.color_text_white);
-                break;
+        if ("black".equals(theme)) {
+            primaryColor = getResources().getColor(R.color.color_primary_black);
+            backgroundColor = getResources().getColor(R.color.color_background_black);
+            textColor = getResources().getColor(R.color.color_text_black);
+        } else {
+            // Default to white
+            primaryColor = getResources().getColor(R.color.color_primary_white);
+            backgroundColor = getResources().getColor(R.color.color_background_white);
+            textColor = getResources().getColor(R.color.color_text_white);
         }
 
         Log.d(TAG, "Colors - Primary: " + primaryColor + ", BG: " + backgroundColor + ", Text: " + textColor);
