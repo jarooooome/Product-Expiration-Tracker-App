@@ -2,6 +2,8 @@ package com.example.productexpirationtrackerapp;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class ProductDetailActivity extends AppCompatActivity {
@@ -75,6 +78,9 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         // Display product details
         displayProductDetails();
+
+        // Load full product data including photo from database
+        loadFullProductData();
     }
 
     @Override
@@ -184,6 +190,50 @@ public class ProductDetailActivity extends AppCompatActivity {
         categoryText.setText("Category");
         quantityText.setText("1");
         notesText.setText("No notes");
+    }
+
+    // Method to load full product data from database
+    private void loadFullProductData() {
+        if (productId != -1) {
+            // Observe search results for the product
+            productViewModel.getSearchResults().observe(this, products -> {
+                if (products != null && !products.isEmpty()) {
+                    // Find the product with matching ID
+                    for (Product product : products) {
+                        if (product.getId() == productId) {
+                            Log.d(TAG, "Full product loaded from database");
+
+                            // Update photo if available
+                            if (product.hasPhoto()) {
+                                byte[] photoBytes = product.getPhoto();
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
+                                productPhoto.setImageBitmap(bitmap);
+                                Log.d(TAG, "Photo loaded successfully");
+                            } else {
+                                // Optional: Set a default placeholder image
+                                // productPhoto.setImageResource(R.drawable.placeholder_image);
+                                Log.d(TAG, "No photo available for this product");
+                            }
+
+                            // Update other fields with real data from database
+                            if (product.hasCategory()) {
+                                categoryText.setText(product.getCategory());
+                            }
+                            if (product.hasQuantity()) {
+                                quantityText.setText(product.getQuantity());
+                            }
+                            if (product.hasNotes()) {
+                                notesText.setText(product.getNotes());
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Trigger the search
+            productViewModel.findProductById(productId);
+        }
     }
 
     private void calculateAndDisplayDaysLeft(String dateString) {
@@ -330,6 +380,9 @@ public class ProductDetailActivity extends AppCompatActivity {
                 if (updatedCategory != null) categoryText.setText(updatedCategory);
                 if (updatedQuantity != null) quantityText.setText(updatedQuantity);
                 if (updatedNotes != null) notesText.setText(updatedNotes);
+
+                // Reload full product data to get updated photo
+                loadFullProductData();
 
                 Toast.makeText(this, "Product updated successfully", Toast.LENGTH_SHORT).show();
             }
