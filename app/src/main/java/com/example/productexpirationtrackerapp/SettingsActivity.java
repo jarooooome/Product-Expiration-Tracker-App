@@ -25,6 +25,8 @@ import java.util.Calendar;
 
 public class SettingsActivity extends AppCompatActivity {
 
+    private static final String TAG = "SettingsActivity"; // ADDED: Tag for logging
+
     private SeekBar reminderFrequencySeekBar;
     private TextView frequencyValueText;
     private RadioGroup vibrationRadioGroup;
@@ -33,6 +35,10 @@ public class SettingsActivity extends AppCompatActivity {
     private Button notificationTimeButton;
     private Button saveButton;
     private Button cancelButton;
+
+    // ADDED: User profile UI components
+    private TextView userNameText;
+    private UserRepository userRepository;
 
     // Bottom Navigation
     private LinearLayout navProfile;
@@ -74,12 +80,16 @@ public class SettingsActivity extends AppCompatActivity {
         preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         editor = preferences.edit();
 
+        // ADDED: Initialize UserRepository
+        userRepository = new UserRepository(getApplication());
+
         initializeViews();
         initializeBottomNavigation();
         setupBottomNavigation();
         setupSeekBar();
         setupTimePicker();
         loadCurrentSettings();
+        getUserName(); // ADDED: Load user name
         setupClickListeners();
     }
 
@@ -92,7 +102,53 @@ public class SettingsActivity extends AppCompatActivity {
         notificationTimeButton = findViewById(R.id.notificationTimeButton);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
+
+        // ADDED: Initialize user name TextView
+        userNameText = findViewById(R.id.userNameText);
+        Log.d(TAG, "userNameText initialized: " + (userNameText != null));
     }
+
+    // ADDED: Method to get user name from database with debugging
+    private void getUserName() {
+        Log.d(TAG, "getUserName() called");
+
+        if (userNameText == null) {
+            Log.e(TAG, "userNameText is null!");
+            return;
+        }
+
+        Log.d(TAG, "Attempting to get user from database asynchronously...");
+
+        // Use the callback method instead of getUserSync()
+        userRepository.getUser(new UserRepository.UserRepositoryCallback() {
+            @Override
+            public void onUserLoaded(User user) {
+                if (user != null) {
+                    Log.d(TAG, "User found in database via callback");
+                    String name = user.getUserName();
+                    Log.d(TAG, "User name from database: '" + name + "'");
+
+                    if (name != null && !name.isEmpty()) {
+                        userNameText.setText(name);
+                        Log.d(TAG, "Successfully set userNameText to: " + name);
+                    } else {
+                        fallbackToSharedPreferences();
+                    }
+                } else {
+                    Log.d(TAG, "No user found in database via callback");
+                    fallbackToSharedPreferences();
+                }
+            }
+        });
+    }
+    private void fallbackToSharedPreferences() {
+        Log.d(TAG, "Falling back to SharedPreferences");
+        SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String userName = prefs.getString("user_name", "User");
+        userNameText.setText(userName);
+        Log.d(TAG, "Set userNameText from SharedPreferences to: " + userName);
+    }
+
 
     private void initializeBottomNavigation() {
         try {
@@ -112,9 +168,9 @@ public class SettingsActivity extends AppCompatActivity {
             navProductsIndicator = findViewById(R.id.navProductsIndicator);
             navSettingsIndicator = findViewById(R.id.navSettingsIndicator);
 
-            Log.d("SettingsActivity", "Bottom navigation initialized");
+            Log.d(TAG, "Bottom navigation initialized");
         } catch (Exception e) {
-            Log.e("SettingsActivity", "Error initializing bottom nav: " + e.getMessage());
+            Log.e(TAG, "Error initializing bottom nav: " + e.getMessage());
         }
     }
 
@@ -129,7 +185,7 @@ public class SettingsActivity extends AppCompatActivity {
         // Profile click listener
         if (navProfile != null) {
             navProfile.setOnClickListener(v -> {
-                Log.d("SettingsActivity", "Profile navigation clicked");
+                Log.d(TAG, "Profile navigation clicked");
                 Intent intent = new Intent(SettingsActivity.this, ProfileActivity.class);
                 startActivity(intent);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -140,7 +196,7 @@ public class SettingsActivity extends AppCompatActivity {
         // Products click listener
         if (navProducts != null) {
             navProducts.setOnClickListener(v -> {
-                Log.d("SettingsActivity", "Products navigation clicked");
+                Log.d(TAG, "Products navigation clicked");
                 Intent intent = new Intent(SettingsActivity.this, ProductListActivity.class);
                 startActivity(intent);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -151,7 +207,7 @@ public class SettingsActivity extends AppCompatActivity {
         // Settings click listener (already on this screen)
         if (navSettings != null) {
             navSettings.setOnClickListener(v -> {
-                Log.d("SettingsActivity", "Settings navigation clicked - already on this screen");
+                Log.d(TAG, "Settings navigation clicked - already on this screen");
             });
         }
     }
@@ -354,7 +410,7 @@ public class SettingsActivity extends AppCompatActivity {
         UserRepository userRepository = new UserRepository(getApplication());
         userRepository.updateTheme(theme);
 
-        Log.d("SettingsActivity", "Theme saved to database: " + theme);
+        Log.d(TAG, "Theme saved to database: " + theme);
 
         // Recreate notification channel with new settings
         recreateNotificationChannel(vibrationPattern);
