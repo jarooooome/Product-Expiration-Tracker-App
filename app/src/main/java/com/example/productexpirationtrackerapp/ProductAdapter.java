@@ -165,24 +165,41 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         long timeDiff = product.getExpiryDate().getTime() - now.getTime();
         long daysLeft = TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
 
-        // Set days left text and color
-        if (daysLeft < 0) {
+        // Set days left text and color - UPDATED with new thresholds
+        // Define custom colors for yellow warning
+        int yellowDark = Color.parseColor("#e6cc00"); // Orange-ish yellow for dark
+        int yellowLight = Color.parseColor("#e8e337"); // Light yellow for background
+
+        if (daysLeft <= 1) {
+            // 🔴 RED - Past expiration date
             holder.productDaysLeft.setText("EXPIRED");
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
             holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_red_light));
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
-        } else if (daysLeft <= 3) {
+        }
+        else if (daysLeft <= 7 && daysLeft >= 1) {
+            // 🟠 ORANGE - 1 to 7 days (critical)
             holder.productDaysLeft.setText(daysLeft + " days left ⚠️");
             holder.productDaysLeft.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
             holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_orange_light));
             holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
-        } else {
-            holder.productDaysLeft.setText(daysLeft + " days left");
-            holder.productDaysLeft.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
-            holder.productDaysLeft.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_green_light));
-            holder.statusIndicator.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
         }
-
+        else if (daysLeft <= 29 && daysLeft >= 8) {
+            // 🟡 YELLOW - 8 to 29 days (warning)
+            holder.productDaysLeft.setText(daysLeft + " days left");
+            holder.productDaysLeft.setTextColor(yellowDark);
+            holder.productDaysLeft.setBackgroundColor(yellowLight);
+            holder.statusIndicator.setBackgroundColor(yellowDark);
+        }
+        else {
+            // CLEAR - 30+ days (no color)
+            holder.productDaysLeft.setText(daysLeft + " days left");
+            // Make it transparent - no background color
+            holder.productDaysLeft.setBackgroundColor(Color.TRANSPARENT);
+            holder.statusIndicator.setBackgroundColor(Color.TRANSPARENT);
+            // Keep text color based on theme
+            holder.productDaysLeft.setTextColor(secondaryTextColor);
+        }
         // Click listeners
         holder.itemLayout.setOnClickListener(v -> {
             int adapterPosition = holder.getAdapterPosition();

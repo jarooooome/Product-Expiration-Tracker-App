@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="backgroundColor" format="color" />
+    <attr name="primaryTextColor" format="color" />
+    <attr name="secondaryTextColor" format="color" />
+    <attr name="cardBackgroundColor" format="color" />
+    <attr name="fabIconColor" format="color" />
+    <attr name="bottomNavColor" format="color" />
+    <attr name="bottomNavIconColor" format="color" />
+    <attr name="bottomNavTextColor" format="color" />
+    <attr name="bottomNavIndicatorColor" format="color" />
+
+    <!-- Status colors -->
+    <attr name="safeColor" format="color" />
+    <attr name="warningColor" format="color" />
+    <attr name="expiredColor" format="color" />
+
+    <!-- Category colors -->
+    <attr name="categoryDairyColor" format="color" />
+    <attr name="categoryVegetablesColor" format="color" />
+    <attr name="categoryFruitsColor" format="color" />
+    <attr name="categoryMeatsColor" format="color" />
+    <attr name="categoryBeveragesColor" format="color" />
+    <attr name="categoryMedicineColor" format="color" />
+    <attr name="categoryOtherColor" format="color" />
+</resources>

@@ -271,10 +271,58 @@ public class ProductListActivity extends AppCompatActivity {
     }
 
     private void updateWelcomeText() {
+        Log.d(TAG, "updateWelcomeText() called");
+
         if (hiUserTextView != null) {
-            String userName = preferences.getString("user_name", "User");
-            hiUserTextView.setText("Hi, " + userName + "! \uD83D\uDC4B");
-            Log.d(TAG, "Welcome text updated for user: " + userName);
+            // Show "Loading..." initially
+            hiUserTextView.setText("Hi, Loading...! \uD83D\uDC4B");
+            Log.d(TAG, "Set temporary loading text");
+
+            // Get user from database asynchronously
+            Log.d(TAG, "Attempting to get user from database via callback...");
+            userRepository.getUser(new UserRepository.UserRepositoryCallback() {
+                @Override
+                public void onUserLoaded(User user) {
+                    Log.d(TAG, "Callback received - user: " + (user != null ? "FOUND" : "NULL"));
+
+                    String userName = "User"; // Default
+                    String source = "default";
+
+                    if (user != null) {
+                        Log.d(TAG, "User object exists in database");
+                        String dbName = user.getUserName();
+                        Log.d(TAG, "Database user name: '" + dbName + "'");
+
+                        if (dbName != null && !dbName.isEmpty()) {
+                            userName = dbName;
+                            source = "database";
+                            Log.d(TAG, "Using name from DATABASE: " + userName);
+                        } else {
+                            // Fallback to SharedPreferences
+                            source = "sharedpreferences (fallback - db name empty)";
+                            userName = preferences.getString("user_name", "User");
+                            Log.d(TAG, "Database name empty, falling back to SharedPreferences");
+                            Log.d(TAG, "SharedPreferences user_name value: " + preferences.getString("user_name", "NOT_FOUND"));
+                        }
+                    } else {
+                        Log.d(TAG, "No user found in database");
+                        // Fallback to SharedPreferences
+                        source = "sharedpreferences (fallback - no user)";
+                        userName = preferences.getString("user_name", "User");
+                        Log.d(TAG, "SharedPreferences user_name value: " + preferences.getString("user_name", "NOT_FOUND"));
+                    }
+
+                    final String finalUserName = userName;
+                    final String finalSource = source;
+
+                    runOnUiThread(() -> {
+                        Log.d(TAG, "Setting welcome text from " + finalSource + " to: " + finalUserName);
+                        hiUserTextView.setText("Hi, " + finalUserName + "! \uD83D\uDC4B");
+                    });
+                }
+            });
+        } else {
+            Log.e(TAG, "hiUserTextView is null, cannot update welcome text");
         }
     }
 
