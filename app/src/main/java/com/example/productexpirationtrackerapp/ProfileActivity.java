@@ -22,6 +22,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.core.content.ContextCompat;
+import android.widget.RelativeLayout;
+
 public class ProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "ProfileActivity";
@@ -60,6 +63,40 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView expiringSoonCount;
     private TextView expiredCount;
 
+    // Stat Labels (NEW)
+    private TextView totalItemsLabel;
+    private TextView safeLabel;
+    private TextView expiringSoonLabel;
+    private TextView expiredLabel;
+
+    // Header and Section Views (NEW)
+    private TextView yourActivityHeader;
+    private TextView categoriesHeader;
+
+    // Category Icons and Names (NEW)
+    private TextView dairyIcon;
+    private TextView dairyName;
+    private TextView vegetablesIcon;
+    private TextView vegetablesName;
+    private TextView fruitsIcon;
+    private TextView fruitsName;
+    private TextView meatsIcon;
+    private TextView meatsName;
+    private TextView beveragesIcon;
+    private TextView beveragesName;
+    private TextView medicineIcon;
+    private TextView medicineName;
+    private TextView otherIcon;
+    private TextView otherName;
+
+    // Layout containers (NEW)
+    private LinearLayout firstRowLayout;
+    private LinearLayout secondRowLayout;
+    private LinearLayout categoriesFirstRow;
+    private LinearLayout categoriesSecondRow;
+    private LinearLayout categoriesThirdRow;
+    private LinearLayout categoriesFourthRow;
+
     // Floating Action Button
     private ImageView addButton;
 
@@ -81,6 +118,8 @@ public class ProfileActivity extends AppCompatActivity {
     private SharedPreferences preferences;
     private ProductViewModel productViewModel;
 
+    private UserRepository userRepository;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +127,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+
+        userRepository = new UserRepository(getApplication());
 
         // Initialize preferences
         preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
@@ -137,6 +178,16 @@ public class ProfileActivity extends AppCompatActivity {
             expiringSoonCount = findViewById(R.id.expiring_soon_count);
             expiredCount = findViewById(R.id.expired_count);
 
+            // Stat Labels (NEW)
+            totalItemsLabel = findViewById(R.id.total_items_label);
+            safeLabel = findViewById(R.id.safe_label);
+            expiringSoonLabel = findViewById(R.id.expiring_soon_label);
+            expiredLabel = findViewById(R.id.expired_label);
+
+            // Header and Section Views (NEW)
+            yourActivityHeader = findViewById(R.id.yourActivityHeader);
+            categoriesHeader = findViewById(R.id.categoriesHeader);
+
             // Category Cards
             dairyCard = findViewById(R.id.dairy_card);
             vegetablesCard = findViewById(R.id.vegetables_card);
@@ -154,6 +205,30 @@ public class ProfileActivity extends AppCompatActivity {
             beveragesCount = findViewById(R.id.beverages_count);
             medicineCount = findViewById(R.id.medicine_count);
             otherCount = findViewById(R.id.other_count);
+
+            // Category Icons and Names (NEW)
+            dairyIcon = findViewById(R.id.dairy_icon);
+            dairyName = findViewById(R.id.dairy_name);
+            vegetablesIcon = findViewById(R.id.vegetables_icon);
+            vegetablesName = findViewById(R.id.vegetables_name);
+            fruitsIcon = findViewById(R.id.fruits_icon);
+            fruitsName = findViewById(R.id.fruits_name);
+            meatsIcon = findViewById(R.id.meats_icon);
+            meatsName = findViewById(R.id.meats_name);
+            beveragesIcon = findViewById(R.id.beverages_icon);
+            beveragesName = findViewById(R.id.beverages_name);
+            medicineIcon = findViewById(R.id.medicine_icon);
+            medicineName = findViewById(R.id.medicine_name);
+            otherIcon = findViewById(R.id.other_icon);
+            otherName = findViewById(R.id.other_name);
+
+            // Layout containers (NEW)
+            firstRowLayout = findViewById(R.id.firstRowLayout);
+            secondRowLayout = findViewById(R.id.secondRowLayout);
+            categoriesFirstRow = findViewById(R.id.categoriesFirstRow);
+            categoriesSecondRow = findViewById(R.id.categoriesSecondRow);
+            categoriesThirdRow = findViewById(R.id.categoriesThirdRow);
+            categoriesFourthRow = findViewById(R.id.categoriesFourthRow);
 
             // Floating Action Button
             addButton = findViewById(R.id.addButton);
@@ -196,28 +271,14 @@ public class ProfileActivity extends AppCompatActivity {
         if (navItem != null) {
             navItem.setBackgroundTintList(null);
         }
-        if (icon != null) {
-            icon.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
-        }
-        if (text != null) {
-            text.setTextColor(Color.WHITE);
-            text.setTextSize(12);
-            text.setAlpha(1.0f);
-        }
+        // Don't set colors here - they're already set by applyThemeColors()
         if (indicator != null) {
             indicator.setVisibility(View.VISIBLE);
         }
     }
 
     private void setInactiveNavItem(LinearLayout navItem, ImageView icon, TextView text, View indicator) {
-        if (icon != null) {
-            icon.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
-        }
-        if (text != null) {
-            text.setTextColor(Color.WHITE);
-            text.setAlpha(0.8f);
-            text.setTextSize(12);
-        }
+        // Don't set colors here - they're already set by applyThemeColors()
         if (indicator != null) {
             indicator.setVisibility(View.GONE);
         }
@@ -354,14 +415,119 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void applyTheme() {
-        // Get theme color from preferences
-        int fabBackgroundColor = preferences.getInt("fab_background_color",
-                getResources().getColor(R.color.color_fab_white));
+        Log.d(TAG, "applyTheme() called");
+
+        // Get theme from database asynchronously
+        userRepository.getUser(new UserRepository.UserRepositoryCallback() {
+            @Override
+            public void onUserLoaded(User user) {
+                String theme = "white"; // Default
+                String source = "default";
+
+                if (user != null) {
+                    Log.d(TAG, "User found in database");
+                    String dbTheme = user.getColorTheme();
+                    Log.d(TAG, "Database theme value: '" + dbTheme + "'");
+
+                    if (dbTheme != null && !dbTheme.isEmpty()) {
+                        theme = dbTheme;
+                        source = "database";
+                        Log.d(TAG, "Using theme from DATABASE: " + theme);
+                    } else {
+                        // Fallback to SharedPreferences
+                        source = "sharedpreferences (fallback - db theme empty)";
+                        theme = preferences.getString("color_theme", "white");
+                        Log.d(TAG, "Database theme empty, using SharedPreferences: " + theme);
+                        Log.d(TAG, "SharedPreferences color_theme value: " + preferences.getString("color_theme", "NOT_FOUND"));
+                    }
+                } else {
+                    Log.d(TAG, "No user found in database");
+                    // Fallback to SharedPreferences
+                    source = "sharedpreferences (fallback - no user)";
+                    theme = preferences.getString("color_theme", "white");
+                    Log.d(TAG, "SharedPreferences color_theme value: " + preferences.getString("color_theme", "NOT_FOUND"));
+                }
+
+                final String finalTheme = theme;
+                final String finalSource = source;
+
+                runOnUiThread(() -> {
+                    Log.d(TAG, "Applying theme from " + finalSource + " with value: " + finalTheme);
+                    applyThemeColors(finalTheme);
+                });
+            }
+        });
+    }
+
+    private void applyThemeColors(String theme) {
+        Log.d(TAG, "applyThemeColors() called with theme: " + theme);
+
+        // Get colors based on theme
+        int fabBackgroundColor;
+        int bottomNavColor;
+        int textColor;
+        int iconColor;
+        int indicatorColor;
+        int backgroundColor;
+        int primaryTextColor;
+        int secondaryTextColor;
+        int cardBackgroundColor;
+        int categoryDairyColor;
+        int categoryVegetablesColor;
+        int categoryFruitsColor;
+        int categoryMeatsColor;
+        int categoryBeveragesColor;
+        int categoryMedicineColor;
+        int categoryOtherColor;
+
+        if ("black".equals(theme)) {
+            // Black theme
+            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_black);
+            bottomNavColor = ContextCompat.getColor(this, R.color.color_nav_background_black);
+            textColor = Color.WHITE;
+            iconColor = Color.WHITE;
+            indicatorColor = Color.WHITE;
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_black);
+            primaryTextColor = Color.WHITE;
+            secondaryTextColor = Color.LTGRAY;
+            cardBackgroundColor = ContextCompat.getColor(this, R.color.color_surface_black);
+            categoryDairyColor = ContextCompat.getColor(this, R.color.category_dairy_dark);
+            categoryVegetablesColor = ContextCompat.getColor(this, R.color.category_vegetables_dark);
+            categoryFruitsColor = ContextCompat.getColor(this, R.color.category_fruits_dark);
+            categoryMeatsColor = ContextCompat.getColor(this, R.color.category_meats_dark);
+            categoryBeveragesColor = ContextCompat.getColor(this, R.color.category_beverages_dark);
+            categoryMedicineColor = ContextCompat.getColor(this, R.color.category_medicine_dark);
+            categoryOtherColor = ContextCompat.getColor(this, R.color.category_other_dark);
+        } else {
+            // White theme (default)
+            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_white);
+            bottomNavColor = ContextCompat.getColor(this, R.color.color_nav_background_white);
+            textColor = Color.BLACK;
+            iconColor = Color.BLACK;
+            indicatorColor = Color.parseColor("#6200EE");
+            backgroundColor = ContextCompat.getColor(this, R.color.color_background_white);
+            primaryTextColor = Color.BLACK;
+            secondaryTextColor = Color.DKGRAY;
+            cardBackgroundColor = ContextCompat.getColor(this, R.color.color_surface_white);
+            categoryDairyColor = ContextCompat.getColor(this, R.color.category_dairy_light);
+            categoryVegetablesColor = ContextCompat.getColor(this, R.color.category_vegetables_light);
+            categoryFruitsColor = ContextCompat.getColor(this, R.color.category_fruits_light);
+            categoryMeatsColor = ContextCompat.getColor(this, R.color.category_meats_light);
+            categoryBeveragesColor = ContextCompat.getColor(this, R.color.category_beverages_light);
+            categoryMedicineColor = ContextCompat.getColor(this, R.color.category_medicine_light);
+            categoryOtherColor = ContextCompat.getColor(this, R.color.category_other_light);
+        }
+
+        // Apply to main background
+        RelativeLayout mainLayout = findViewById(R.id.mainLayout);
+        if (mainLayout != null) {
+            mainLayout.setBackgroundColor(backgroundColor);
+        }
 
         // Apply to bottom navigation
         LinearLayout bottomNavigation = findViewById(R.id.bottomNavigation);
         if (bottomNavigation != null) {
-            bottomNavigation.setBackgroundColor(fabBackgroundColor);
+            bottomNavigation.setBackgroundColor(bottomNavColor);
         }
 
         // Apply to FAB
@@ -371,21 +537,89 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         // Bottom navigation icons and text colors
-        int whiteColor = Color.WHITE;
+        if (navProfileIcon != null) navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(iconColor));
+        if (navProductsIcon != null) navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(iconColor));
+        if (navSettingsIcon != null) navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(iconColor));
 
-        if (navProfileIcon != null) navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
-        if (navProductsIcon != null) navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
-        if (navSettingsIcon != null) navSettingsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(whiteColor));
+        if (navProfileText != null) navProfileText.setTextColor(textColor);
+        if (navProductsText != null) navProductsText.setTextColor(textColor);
+        if (navSettingsText != null) navSettingsText.setTextColor(textColor);
 
-        if (navProfileText != null) navProfileText.setTextColor(whiteColor);
-        if (navProductsText != null) navProductsText.setTextColor(whiteColor);
-        if (navSettingsText != null) navSettingsText.setTextColor(whiteColor);
+        if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(indicatorColor);
+        if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(indicatorColor);
+        if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(indicatorColor);
 
-        if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(whiteColor);
-        if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(whiteColor);
-        if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(whiteColor);
+        // Apply text colors to main content
+        if (profileTitle != null) profileTitle.setTextColor(primaryTextColor);
+        if (profileSubtitle != null) profileSubtitle.setTextColor(secondaryTextColor);
 
-        Log.d(TAG, "Theme applied to profile activity");
+        // Apply to section headers
+        if (yourActivityHeader != null) yourActivityHeader.setTextColor(primaryTextColor);
+        if (categoriesHeader != null) categoriesHeader.setTextColor(primaryTextColor);
+
+        // Apply to stat numbers
+        if (totalItemsCount != null) totalItemsCount.setTextColor(primaryTextColor);
+        if (safeCount != null) safeCount.setTextColor(ContextCompat.getColor(this, R.color.color_safe));
+        if (expiringSoonCount != null) expiringSoonCount.setTextColor(ContextCompat.getColor(this, R.color.color_soon));
+        if (expiredCount != null) expiredCount.setTextColor(ContextCompat.getColor(this, R.color.color_expired));
+
+        // Apply to stat labels
+        if (totalItemsLabel != null) totalItemsLabel.setTextColor(secondaryTextColor);
+        if (safeLabel != null) safeLabel.setTextColor(secondaryTextColor);
+        if (expiringSoonLabel != null) expiringSoonLabel.setTextColor(secondaryTextColor);
+        if (expiredLabel != null) expiredLabel.setTextColor(secondaryTextColor);
+
+        // Category counts
+        if (dairyCount != null) dairyCount.setTextColor(secondaryTextColor);
+        if (vegetablesCount != null) vegetablesCount.setTextColor(secondaryTextColor);
+        if (fruitsCount != null) fruitsCount.setTextColor(secondaryTextColor);
+        if (meatsCount != null) meatsCount.setTextColor(secondaryTextColor);
+        if (beveragesCount != null) beveragesCount.setTextColor(secondaryTextColor);
+        if (medicineCount != null) medicineCount.setTextColor(secondaryTextColor);
+        if (otherCount != null) otherCount.setTextColor(secondaryTextColor);
+
+        // Apply to category names
+        if (dairyName != null) dairyName.setTextColor(primaryTextColor);
+        if (vegetablesName != null) vegetablesName.setTextColor(primaryTextColor);
+        if (fruitsName != null) fruitsName.setTextColor(primaryTextColor);
+        if (meatsName != null) meatsName.setTextColor(primaryTextColor);
+        if (beveragesName != null) beveragesName.setTextColor(primaryTextColor);
+        if (medicineName != null) medicineName.setTextColor(primaryTextColor);
+        if (otherName != null) otherName.setTextColor(primaryTextColor);
+
+        // Apply to category icons (emojis)
+        if (dairyIcon != null) dairyIcon.setTextColor(primaryTextColor);
+        if (vegetablesIcon != null) vegetablesIcon.setTextColor(primaryTextColor);
+        if (fruitsIcon != null) fruitsIcon.setTextColor(primaryTextColor);
+        if (meatsIcon != null) meatsIcon.setTextColor(primaryTextColor);
+        if (beveragesIcon != null) beveragesIcon.setTextColor(primaryTextColor);
+        if (medicineIcon != null) medicineIcon.setTextColor(primaryTextColor);
+        if (otherIcon != null) otherIcon.setTextColor(primaryTextColor);
+
+        // Apply to layout backgrounds
+        if (firstRowLayout != null) firstRowLayout.setBackgroundColor(backgroundColor);
+        if (secondRowLayout != null) secondRowLayout.setBackgroundColor(backgroundColor);
+        if (categoriesFirstRow != null) categoriesFirstRow.setBackgroundColor(backgroundColor);
+        if (categoriesSecondRow != null) categoriesSecondRow.setBackgroundColor(backgroundColor);
+        if (categoriesThirdRow != null) categoriesThirdRow.setBackgroundColor(backgroundColor);
+        if (categoriesFourthRow != null) categoriesFourthRow.setBackgroundColor(backgroundColor);
+
+        // Apply to card backgrounds
+        if (totalItemsCard != null) totalItemsCard.setCardBackgroundColor(cardBackgroundColor);
+        if (safeCard != null) safeCard.setCardBackgroundColor(cardBackgroundColor);
+        if (expiringSoonCard != null) expiringSoonCard.setCardBackgroundColor(cardBackgroundColor);
+        if (expiredCard != null) expiredCard.setCardBackgroundColor(cardBackgroundColor);
+
+        // Apply to category card backgrounds
+        if (dairyCard != null) dairyCard.setCardBackgroundColor(categoryDairyColor);
+        if (vegetablesCard != null) vegetablesCard.setCardBackgroundColor(categoryVegetablesColor);
+        if (fruitsCard != null) fruitsCard.setCardBackgroundColor(categoryFruitsColor);
+        if (meatsCard != null) meatsCard.setCardBackgroundColor(categoryMeatsColor);
+        if (beveragesCard != null) beveragesCard.setCardBackgroundColor(categoryBeveragesColor);
+        if (medicineCard != null) medicineCard.setCardBackgroundColor(categoryMedicineColor);
+        if (otherCard != null) otherCard.setCardBackgroundColor(categoryOtherColor);
+
+        Log.d(TAG, "Theme applied to profile activity: " + theme);
     }
 
     private void loadProfileData() {

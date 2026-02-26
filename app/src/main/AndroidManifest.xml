@@ -62,7 +62,7 @@
         <!-- Profile Activity -->
         <activity
             android:name=".ProfileActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/Theme.ProductExpirationTrackerApp"
             android:exported="false" />
 
         <!-- Category Detail Activity -->
