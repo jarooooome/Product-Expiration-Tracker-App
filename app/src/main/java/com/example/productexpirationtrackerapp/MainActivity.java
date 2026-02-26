@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -21,6 +22,8 @@ import androidx.core.view.WindowInsetsCompat;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity"; // ADDED: Tag for logging
 
     private TextView loadingText, appTitle, appSubtitle, versionText;
     private View progressFill;
@@ -47,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // ADDED: Log when activity starts
+        Log.d(TAG, "onCreate started");
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -195,6 +201,9 @@ public class MainActivity extends AppCompatActivity {
             boolean isFirstTime = prefs.getBoolean(PREF_FIRST_TIME, true);
             boolean setupCompleted = prefs.getBoolean(PREF_SETUP_COMPLETED, false);
 
+            // ADDED: Log the preference values
+            Log.d(TAG, "checkUserPreferences - isFirstTime: " + isFirstTime + ", setupCompleted: " + setupCompleted);
+
             String status = isFirstTime
                     ? "First-time user detected"
                     : setupCompleted
@@ -216,6 +225,10 @@ public class MainActivity extends AppCompatActivity {
                 handler.postDelayed(() -> {
                     updateProgress(100, "Ready! Launching application...");
                     isLoadingComplete = true;
+
+                    // ADDED: Log before navigation
+                    Log.d(TAG, "loadThemeAndFinalize - About to navigate, currentProgress: " + currentProgress);
+
                     handler.postDelayed(this::navigateBasedOnUserStatus, 800);
                 }, 800);
             }, 800);
@@ -227,6 +240,10 @@ public class MainActivity extends AppCompatActivity {
         boolean isFirstTime = prefs.getBoolean(PREF_FIRST_TIME, true);
         boolean setupCompleted = prefs.getBoolean(PREF_SETUP_COMPLETED, false);
 
+        // ADDED: Log the navigation decision
+        Log.d(TAG, "NAVIGATION DECISION - isFirstTime: " + isFirstTime + ", setupCompleted: " + setupCompleted);
+        Log.d(TAG, "Navigating to: " + (isFirstTime ? "Onboarding" : setupCompleted ? "ProductList" : "Setup"));
+
         if (isFirstTime) goToOnboarding();
         else if (setupCompleted) goToProductList();
         else goToSetup();
@@ -236,6 +253,9 @@ public class MainActivity extends AppCompatActivity {
         currentProgress = progress;
         runOnUiThread(() -> {
             loadingText.setText(status);
+
+            // ADDED: Log progress updates
+            Log.d(TAG, "Progress: " + progress + "% - " + status);
 
             // Wait for layout to be measured
             progressFill.post(() -> {
@@ -336,30 +356,39 @@ public class MainActivity extends AppCompatActivity {
 
     private void goToOnboarding() {
         try {
+            // ADDED: Log when navigating to Onboarding
+            Log.d(TAG, "Attempting to navigate to OnboardingActivity");
             Intent intent = new Intent(this, OnboardingActivity.class);
             startActivity(intent);
             finish();
         } catch (Exception e) {
+            Log.e(TAG, "Error navigating to Onboarding: " + e.getMessage()); // ADDED: Error log
             Toast.makeText(this, "Create OnboardingActivity first!", Toast.LENGTH_LONG).show();
         }
     }
 
     private void goToProductList() {
         try {
+            // ADDED: Log when navigating to ProductList
+            Log.d(TAG, "Attempting to navigate to ProductListActivity");
             Intent intent = new Intent(this, ProductListActivity.class);
             startActivity(intent);
             finish();
         } catch (Exception e) {
+            Log.e(TAG, "Error navigating to ProductList: " + e.getMessage()); // ADDED: Error log
             Toast.makeText(this, "Create ProductListActivity first!", Toast.LENGTH_LONG).show();
         }
     }
 
     private void goToSetup() {
         try {
+            // ADDED: Log when navigating to Setup
+            Log.d(TAG, "Attempting to navigate to SetupActivity");
             Intent intent = new Intent(this, SetupActivity.class);
             startActivity(intent);
             finish();
         } catch (Exception e) {
+            Log.e(TAG, "Error navigating to Setup: " + e.getMessage()); // ADDED: Error log
             Toast.makeText(this, "Create SetupActivity first!", Toast.LENGTH_LONG).show();
         }
     }
@@ -367,6 +396,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // ADDED: Log when activity is destroyed
+        Log.d(TAG, "onDestroy called");
+
         if (progressAnimator != null && progressAnimator.isRunning()) {
             progressAnimator.cancel();
         }

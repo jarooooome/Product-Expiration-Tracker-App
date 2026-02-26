@@ -24,6 +24,18 @@
             android:gravity="center"
             android:layout_marginBottom="32dp" />
 
+        <!-- NEW: SCAN PRODUCT BUTTON - Added here -->
+        <Button
+            android:id="@+id/btnScanProduct"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="📷 SCAN PRODUCT WITH CAMERA"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#6200EE"
+            android:layout_marginBottom="24dp" />
+
         <!-- Product Photo Section -->
         <TextView
             android:id="@+id/photoLabel"

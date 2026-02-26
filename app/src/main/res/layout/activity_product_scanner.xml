@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#121212">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#6200EE">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📷 Scan Product"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#FF0000"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Camera Preview -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Scanning Overlay -->
+        <View
+            android:id="@+id/scanningOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#33000000" />
+
+        <!-- Scanning Frame -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvInstruction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📷 Point camera at product label"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="#AA000000"
+                android:padding="16dp"
+                android:layout_margin="16dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Results Panel -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#1E1E1E">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Detected Information:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/tvBarcodeResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📋 Barcode: "
+            android:textSize="14sp"
+            android:textColor="#4CAF50"
+            android:padding="4dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvNameResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📦 Product: "
+            android:textSize="14sp"
+            android:textColor="#4CAF50"
+            android:padding="4dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvExpiryResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⏰ Expiry: "
+            android:textSize="14sp"
+            android:textColor="#4CAF50"
+            android:padding="4dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvBatchResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔢 Batch: "
+            android:textSize="14sp"
+            android:textColor="#4CAF50"
+            android:padding="4dp"
+            android:visibility="gone" />
+
+        <!-- Capture Button -->
+        <Button
+            android:id="@+id/btnCapture"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="CAPTURE PRODUCT DATA"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#6200EE"
+            android:layout_marginTop="16dp"
+            android:enabled="false"
+            android:alpha="0.5" />
+
+    </LinearLayout>
+
+</LinearLayout>
