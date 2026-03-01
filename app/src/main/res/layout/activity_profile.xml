@@ -23,33 +23,58 @@
             android:padding="20dp"
             android:paddingBottom="80dp">
 
-            <!-- Header Section -->
-            <LinearLayout
+            <!-- Header Section with Info Button -->
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="30dp">
 
-                <TextView
-                    android:id="@+id/profileTitle"
-                    android:layout_width="wrap_content"
+                <!-- Title + Subtitle -->
+                <LinearLayout
+                    android:id="@+id/headerTextBlock"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="My Profile"
-                    android:textSize="32sp"
-                    android:textColor="?attr/primaryTextColor"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium"
-                    android:layout_marginBottom="8dp" />
+                    android:orientation="vertical"
+                    android:paddingEnd="48dp">
 
-                <TextView
-                    android:id="@+id/profileSubtitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Track and manage your items"
-                    android:textSize="16sp"
-                    android:textColor="?attr/secondaryTextColor" />
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/profileTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="My Profile"
+                        android:textSize="32sp"
+                        android:textColor="?attr/primaryTextColor"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/profileSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Track and manage your items"
+                        android:textSize="16sp"
+                        android:textColor="?attr/secondaryTextColor" />
+
+                </LinearLayout>
+
+                <!-- Info Button — top-right corner -->
+                <ImageView
+                    android:id="@+id/infoButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="Information"
+                    android:focusable="true"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_info_button"
+                    tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck,TouchTargetSizeCheck,TouchTargetSizeCheck,TouchTargetSizeCheck,TouchTargetSizeCheck" />
+
+            </RelativeLayout>
 
             <!-- Your Activity Section -->
             <TextView
@@ -349,7 +374,7 @@
                             android:layout_marginEnd="12dp" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
@@ -535,7 +560,7 @@
                             android:layout_marginEnd="12dp" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
@@ -591,7 +616,7 @@
                             android:layout_marginEnd="12dp" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
@@ -701,7 +726,7 @@
         android:layout_above="@id/bottomNavigation"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/ic_fab_add"
         android:contentDescription="Add Product"
         android:background="@drawable/fab_modern_background"
         android:elevation="8dp"

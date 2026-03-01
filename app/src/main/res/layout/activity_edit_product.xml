@@ -7,45 +7,38 @@
     android:background="#F5F7FA">
 
     <LinearLayout
+        android:id="@+id/rootLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- Header -->
-        <LinearLayout
+        <!-- Back Button — ImageView above title, same as CategoryDetailActivity -->
+        <ImageView
+            android:id="@+id/cancelButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_back_arrow"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Go back"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="6dp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/headerTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="32dp">
-
-            <Button
-                android:id="@+id/cancelButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:text="←"
-                android:textSize="20sp"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#757575" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Edit Product"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:textColor="#1A1E2C" />
-
-            <View
-                android:layout_width="48dp"
-                android:layout_height="48dp" />
-        </LinearLayout>
+            android:text="Edit Product"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#1A1E2C"
+            android:layout_marginBottom="32dp" />
 
         <!-- Product Name -->
         <TextView
+            android:id="@+id/productNameLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Product Name"
@@ -66,6 +59,7 @@
 
         <!-- Expiry Date -->
         <TextView
+            android:id="@+id/expiryDateLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Expiry Date"
@@ -74,19 +68,26 @@
             android:textColor="#1A1E2C"
             android:layout_marginBottom="8dp" />
 
+        <!-- Expiry Date field with calendar icon -->
         <EditText
             android:id="@+id/expiryDateEdit"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:hint="Select expiry date"
-            android:padding="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
             android:background="#FFFFFF"
             android:elevation="2dp"
             android:focusable="false"
+            android:drawableEnd="@drawable/ic_calendar"
+            android:drawablePadding="8dp"
             android:layout_marginBottom="24dp" />
 
         <!-- Category -->
         <TextView
+            android:id="@+id/categoryLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Category"
@@ -95,17 +96,38 @@
             android:textColor="#1A1E2C"
             android:layout_marginBottom="8dp" />
 
-        <Spinner
-            android:id="@+id/categorySpinner"
+        <!-- Category Spinner with dropdown icon -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="#FFFFFF"
-            android:elevation="2dp"
-            android:padding="8dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="24dp">
+
+            <Spinner
+                android:id="@+id/categorySpinner"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="#FFFFFF"
+                android:elevation="2dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="52dp" />
+
+            <ImageView
+                android:id="@+id/dropdownIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="14dp"
+                android:src="@drawable/ic_dropdown_updown"
+                android:contentDescription="Select category"
+                android:clickable="false"
+                android:focusable="false"
+                android:elevation="4dp" />
+
+        </FrameLayout>
 
         <!-- Quantity -->
         <TextView
+            android:id="@+id/quantityLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Quantity"
@@ -127,6 +149,7 @@
 
         <!-- Notes -->
         <TextView
+            android:id="@+id/notesLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Notes"

@@ -5,7 +5,7 @@
     android:id="@+id/productCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
+    android:layout_marginBottom="12dp"
     android:layout_marginHorizontal="2dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
@@ -15,28 +15,43 @@
         android:id="@+id/productItemLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="12dp">
+        android:orientation="vertical">
 
-        <!-- Product Image -->
-        <ImageView
-            android:id="@+id/productImage"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="Product image"
-            android:background="@drawable/image_rounded_background"
-            android:clipToOutline="true" />
+        <!-- Full-width image on top -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="180dp">
 
-        <!-- Name / Expiry / Badge -->
+            <ImageView
+                android:id="@+id/productImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Product image" />
+
+            <!-- three-dot menu in top-right corner over the image -->
+            <ImageView
+                android:id="@+id/menuButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_more_vert"
+                android:padding="6dp"
+                android:background="@drawable/menu_button_bg"
+                android:contentDescription="More options"
+                android:clickable="true"
+                android:focusable="true"
+                app:tint="#FFFFFF" />
+
+        </FrameLayout>
+
+        <!-- Text section below image -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="4dp">
+            android:padding="12dp">
 
             <TextView
                 android:id="@+id/productName"
@@ -54,11 +69,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Expires: Jan 1, 2026"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="#8A8F9E"
                 android:layout_marginTop="2dp" />
 
-            <!-- Status Badge (replaces old daysLeft label + colored bar) -->
+            <!-- Status Badge -->
             <TextView
                 android:id="@+id/productDaysLeft"
                 android:layout_width="wrap_content"
@@ -74,20 +89,7 @@
 
         </LinearLayout>
 
-        <!-- ⋮ Three-dot menu button -->
-        <ImageView
-            android:id="@+id/menuButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_more_vert"
-            android:padding="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="More options"
-            android:clickable="true"
-            android:focusable="true"
-            app:tint="#8A8F9E" />
-
-        <!-- Hidden — kept for adapter compatibility, no longer visible -->
+        <!-- Hidden - kept for adapter compatibility -->
         <View
             android:id="@+id/statusIndicator"
             android:layout_width="0dp"

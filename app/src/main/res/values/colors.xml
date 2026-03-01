@@ -15,7 +15,7 @@
     <color name="color_fab_white">#6200EE</color>
     <color name="color_fab_icon_white">#FFFFFF</color>
 
-    <!-- Navigation Colors - White Theme (ADD THESE) -->
+    <!-- Navigation Colors - White Theme -->
     <color name="color_nav_background_white">#6200EE</color>
     <color name="color_nav_inactive_white">#B39DDB</color>
 
@@ -34,7 +34,7 @@
     <color name="color_fab_black">#BB86FC</color>
     <color name="color_fab_icon_black">#121212</color>
 
-    <!-- Navigation Colors - Black Theme (ADD THESE) -->
+    <!-- Navigation Colors - Black Theme -->
     <color name="color_nav_background_black">#1E1E1E</color>
     <color name="color_nav_inactive_black">#666666</color>
 
@@ -55,23 +55,22 @@
     <color name="gray_medium">#9E9E9E</color>
     <color name="gray_dark">#616161</color>
 
-    <!-- Card surface colors -->
+    <!-- Category Colors - Light Theme -->
+    <color name="category_dairy_light">#FEF5E7</color>      <!-- Cream -->
+    <color name="category_vegetables_light">#E8F5E9</color> <!-- Mint -->
+    <color name="category_fruits_light">#FFF3E0</color>     <!-- Peach -->
+    <color name="category_meats_light">#FFEBEE</color>      <!-- Rose -->
+    <color name="category_beverages_light">#E3F2FD</color>  <!-- Sky blue -->
+    <color name="category_medicine_light">#F3E5F5</color>   <!-- Lavender -->
+    <color name="category_other_light">#EDE7F6</color>      <!-- Periwinkle -->
 
-    <!-- Category colors - Light theme -->
-    <color name="category_dairy_light">#FFF3E0</color>
-    <color name="category_vegetables_light">#E8F5E9</color>
-    <color name="category_fruits_light">#FFF3E0</color>
-    <color name="category_meats_light">#FFEBEE</color>
-    <color name="category_beverages_light">#E0F2F1</color>
-    <color name="category_medicine_light">#FFE8E8</color>
-    <color name="category_other_light">#F3F0FF</color>
+    <!-- Category Colors - Dark Theme -->
+    <color name="category_dairy_dark">#2A2A3A</color>       <!-- Darker navy -->
+    <color name="category_vegetables_dark">#2D5A5A</color>  <!-- Deep teal -->
+    <color name="category_fruits_dark">#B45D5A</color>      <!-- Warm terracotta -->
+    <color name="category_meats_dark">#8B3A5A</color>       <!-- Deep berry -->
+    <color name="category_beverages_dark">#2A5F7A</color>   <!-- Deep teal -->
+    <color name="category_medicine_dark">#6B3E6B</color>    <!-- Rich purple -->
+    <color name="category_other_dark">#4A4A6A</color>       <!-- Slate blue -->
 
-    <!-- Category colors - Dark theme -->
-    <color name="category_dairy_dark">#332B1A</color>
-    <color name="category_vegetables_dark">#1A2E1A</color>
-    <color name="category_fruits_dark">#332B1A</color>
-    <color name="category_meats_dark">#331A1A</color>
-    <color name="category_beverages_dark">#1A2E2E</color>
-    <color name="category_medicine_dark">#331A1A</color>
-    <color name="category_other_dark">#1A1A33</color>
 </resources>
