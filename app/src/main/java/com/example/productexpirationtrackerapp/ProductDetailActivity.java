@@ -54,7 +54,9 @@ public class ProductDetailActivity extends AppCompatActivity {
     private int productId;
     private String productName;
     private String expiryDate;
+    private Product currentProduct;
     private ProductViewModel productViewModel;
+    private ConsumedProductViewModel consumedProductViewModel;
     private SharedPreferences preferences;
 
     @Override
@@ -64,6 +66,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+        consumedProductViewModel = new ViewModelProvider(this).get(ConsumedProductViewModel.class);
 
         initializeViews();
         getIntentData();
@@ -142,6 +145,8 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void populateFromProduct(Product product) {
+        this.currentProduct = product;
+
         // Name & title
         if (product.getName() != null) {
             productNameText.setText(product.getName());
@@ -197,6 +202,51 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
             productPhoto.setImageResource(placeholder);
         }
+
+        updateConsumeButton();
+    }
+
+    // ── Check if product is expired ──────────────────────────────────────────
+
+    private boolean isProductExpired() {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date expiry = sdf.parse(expiryDate);
+            Date today = new Date();
+            return expiry != null && expiry.before(today);
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking expiry: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ── Update consume button based on expiry ────────────────────────────────
+
+    private void updateConsumeButton() {
+        if (consumeButton == null) return;
+
+        boolean isExpired = isProductExpired();
+        float dp = getResources().getDisplayMetrics().density;
+
+        if (isExpired) {
+            consumeButton.setText("DISCARD PRODUCT");
+
+            // Red color for discard
+            android.graphics.drawable.GradientDrawable buttonBg =
+                    new android.graphics.drawable.GradientDrawable();
+            buttonBg.setColor(Color.parseColor("#D32F2F")); // Red
+            buttonBg.setCornerRadius(8 * dp);
+            consumeButton.setBackground(buttonBg);
+        } else {
+            consumeButton.setText("CONSUME PRODUCT");
+
+            // Green color for consume
+            android.graphics.drawable.GradientDrawable buttonBg =
+                    new android.graphics.drawable.GradientDrawable();
+            buttonBg.setColor(Color.parseColor("#4CAF50")); // Green
+            buttonBg.setCornerRadius(8 * dp);
+            consumeButton.setBackground(buttonBg);
+        }
     }
 
     // ── Click listeners ───────────────────────────────────────────────────────
@@ -239,7 +289,49 @@ public class ProductDetailActivity extends AppCompatActivity {
         });
 
         consumeButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Consume feature coming soon", Toast.LENGTH_SHORT).show();
+            if (currentProduct == null) {
+                Toast.makeText(this, "Product data not loaded", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            boolean isExpired = isProductExpired();
+            String actionType = isExpired ? "DISCARDED" : "CONSUMED";
+            String buttonText = isExpired ? "discard" : "consume";
+            String dialogTitle = isExpired ? "Discard Product" : "Consume Product";
+            String dialogMessage = "Are you sure you want to " + buttonText + " \"" +
+                    currentProduct.getName() + "\"?";
+
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(dialogTitle)
+                    .setMessage(dialogMessage)
+                    .setPositiveButton("Yes, " + (isExpired ? "Discard" : "Consume"),
+                            (dialog, which) -> {
+                                // Create ConsumedProduct record with appropriate action type
+                                ConsumedProduct consumedProduct = new ConsumedProduct(
+                                        currentProduct.getId(),
+                                        currentProduct.getName(),
+                                        currentProduct.getCategory(),
+                                        currentProduct.getQuantity(),
+                                        currentProduct.getExpiryDate(),
+                                        actionType,  // "CONSUMED" or "DISCARDED"
+                                        currentProduct.getPhoto()
+                                );
+
+                                // Insert into consumed_products
+                                consumedProductViewModel.insert(consumedProduct);
+
+                                // Delete from products
+                                productViewModel.delete(currentProduct);
+
+                                Toast.makeText(this,
+                                        "Product marked as " + actionType + "!",
+                                        Toast.LENGTH_SHORT).show();
+
+                                // Return to product list
+                                finish();
+                            })
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
     }
 
@@ -266,6 +358,8 @@ public class ProductDetailActivity extends AppCompatActivity {
                     daysLeftText.setTextColor(Color.parseColor("#00C853")); // green
                 }
             }
+
+            updateConsumeButton();
         } catch (Exception e) {
             daysLeftText.setText("Unknown");
         }
@@ -329,15 +423,8 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
         }
 
-        // ── Consume button (green) ────────────────────────────────────────
-        if (consumeButton != null) {
-            android.graphics.drawable.GradientDrawable consumeBg =
-                    new android.graphics.drawable.GradientDrawable();
-            consumeBg.setColor(accentGreen);
-            consumeBg.setCornerRadius(8 * dp);
-            consumeButton.setBackground(consumeBg);
-            consumeButton.setTextColor(Color.WHITE);
-        }
+        // ── Consume button will be updated by updateConsumeButton() ───────
+        // The theme will be applied there with the correct colors
 
         // ── Edit button (green) ───────────────────────────────────────────
         if (editButton != null) {
@@ -387,6 +474,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             if (updatedQuantity != null) quantityText.setText(updatedQuantity);
             if (updatedNotes    != null) notesText.setText(updatedNotes);
 
+            updateConsumeButton();
             Toast.makeText(this, "Product updated successfully", Toast.LENGTH_SHORT).show();
         }
     }
