@@ -13,35 +13,27 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- Header (without Consume Button) -->
-        <LinearLayout
+        <!-- Back Button — ImageView above title, same as CategoryDetailActivity -->
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_back_arrow"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Go back"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="6dp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/titleTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="24dp">
-
-            <Button
-                android:id="@+id/backButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:text="←"
-                android:textSize="20sp"
-                android:textColor="#FFFFFF" />
-
-            <TextView
-                android:id="@+id/titleTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Product Details"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp" />
-
-        </LinearLayout>
+            android:text="Product Details"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
 
         <!-- Product Photo -->
         <TextView
@@ -67,7 +59,7 @@
             android:id="@+id/consumeButton"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="✓ CONSUME PRODUCT"
+            android:text="CONSUME PRODUCT"
             android:textSize="18sp"
             android:textColor="#FFFFFF"
             android:layout_marginBottom="24dp"
@@ -200,7 +192,7 @@
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
-                android:text="✏️ Edit"
+                android:text="EDIT"
                 android:textSize="18sp"
                 android:textColor="#FFFFFF"
                 android:layout_marginEnd="8dp" />
@@ -210,7 +202,7 @@
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
-                android:text="🗑️ Delete"
+                android:text="DELETE"
                 android:textSize="18sp"
                 android:textColor="#FFFFFF"
                 android:layout_marginStart="8dp" />

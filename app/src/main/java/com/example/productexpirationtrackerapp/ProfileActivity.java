@@ -99,6 +99,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Floating Action Button
     private ImageView addButton;
+    private ImageView infoButton;
 
     // Bottom Navigation
     private LinearLayout navProfile;
@@ -232,6 +233,7 @@ public class ProfileActivity extends AppCompatActivity {
 
             // Floating Action Button
             addButton = findViewById(R.id.addButton);
+            infoButton = findViewById(R.id.infoButton);
 
             // Bottom Navigation
             navProfile = findViewById(R.id.navProfile);
@@ -255,6 +257,128 @@ public class ProfileActivity extends AppCompatActivity {
             Log.d(TAG, "All views initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing views: " + e.getMessage());
+        }
+    }
+
+    private void showInfoDialog() {
+        // Build a custom dialog view
+        android.widget.LinearLayout root = new android.widget.LinearLayout(this);
+        root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int)(20 * getResources().getDisplayMetrics().density);
+        root.setPadding(pad, pad, pad, pad);
+
+        // Detect current theme for dialog colors
+        String theme = preferences.getString("selected_theme", "white");
+        boolean isDark = "black".equals(theme);
+        int dialogBg    = isDark ? android.graphics.Color.parseColor("#1E1E1E") : android.graphics.Color.WHITE;
+        int textPrimary = isDark ? android.graphics.Color.WHITE  : android.graphics.Color.parseColor("#212121");
+        int textSec     = isDark ? android.graphics.Color.LTGRAY : android.graphics.Color.parseColor("#757575");
+        root.setBackgroundColor(dialogBg);
+
+        // Helper to add a section title
+        java.util.function.Consumer<String> addSection = title -> {
+            android.widget.TextView tv = new android.widget.TextView(this);
+            tv.setText(title);
+            tv.setTextColor(textPrimary);
+            tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15);
+            tv.setTypeface(null, android.graphics.Typeface.BOLD);
+            int topMargin = (int)(14 * getResources().getDisplayMetrics().density);
+            android.widget.LinearLayout.LayoutParams lp =
+                    new android.widget.LinearLayout.LayoutParams(
+                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = topMargin;
+            tv.setLayoutParams(lp);
+            root.addView(tv);
+        };
+
+        // Helper to add a colour-dot row
+        java.util.function.BiConsumer<Integer, String> addColorRow = (color, desc) -> {
+            android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+            row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            int rowPad = (int)(6 * getResources().getDisplayMetrics().density);
+            row.setPadding(0, rowPad, 0, rowPad);
+
+            // Colour dot
+            android.view.View dot = new android.view.View(this);
+            int dotSize = (int)(16 * getResources().getDisplayMetrics().density);
+            android.widget.LinearLayout.LayoutParams dotLp =
+                    new android.widget.LinearLayout.LayoutParams(dotSize, dotSize);
+            dotLp.setMarginEnd((int)(12 * getResources().getDisplayMetrics().density));
+            dot.setLayoutParams(dotLp);
+            android.graphics.drawable.GradientDrawable circle = new android.graphics.drawable.GradientDrawable();
+            circle.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            circle.setColor(color);
+            dot.setBackground(circle);
+            row.addView(dot);
+
+            android.widget.TextView tv = new android.widget.TextView(this);
+            tv.setText(desc);
+            tv.setTextColor(textSec);
+            tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
+            row.addView(tv);
+            root.addView(row);
+        };
+
+        // Helper for plain text rows
+        java.util.function.Consumer<String> addNote = note -> {
+            android.widget.TextView tv = new android.widget.TextView(this);
+            tv.setText("• " + note);
+            tv.setTextColor(textSec);
+            tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
+            int topM = (int)(4 * getResources().getDisplayMetrics().density);
+            android.widget.LinearLayout.LayoutParams lp =
+                    new android.widget.LinearLayout.LayoutParams(
+                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = topM;
+            tv.setLayoutParams(lp);
+            root.addView(tv);
+        };
+
+        // ── Colour Coding ─────────────────────────────────────────────────
+        addSection.accept("Colour Coding");
+        addColorRow.accept(android.graphics.Color.parseColor("#00C853"), "Safe — product is well within its expiry date");
+        addColorRow.accept(android.graphics.Color.parseColor("#FF6D00"), "Expiring Soon — expires within the next 3 days");
+        addColorRow.accept(android.graphics.Color.parseColor("#D50000"), "Expired — product is past its expiry date");
+
+        // ── Categories ────────────────────────────────────────────────────
+        addSection.accept("Categories");
+        addNote.accept("Dairy, Vegetables, Fruits, Meats, Beverages, Medicine, Other");
+        addNote.accept("Tap a category card to filter your product list");
+
+        // ── How to use ────────────────────────────────────────────────────
+        addSection.accept("💡  Quick Tips");
+        addNote.accept("Tap + to add a new product with its expiry date");
+        addNote.accept("Use the barcode scanner (in Products) to look up items quickly");
+        addNote.accept("Use the search bar to find specific products by name");
+        addNote.accept("Tap the history icon to view recently viewed items");
+        addNote.accept("Products are sorted by expiry date by default");
+
+        // ── Expiry Logic ──────────────────────────────────────────────────
+        addSection.accept("Expiry Rules");
+        addNote.accept("'Expiring Soon' triggers when 3 days remain");
+        addNote.accept("'Expired' shows products with a past expiry date");
+        addNote.accept("Check the Products page regularly to avoid waste");
+
+        // Build & show dialog
+        androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("App Guide & Information");
+        builder.setView(new android.widget.ScrollView(this) {{
+            addView(root);
+        }});
+        builder.setPositiveButton("Got it!", null);
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Style dialog background to match theme
+        if (dialog.getWindow() != null) {
+            android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+            bg.setColor(dialogBg);
+            bg.setCornerRadius(24f);
+            dialog.getWindow().setBackgroundDrawable(bg);
         }
     }
 
@@ -285,6 +409,11 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
+        // Info button — shows color coding and app guide
+        if (infoButton != null) {
+            infoButton.setOnClickListener(v -> showInfoDialog());
+        }
+
         // Activity stat cards
         if (totalItemsCard != null) {
             totalItemsCard.setOnClickListener(v -> {
@@ -482,7 +611,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         if ("black".equals(theme)) {
             // Black theme
-            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_black);
+            fabBackgroundColor = Color.parseColor("#1E1E1E");
             bottomNavColor = ContextCompat.getColor(this, R.color.color_nav_background_black);
             textColor = Color.WHITE;
             iconColor = Color.WHITE;
@@ -536,6 +665,11 @@ public class ProfileActivity extends AppCompatActivity {
             addButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
         }
 
+        // Info button tint — matches primary text color for visibility
+        if (infoButton != null) {
+            infoButton.setImageTintList(android.content.res.ColorStateList.valueOf(primaryTextColor));
+        }
+
         // Bottom navigation icons and text colors
         if (navProfileIcon != null) navProfileIcon.setImageTintList(android.content.res.ColorStateList.valueOf(iconColor));
         if (navProductsIcon != null) navProductsIcon.setImageTintList(android.content.res.ColorStateList.valueOf(iconColor));
@@ -569,32 +703,37 @@ public class ProfileActivity extends AppCompatActivity {
         if (expiringSoonLabel != null) expiringSoonLabel.setTextColor(secondaryTextColor);
         if (expiredLabel != null) expiredLabel.setTextColor(secondaryTextColor);
 
-        // Category counts
-        if (dairyCount != null) dairyCount.setTextColor(secondaryTextColor);
-        if (vegetablesCount != null) vegetablesCount.setTextColor(secondaryTextColor);
-        if (fruitsCount != null) fruitsCount.setTextColor(secondaryTextColor);
-        if (meatsCount != null) meatsCount.setTextColor(secondaryTextColor);
-        if (beveragesCount != null) beveragesCount.setTextColor(secondaryTextColor);
-        if (medicineCount != null) medicineCount.setTextColor(secondaryTextColor);
-        if (otherCount != null) otherCount.setTextColor(secondaryTextColor);
+        // FIXED: ALL categories now use the same text color as "Other"
+        // This ensures consistent text color across all category cards
+        int categoryNameColor = primaryTextColor;  // Use same as primary text (white in dark, black in light)
+        int categoryCountColor = secondaryTextColor; // Use same as secondary text
+
+        // Apply to category counts
+        if (dairyCount != null) dairyCount.setTextColor(categoryCountColor);
+        if (vegetablesCount != null) vegetablesCount.setTextColor(categoryCountColor);
+        if (fruitsCount != null) fruitsCount.setTextColor(categoryCountColor);
+        if (meatsCount != null) meatsCount.setTextColor(categoryCountColor);
+        if (beveragesCount != null) beveragesCount.setTextColor(categoryCountColor);
+        if (medicineCount != null) medicineCount.setTextColor(categoryCountColor);
+        if (otherCount != null) otherCount.setTextColor(categoryCountColor);
 
         // Apply to category names
-        if (dairyName != null) dairyName.setTextColor(primaryTextColor);
-        if (vegetablesName != null) vegetablesName.setTextColor(primaryTextColor);
-        if (fruitsName != null) fruitsName.setTextColor(primaryTextColor);
-        if (meatsName != null) meatsName.setTextColor(primaryTextColor);
-        if (beveragesName != null) beveragesName.setTextColor(primaryTextColor);
-        if (medicineName != null) medicineName.setTextColor(primaryTextColor);
-        if (otherName != null) otherName.setTextColor(primaryTextColor);
+        if (dairyName != null) dairyName.setTextColor(categoryNameColor);
+        if (vegetablesName != null) vegetablesName.setTextColor(categoryNameColor);
+        if (fruitsName != null) fruitsName.setTextColor(categoryNameColor);
+        if (meatsName != null) meatsName.setTextColor(categoryNameColor);
+        if (beveragesName != null) beveragesName.setTextColor(categoryNameColor);
+        if (medicineName != null) medicineName.setTextColor(categoryNameColor);
+        if (otherName != null) otherName.setTextColor(categoryNameColor);
 
         // Apply to category icons (emojis)
-        if (dairyIcon != null) dairyIcon.setTextColor(primaryTextColor);
-        if (vegetablesIcon != null) vegetablesIcon.setTextColor(primaryTextColor);
-        if (fruitsIcon != null) fruitsIcon.setTextColor(primaryTextColor);
-        if (meatsIcon != null) meatsIcon.setTextColor(primaryTextColor);
-        if (beveragesIcon != null) beveragesIcon.setTextColor(primaryTextColor);
-        if (medicineIcon != null) medicineIcon.setTextColor(primaryTextColor);
-        if (otherIcon != null) otherIcon.setTextColor(primaryTextColor);
+        if (dairyIcon != null) dairyIcon.setTextColor(categoryNameColor);
+        if (vegetablesIcon != null) vegetablesIcon.setTextColor(categoryNameColor);
+        if (fruitsIcon != null) fruitsIcon.setTextColor(categoryNameColor);
+        if (meatsIcon != null) meatsIcon.setTextColor(categoryNameColor);
+        if (beveragesIcon != null) beveragesIcon.setTextColor(categoryNameColor);
+        if (medicineIcon != null) medicineIcon.setTextColor(categoryNameColor);
+        if (otherIcon != null) otherIcon.setTextColor(categoryNameColor);
 
         // Apply to layout backgrounds
         if (firstRowLayout != null) firstRowLayout.setBackgroundColor(backgroundColor);

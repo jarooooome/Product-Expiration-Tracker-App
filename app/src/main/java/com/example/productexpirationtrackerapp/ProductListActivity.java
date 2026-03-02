@@ -44,6 +44,11 @@ public class ProductListActivity extends AppCompatActivity {
     // UI Components
     private TextView hiUserTextView;
     private ImageView historyButton;
+    private android.view.View searchBarContainer;
+    private ImageView listViewButton;
+    private ImageView gridViewButton;
+    private LinearLayout viewToggleContainer;
+    private boolean isListView = true;
     private TextView welcomeDescriptionTextView;
     private TextView categoryLabelTextView;
     private ImageView addButton;
@@ -53,8 +58,9 @@ public class ProductListActivity extends AppCompatActivity {
     private LinearLayout bottomNavigation;
     private LinearLayout headerLayout;
     private EditText searchEditText;
-    private TextView searchEmoji;
+    private ImageView searchEmoji;
     private ImageView clearSearchButton;
+    private ImageView barcodeScannerButton;
     private HorizontalScrollView categoryScrollView;
     private ScrollView scrollView;
 
@@ -270,60 +276,59 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
+    private String getTimeBasedGreeting() {
+        int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
+        if (hour >= 5 && hour < 12) {
+            return "Good morning";
+        } else if (hour >= 12 && hour < 17) {
+            return "Good afternoon";
+        } else {
+            return "Good evening";
+        }
+    }
+
     private void updateWelcomeText() {
         Log.d(TAG, "updateWelcomeText() called");
 
-        if (hiUserTextView != null) {
-            // Show "Loading..." initially
-            hiUserTextView.setText("Hi, Loading...! \uD83D\uDC4B");
-            Log.d(TAG, "Set temporary loading text");
-
-            // Get user from database asynchronously
-            Log.d(TAG, "Attempting to get user from database via callback...");
-            userRepository.getUser(new UserRepository.UserRepositoryCallback() {
-                @Override
-                public void onUserLoaded(User user) {
-                    Log.d(TAG, "Callback received - user: " + (user != null ? "FOUND" : "NULL"));
-
-                    String userName = "User"; // Default
-                    String source = "default";
-
-                    if (user != null) {
-                        Log.d(TAG, "User object exists in database");
-                        String dbName = user.getUserName();
-                        Log.d(TAG, "Database user name: '" + dbName + "'");
-
-                        if (dbName != null && !dbName.isEmpty()) {
-                            userName = dbName;
-                            source = "database";
-                            Log.d(TAG, "Using name from DATABASE: " + userName);
-                        } else {
-                            // Fallback to SharedPreferences
-                            source = "sharedpreferences (fallback - db name empty)";
-                            userName = preferences.getString("user_name", "User");
-                            Log.d(TAG, "Database name empty, falling back to SharedPreferences");
-                            Log.d(TAG, "SharedPreferences user_name value: " + preferences.getString("user_name", "NOT_FOUND"));
-                        }
-                    } else {
-                        Log.d(TAG, "No user found in database");
-                        // Fallback to SharedPreferences
-                        source = "sharedpreferences (fallback - no user)";
-                        userName = preferences.getString("user_name", "User");
-                        Log.d(TAG, "SharedPreferences user_name value: " + preferences.getString("user_name", "NOT_FOUND"));
-                    }
-
-                    final String finalUserName = userName;
-                    final String finalSource = source;
-
-                    runOnUiThread(() -> {
-                        Log.d(TAG, "Setting welcome text from " + finalSource + " to: " + finalUserName);
-                        hiUserTextView.setText("Hi, " + finalUserName + "! \uD83D\uDC4B");
-                    });
-                }
-            });
-        } else {
+        if (hiUserTextView == null) {
             Log.e(TAG, "hiUserTextView is null, cannot update welcome text");
+            return;
         }
+
+        // Show time-based placeholder immediately while DB loads
+        hiUserTextView.setText(getTimeBasedGreeting() + ", ...");
+
+        userRepository.getUser(new UserRepository.UserRepositoryCallback() {
+            @Override
+            public void onUserLoaded(User user) {
+                String userName = "User";
+                String source   = "default";
+
+                if (user != null) {
+                    String dbName = user.getUserName();
+                    if (dbName != null && !dbName.trim().isEmpty()) {
+                        userName = dbName.trim();
+                        source   = "database";
+                    } else {
+                        String spName = preferences.getString("user_name", "").trim();
+                        if (!spName.isEmpty()) { userName = spName; source = "SharedPreferences (db empty)"; }
+                    }
+                } else {
+                    String spName = preferences.getString("user_name", "").trim();
+                    if (!spName.isEmpty()) { userName = spName; source = "SharedPreferences (no db user)"; }
+                }
+
+                Log.d(TAG, "Greeting source: " + source + " -> " + userName);
+
+                final String finalText = getTimeBasedGreeting() + ", " + userName + "!";
+                runOnUiThread(() -> {
+                    if (hiUserTextView != null) {
+                        hiUserTextView.setText(finalText);
+                        Log.d(TAG, "Greeting set: " + finalText);
+                    }
+                });
+            }
+        });
     }
 
     private void initializeViews() {
@@ -340,10 +345,21 @@ public class ProductListActivity extends AppCompatActivity {
             headerLayout = findViewById(R.id.headerLayout);
             searchEditText = findViewById(R.id.searchEditText);
             searchEmoji = findViewById(R.id.searchEmoji);
+            searchBarContainer = findViewById(R.id.searchBarContainer);
             clearSearchButton = findViewById(R.id.clearSearchButton);
+            barcodeScannerButton = findViewById(R.id.barcodeScannerButton);
+            if (barcodeScannerButton != null) {
+                barcodeScannerButton.setOnClickListener(v -> {
+                    android.widget.Toast.makeText(this,
+                            "Barcode Scanner coming soon!", android.widget.Toast.LENGTH_SHORT).show();
+                });
+            }
             categoryScrollView = findViewById(R.id.categoryScrollView);
             scrollView = findViewById(R.id.scrollView);
             historyButton = findViewById(R.id.historyButton);
+            listViewButton = findViewById(R.id.listViewButton);
+            gridViewButton = findViewById(R.id.gridViewButton);
+            viewToggleContainer = findViewById(R.id.viewToggleContainer);
 
             // Bulk Action Views
             bulkActionLayout = findViewById(R.id.bulkActionLayout);
@@ -494,23 +510,9 @@ public class ProductListActivity extends AppCompatActivity {
             @Override
             public void onItemClick(int position) {
                 if (isInBulkMode) {
-                    // In bulk mode, toggle selection
                     toggleSelection(position);
-                } else {
-                    // Normal mode - open product details
-                    Product product = productList.get(position);
-                    Log.d(TAG, "Opening product details: " + product.getName());
-
-                    Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
-                    intent.putExtra("product_id", product.getId());
-                    intent.putExtra("product_name", product.getName());
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
-
-                    startActivityForResult(intent, 100);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
+                // Normal mode: do nothing — use the 3-dot Edit button to open product details
             }
 
             @Override
@@ -518,6 +520,31 @@ public class ProductListActivity extends AppCompatActivity {
                 // Enter bulk mode and select the item
                 enterBulkMode();
                 toggleSelection(position);
+            }
+        });
+
+        adapter.setOnMenuClickListener(new ProductAdapter.OnMenuClickListener() {
+            @Override
+            public void onEditClick(int position) {
+                Product product = productList.get(position);
+                Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
+                intent.putExtra("product_id", product.getId());
+                intent.putExtra("product_name", product.getName());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
+                startActivityForResult(intent, 100);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
+
+            @Override
+            public void onDeleteClick(int position) {
+                Product product = productList.get(position);
+                new android.app.AlertDialog.Builder(ProductListActivity.this)
+                        .setTitle("Delete Product")
+                        .setMessage("Are you sure you want to delete \"" + product.getName() + "\"?")
+                        .setPositiveButton("Delete", (dialog, which) -> productViewModel.delete(product))
+                        .setNegativeButton("Cancel", null)
+                        .show();
             }
         });
 
@@ -658,6 +685,31 @@ public class ProductListActivity extends AppCompatActivity {
                     Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
                     startActivityForResult(intent, 200);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+            });
+        }
+
+        if (listViewButton != null) {
+            listViewButton.setOnClickListener(v -> {
+                if (!isListView) {
+                    isListView = true;
+                    listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#4361EE")));
+                    gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#999999")));
+                    if (productRecyclerView != null)
+                        productRecyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(ProductListActivity.this));
+                    adapter.setGridView(false);
+                }
+            });
+        }
+        if (gridViewButton != null) {
+            gridViewButton.setOnClickListener(v -> {
+                if (isListView) {
+                    isListView = false;
+                    gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#4361EE")));
+                    listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#999999")));
+                    if (productRecyclerView != null)
+                        productRecyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(ProductListActivity.this));
+                    adapter.setGridView(true);
                 }
             });
         }
@@ -872,7 +924,7 @@ public class ProductListActivity extends AppCompatActivity {
             fabBackgroundColor = Color.parseColor("#1E1E1E"); // Slightly lighter black for FAB
             fabIconColor = Color.WHITE; // White icon for FAB
 
-            // Set all category text to white for dark theme
+            // FIXED: ALL categories now use white text in dark theme (matching Other)
             if (categoryAllTitle != null) {
                 categoryAllTitle.setTextColor(Color.WHITE);
                 categoryAllTitle.setBackgroundColor(Color.TRANSPARENT);
@@ -953,6 +1005,7 @@ public class ProductListActivity extends AppCompatActivity {
                 categoryMedicineCount.setTextColor(Color.WHITE);
                 categoryMedicineCount.setBackgroundColor(Color.TRANSPARENT);
             }
+            // Other category - already white, but ensure consistency
             if (categoryOtherIcon != null) {
                 categoryOtherIcon.setTextColor(Color.WHITE);
                 categoryOtherIcon.setBackgroundColor(Color.TRANSPARENT);
@@ -982,16 +1035,46 @@ public class ProductListActivity extends AppCompatActivity {
             if (productCountText != null) {
                 productCountText.setTextColor(Color.WHITE);
             }
+            // Dark search bar container
+            if (searchBarContainer != null) {
+                android.graphics.drawable.GradientDrawable searchBgDark = new android.graphics.drawable.GradientDrawable();
+                searchBgDark.setColor(Color.parseColor("#2C2C2C"));
+                searchBgDark.setCornerRadius(50 * getResources().getDisplayMetrics().density);
+                searchBarContainer.setBackground(searchBgDark);
+            }
             if (searchEditText != null) {
                 searchEditText.setTextColor(Color.WHITE);
-                searchEditText.setHintTextColor(Color.parseColor("#80FFFFFF"));
+                searchEditText.setHintTextColor(Color.parseColor("#888888"));
                 searchEditText.setBackgroundColor(Color.TRANSPARENT);
             }
             if (searchEmoji != null) {
-                searchEmoji.setTextColor(Color.WHITE);
+                searchEmoji.setColorFilter(Color.WHITE);
+            }
+            if (barcodeScannerButton != null) {
+                barcodeScannerButton.setColorFilter(Color.WHITE);
+                // Glass circle background in dark mode
+                android.graphics.drawable.GradientDrawable glassCircle = new android.graphics.drawable.GradientDrawable();
+                glassCircle.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+                glassCircle.setColor(Color.argb(50, 255, 255, 255));
+                glassCircle.setStroke(2, Color.argb(120, 255, 255, 255));
+                barcodeScannerButton.setBackground(glassCircle);
             }
             if (historyButton != null) {
                 historyButton.setColorFilter(Color.WHITE);
+            }
+            if (listViewButton != null)
+                listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(
+                        isListView ? Color.parseColor("#4361EE") : Color.parseColor("#AAAAAA")));
+            if (gridViewButton != null)
+                gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(
+                        isListView ? Color.parseColor("#AAAAAA") : Color.parseColor("#4361EE")));
+            if (viewToggleContainer != null) {
+                float dp = getResources().getDisplayMetrics().density;
+                android.graphics.drawable.GradientDrawable toggleBg = new android.graphics.drawable.GradientDrawable();
+                toggleBg.setColor(Color.parseColor("#2A2A2A"));
+                toggleBg.setCornerRadius(32 * dp);
+                toggleBg.setStroke(1, Color.parseColor("#444444"));
+                viewToggleContainer.setBackground(toggleBg);
             }
 
             // Make category button backgrounds transparent
@@ -1041,41 +1124,63 @@ public class ProductListActivity extends AppCompatActivity {
             if (productCountText != null) {
                 productCountText.setTextColor(Color.BLACK);
             }
+            // Light search bar container
+            if (searchBarContainer != null) {
+                android.graphics.drawable.GradientDrawable searchBgLight = new android.graphics.drawable.GradientDrawable();
+                searchBgLight.setColor(Color.WHITE);
+                searchBgLight.setCornerRadius(50 * getResources().getDisplayMetrics().density);
+                searchBgLight.setStroke(1, Color.parseColor("#E0E0E0"));
+                searchBarContainer.setBackground(searchBgLight);
+            }
             if (searchEditText != null) {
                 searchEditText.setTextColor(Color.BLACK);
                 searchEditText.setHintTextColor(Color.parseColor("#80000000"));
             }
             if (searchEmoji != null) {
-                searchEmoji.setTextColor(Color.BLACK);
+                searchEmoji.setColorFilter(Color.DKGRAY);
             }
             if (historyButton != null) {
                 historyButton.setColorFilter(Color.BLACK);
             }
+            if (listViewButton != null)
+                listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(
+                        isListView ? Color.parseColor("#4361EE") : Color.parseColor("#777777")));
+            if (gridViewButton != null)
+                gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(
+                        isListView ? Color.parseColor("#777777") : Color.parseColor("#4361EE")));
+            if (viewToggleContainer != null) {
+                float dp = getResources().getDisplayMetrics().density;
+                android.graphics.drawable.GradientDrawable toggleBg = new android.graphics.drawable.GradientDrawable();
+                toggleBg.setColor(Color.WHITE);
+                toggleBg.setCornerRadius(32 * dp);
+                toggleBg.setStroke(1, Color.parseColor("#DDDDDD"));
+                viewToggleContainer.setBackground(toggleBg);
+            }
 
-            // Set category text to black
+            // Set category text to white (readable on colored backgrounds)
             if (categoryAllTitle != null) categoryAllTitle.setTextColor(Color.BLACK);
             if (categoryAllCount != null) categoryAllCount.setTextColor(Color.DKGRAY);
-            if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(Color.BLACK);
-            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(Color.BLACK);
-            if (categoryDairyCount != null) categoryDairyCount.setTextColor(Color.DKGRAY);
-            if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(Color.BLACK);
-            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(Color.BLACK);
-            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(Color.DKGRAY);
-            if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(Color.BLACK);
-            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(Color.BLACK);
-            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(Color.DKGRAY);
-            if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(Color.BLACK);
-            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(Color.BLACK);
-            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(Color.DKGRAY);
-            if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(Color.BLACK);
-            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(Color.BLACK);
-            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(Color.DKGRAY);
-            if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(Color.BLACK);
-            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(Color.BLACK);
-            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(Color.DKGRAY);
-            if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(Color.BLACK);
-            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(Color.BLACK);
-            if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.DKGRAY);
+            if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(Color.WHITE);
+            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(Color.WHITE);
+            if (categoryDairyCount != null) categoryDairyCount.setTextColor(Color.parseColor("#DDDDDD"));
+            if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(Color.WHITE);
+            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(Color.WHITE);
+            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(Color.parseColor("#DDDDDD"));
+            if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(Color.WHITE);
+            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(Color.WHITE);
+            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(Color.parseColor("#DDDDDD"));
+            if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(Color.WHITE);
+            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(Color.WHITE);
+            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(Color.parseColor("#DDDDDD"));
+            if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(Color.WHITE);
+            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(Color.WHITE);
+            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(Color.parseColor("#DDDDDD"));
+            if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(Color.WHITE);
+            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(Color.WHITE);
+            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(Color.parseColor("#DDDDDD"));
+            if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(Color.WHITE);
+            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(Color.WHITE);
+            if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.parseColor("#DDDDDD"));
         }
 
         Log.d(TAG, "Theme: " + theme);
@@ -1093,11 +1198,8 @@ public class ProductListActivity extends AppCompatActivity {
         if (productRecyclerView != null) productRecyclerView.setBackgroundColor(backgroundColor);
         if (headerLayout != null) headerLayout.setBackgroundColor(backgroundColor);
 
-        // Don't call setCategoryButtonColors for black theme - keep transparent
-        if (!"black".equals(theme)) {
-            setCategoryButtonColors(fabBackgroundColor);
-        }
-        if (categoryAllButton != null && !"black".equals(theme)) {
+        // Always initialize category buttons for both themes
+        if (categoryAllButton != null) {
             setActiveCategoryButton(categoryAllButton, fabBackgroundColor);
         }
         applyFABAndBottomNavColors();
@@ -1157,23 +1259,120 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
+    private android.graphics.drawable.GradientDrawable makeRoundedBg(int color, boolean withStroke) {
+        android.graphics.drawable.GradientDrawable d = new android.graphics.drawable.GradientDrawable();
+        d.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        d.setCornerRadius(16f * getResources().getDisplayMetrics().density);
+        d.setColor(color);
+        if (withStroke) {
+            d.setStroke(2, Color.argb(120, 255, 255, 255));
+        }
+        return d;
+    }
+
     private void setActiveCategoryButton(LinearLayout activeButton, int fabColor) {
-        boolean isDarkTheme = (fabColor == getResources().getColor(R.color.color_fab_black));
-        boolean isWhiteTheme = (fabColor == getResources().getColor(R.color.color_fab_white));
+        User user = userRepository.getUserSync();
+        boolean isBlackTheme = user != null && "black".equals(user.getColorTheme());
 
-        setCategoryButtonColors(fabColor);
+        // Per-category profile light colors (matches Profile activity)
+        int[] categoryColors = {
+                0, // All — handled separately
+                ContextCompat.getColor(this, R.color.category_dairy_dark),
+                ContextCompat.getColor(this, R.color.category_vegetables_dark),
+                ContextCompat.getColor(this, R.color.category_fruits_dark),
+                ContextCompat.getColor(this, R.color.category_meats_dark),
+                ContextCompat.getColor(this, R.color.category_beverages_dark),
+                ContextCompat.getColor(this, R.color.category_medicine_dark),
+                ContextCompat.getColor(this, R.color.category_other_dark)
+        };
+        LinearLayout[] allButtons = {
+                categoryAllButton, categoryDairyButton, categoryVegetablesButton,
+                categoryFruitsButton, categoryMeatsButton, categoryBeveragesButton,
+                categoryMedicineButton, categoryOtherButton
+        };
 
-        if (activeButton != null) {
-            if (isDarkTheme) {
-                activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#CCCCCC")));
-                setCategoryTextColor(Color.BLACK);
-            } else if (isWhiteTheme) {
-                activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#A9A9A9")));
-                setCategoryTextColor(Color.WHITE);
-            } else {
-                activeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fabColor));
-                setCategoryTextColor(Color.WHITE);
+        if (isBlackTheme) {
+            // "All" button: glass effect
+            if (categoryAllButton != null) {
+                boolean isActive = categoryAllButton == activeButton;
+                categoryAllButton.setBackground(makeRoundedBg(
+                        isActive ? Color.argb(70, 255, 255, 255) : Color.argb(25, 255, 255, 255), isActive));
             }
+            // Other buttons: profile light colors, with white border glow when active
+            for (int i = 1; i < allButtons.length; i++) {
+                LinearLayout btn = allButtons[i];
+                if (btn != null) {
+                    android.graphics.drawable.GradientDrawable d = makeRoundedBg(categoryColors[i], true);
+                    if (btn == activeButton) {
+                        // Brighter border when active
+                        d.setStroke(3, Color.WHITE);
+                    }
+                    btn.setBackground(d);
+                }
+            }
+            // FIXED: ALL categories now use white text in dark theme
+            if (categoryAllTitle != null) categoryAllTitle.setTextColor(Color.WHITE);
+            if (categoryAllCount  != null) categoryAllCount.setTextColor(Color.WHITE);
+            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(Color.WHITE);
+            if (categoryDairyCount != null) categoryDairyCount.setTextColor(Color.WHITE);
+            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(Color.WHITE);
+            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(Color.WHITE);
+            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(Color.WHITE);
+            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(Color.WHITE);
+            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(Color.WHITE);
+            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(Color.WHITE);
+            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(Color.WHITE);
+            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(Color.WHITE);
+            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(Color.WHITE);
+            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(Color.WHITE);
+            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(Color.WHITE);
+            if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.WHITE);
+
+        } else {
+            // Light mode: "All" grey, other buttons use profile light colors
+            if (categoryAllButton != null) {
+                boolean isActive = categoryAllButton == activeButton;
+                categoryAllButton.setBackground(makeRoundedBg(
+                        isActive ? Color.argb(60, 180, 180, 180) : Color.parseColor("#CCCCCC"), isActive));
+            }
+            for (int i = 1; i < allButtons.length; i++) {
+                LinearLayout btn = allButtons[i];
+                if (btn != null) {
+                    if (btn == activeButton) {
+                        android.graphics.drawable.GradientDrawable activeBg = makeRoundedBg(categoryColors[i], false);
+                        activeBg.setStroke(3, Color.WHITE);
+                        btn.setBackground(activeBg);
+                    } else {
+                        btn.setBackground(makeRoundedBg(categoryColors[i], false));
+                    }
+                }
+            }
+            // Active button text white (on blue), inactive text black
+            // Exception: Other always white (dark navy background)
+            // All category buttons have colored backgrounds — always white text
+            if (categoryAllTitle != null) categoryAllTitle.setTextColor(categoryAllButton == activeButton ? Color.WHITE : Color.BLACK);
+            if (categoryAllCount  != null) categoryAllCount.setTextColor(categoryAllButton == activeButton ? Color.WHITE : Color.DKGRAY);
+            LinearLayout[] textBtns = {categoryDairyButton, categoryVegetablesButton, categoryFruitsButton,
+                    categoryMeatsButton, categoryBeveragesButton, categoryMedicineButton, categoryOtherButton};
+            TextView[][] textViews = {
+                    {categoryDairyIcon, categoryDairyTitle, categoryDairyCount},
+                    {categoryVegetablesIcon, categoryVegetablesTitle, categoryVegetablesCount},
+                    {categoryFruitsIcon, categoryFruitsTitle, categoryFruitsCount},
+                    {categoryMeatsIcon, categoryMeatsTitle, categoryMeatsCount},
+                    {categoryBeveragesIcon, categoryBeveragesTitle, categoryBeveragesCount},
+                    {categoryMedicineIcon, categoryMedicineTitle, categoryMedicineCount},
+                    {categoryOtherIcon, categoryOtherTitle, categoryOtherCount}
+            };
+            for (int j = 0; j < textBtns.length; j++) {
+                for (TextView tv : textViews[j]) { if (tv != null) tv.setTextColor(Color.WHITE); }
+            }
+        }
+
+        // Scrollbar thumb color: white in dark mode, grey in light mode
+        if (categoryScrollView != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            categoryScrollView.setHorizontalScrollbarThumbDrawable(
+                    new android.graphics.drawable.ColorDrawable(
+                            isBlackTheme ? Color.WHITE : Color.parseColor("#888888")));
         }
     }
 
@@ -1212,9 +1411,10 @@ public class ProductListActivity extends AppCompatActivity {
         int fabIconColor = prefs.getInt("fab_icon_color",
                 getResources().getColor(R.color.color_fab_icon_white));
 
-        // Get current theme
+        // Get current theme - check both DB and SharedPreferences as fallback
         User user = userRepository.getUserSync();
-        boolean isBlackTheme = user != null ? "black".equals(user.getColorTheme()) : false;
+        String savedTheme = prefs.getString("color_theme", "white");
+        boolean isBlackTheme = (user != null && "black".equals(user.getColorTheme())) || "black".equals(savedTheme);
 
         if (addButton != null) {
             if (isBlackTheme) {
@@ -1245,31 +1445,44 @@ public class ProductListActivity extends AppCompatActivity {
                 if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(Color.WHITE);
                 if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(Color.WHITE);
 
-                if (searchEmoji != null) searchEmoji.setTextColor(Color.WHITE);
+                if (searchEmoji != null) searchEmoji.setColorFilter(Color.WHITE);
                 if (clearSearchButton != null) clearSearchButton.setColorFilter(Color.WHITE);
-                if (historyButton != null) historyButton.setColorFilter(Color.WHITE);
+
+                // OPTION 2: History icon - WHITE in dark mode
+                if (historyButton != null) {
+                    historyButton.setColorFilter(Color.WHITE);
+                }
 
             } else {
-                // White theme: Navigation bar WHITE, icons and text BLACK
-                bottomNavigation.setBackgroundColor(Color.WHITE);
+                // White theme: Navigation bar DARK, icons and text WHITE
+                bottomNavigation.setBackgroundColor(Color.parseColor("#1E1E1E"));
                 bottomNavigation.setElevation(8f);
 
-                // For white theme, icons and text should be BLACK
-                if (navProfileIcon != null) navProfileIcon.setColorFilter(Color.BLACK);
-                if (navProfileText != null) navProfileText.setTextColor(Color.BLACK);
-                if (navProductsIcon != null) navProductsIcon.setColorFilter(Color.BLACK);
-                if (navProductsText != null) navProductsText.setTextColor(Color.BLACK);
-                if (navSettingsIcon != null) navSettingsIcon.setColorFilter(Color.BLACK);
-                if (navSettingsText != null) navSettingsText.setTextColor(Color.BLACK);
+                if (navProfileIcon != null) navProfileIcon.setColorFilter(Color.WHITE);
+                if (navProfileText != null) navProfileText.setTextColor(Color.WHITE);
+                if (navProductsIcon != null) navProductsIcon.setColorFilter(Color.WHITE);
+                if (navProductsText != null) navProductsText.setTextColor(Color.WHITE);
+                if (navSettingsIcon != null) navSettingsIcon.setColorFilter(Color.WHITE);
+                if (navSettingsText != null) navSettingsText.setTextColor(Color.WHITE);
 
-                // Keep indicators purple for visibility
-                if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(Color.parseColor("#6200EE"));
-                if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(Color.parseColor("#6200EE"));
-                if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(Color.parseColor("#6200EE"));
+                if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(Color.WHITE);
+                if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(Color.WHITE);
+                if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(Color.WHITE);
 
-                if (searchEmoji != null) searchEmoji.setTextColor(Color.BLACK);
+                if (searchEmoji != null) searchEmoji.setColorFilter(Color.DKGRAY);
+                if (barcodeScannerButton != null) {
+                    barcodeScannerButton.setColorFilter(Color.DKGRAY);
+                    android.graphics.drawable.GradientDrawable greyCircle = new android.graphics.drawable.GradientDrawable();
+                    greyCircle.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+                    greyCircle.setColor(Color.parseColor("#E0E0E0"));
+                    barcodeScannerButton.setBackground(greyCircle);
+                }
                 if (clearSearchButton != null) clearSearchButton.setColorFilter(Color.BLACK);
-                if (historyButton != null) historyButton.setColorFilter(Color.BLACK);
+
+                // OPTION 2: History icon - BLACK in light mode
+                if (historyButton != null) {
+                    historyButton.setColorFilter(Color.BLACK);
+                }
             }
         }
     }

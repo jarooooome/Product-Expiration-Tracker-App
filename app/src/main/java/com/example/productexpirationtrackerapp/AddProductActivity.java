@@ -113,131 +113,156 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void applyThemeFromDatabase() {
-        // Get user from database to get theme
         User user = userRepository.getUserSync();
+        String theme;
 
-        if (user != null) {
-            String theme = user.getColorTheme();
-            Log.d(TAG, "Applying theme: " + theme);
-
-            // Apply theme using ThemeUtils
-            ThemeUtils.applyTheme(this, theme);
-
-            // Apply additional custom theme colors
-            applyCustomThemeColors(theme);
+        if (user != null && user.getColorTheme() != null) {
+            theme = user.getColorTheme();
         } else {
-            // Fallback to default theme
-            Log.d(TAG, "No user found, using white theme");
-            ThemeUtils.applyTheme(this, "white");
-            applyCustomThemeColors("white");
+            // Fallback to SharedPreferences so dark mode persists correctly
+            android.content.SharedPreferences prefs =
+                    getSharedPreferences("AppPrefs", MODE_PRIVATE);
+            theme = prefs.getString("color_theme", "white");
         }
+
+        Log.d(TAG, "AddProduct applying theme: " + theme);
+        ThemeUtils.applyTheme(this, theme);
+        applyCustomThemeColors(theme);
     }
 
     private void applyCustomThemeColors(String theme) {
-        int primaryColor;
-        int textColor;
-        int backgroundColor;
-        int hintColor;
+        boolean isDark = "black".equals(theme);
+        float dp = getResources().getDisplayMetrics().density;
 
-        // Get colors based on theme - ONLY WHITE AND BLACK
-        if ("black".equals(theme)) {
-            // Black/Dark Theme
-            primaryColor = getResources().getColor(R.color.color_primary_black);
-            textColor = getResources().getColor(R.color.color_text_black);
-            backgroundColor = getResources().getColor(R.color.color_background_black);
-            hintColor = Color.parseColor("#80FFFFFF");
-        } else {
-            // White/Light Theme (Default)
-            primaryColor = getResources().getColor(R.color.color_primary_white);
-            textColor = getResources().getColor(R.color.color_text_white);
-            backgroundColor = getResources().getColor(R.color.color_background_white);
-            hintColor = Color.parseColor("#80000000");
-        }
+        // ── Palette ──────────────────────────────────────────────────────
+        // Dark mode: pure black/white only, except violet on 3 specific buttons
+        // Light mode: white bg, dark text, violet accent on same 3 buttons
+        int backgroundColor  = isDark ? Color.parseColor("#121212") : Color.parseColor("#F7F7F7");
+        int cardColor        = isDark ? Color.parseColor("#1C1C1C") : Color.WHITE;
+        int fieldBgColor     = isDark ? Color.parseColor("#222222") : Color.WHITE;
+        int fieldBorderColor = isDark ? Color.parseColor("#3A3A3A") : Color.parseColor("#DEDEDE");
+        int textColor        = isDark ? Color.WHITE                 : Color.parseColor("#1A1A1A");
+        int labelColor       = isDark ? Color.WHITE                 : Color.parseColor("#888888");  // white in dark
+        int hintColor        = isDark ? Color.parseColor("#555555") : Color.parseColor("#AAAAAA");
+        int accentColor      = isDark ? Color.parseColor("#4CAF50") : Color.parseColor("#388E3C");  // green
+        int dividerColor     = isDark ? Color.parseColor("#2A2A2A") : Color.parseColor("#E8E8E8");
 
-        // Apply background color to main layout
+        // ── Page background ───────────────────────────────────────────────
         mainLayout = findViewById(R.id.mainLayout);
-        if (mainLayout != null) {
-            mainLayout.setBackgroundColor(backgroundColor);
+        if (mainLayout != null) mainLayout.setBackgroundColor(backgroundColor);
+
+        // ── Header accent bar (stays violet always) ───────────────────────
+        android.view.View accentBar = findViewById(R.id.headerAccentBar);
+        if (accentBar != null) accentBar.setBackgroundColor(accentColor);
+
+        // ── Dividers ──────────────────────────────────────────────────────
+        android.view.View div1 = findViewById(R.id.divider1);
+        android.view.View div2 = findViewById(R.id.divider2);
+        if (div1 != null) div1.setBackgroundColor(dividerColor);
+        if (div2 != null) div2.setBackgroundColor(dividerColor);
+
+        // ── Photo card ────────────────────────────────────────────────────
+        android.view.View photoCard = findViewById(R.id.photoCard);
+        if (photoCard != null) {
+            android.graphics.drawable.GradientDrawable cardBg = new android.graphics.drawable.GradientDrawable();
+            cardBg.setColor(cardColor);
+            cardBg.setCornerRadius(12 * dp);
+            cardBg.setStroke(1, fieldBorderColor);
+            photoCard.setBackground(cardBg);
         }
 
-        // Set text colors for labels
-        if (titleTextView != null) {
-            titleTextView.setTextColor(textColor);
-        }
-        if (photoLabel != null) {
-            photoLabel.setTextColor(textColor);
-        }
-        if (productNameLabel != null) {
-            productNameLabel.setTextColor(textColor);
-        }
-        if (expiryDateLabel != null) {
-            expiryDateLabel.setTextColor(textColor);
-        }
-        if (categoryLabel != null) {
-            categoryLabel.setTextColor(textColor);
-        }
-        if (quantityLabel != null) {
-            quantityLabel.setTextColor(textColor);
-        }
-        if (notesLabel != null) {
-            notesLabel.setTextColor(textColor);
+        // ── Photo preview placeholder ─────────────────────────────────────
+        if (productPhotoPreview != null) {
+            android.graphics.drawable.GradientDrawable previewBg = new android.graphics.drawable.GradientDrawable();
+            previewBg.setColor(isDark ? Color.parseColor("#2A2A2A") : Color.parseColor("#F0F0F0"));
+            previewBg.setCornerRadius(10 * dp);
+            previewBg.setStroke(1, fieldBorderColor);
+            productPhotoPreview.setBackground(previewBg);
         }
 
-        // Set text colors for EditText fields
-        if (productNameEditText != null) {
-            productNameEditText.setTextColor(textColor);
-            productNameEditText.setHintTextColor(hintColor);
-        }
-        if (expiryDateEditText != null) {
-            expiryDateEditText.setTextColor(textColor);
-            expiryDateEditText.setHintTextColor(hintColor);
-        }
-        if (quantityEditText != null) {
-            quantityEditText.setTextColor(textColor);
-            quantityEditText.setHintTextColor(hintColor);
-        }
-        if (notesEditText != null) {
-            notesEditText.setTextColor(textColor);
-            notesEditText.setHintTextColor(hintColor);
-        }
+        // ── Titles and labels ─────────────────────────────────────────────
+        if (titleTextView    != null) titleTextView.setTextColor(textColor);
+        if (photoLabel       != null) photoLabel.setTextColor(labelColor);
+        if (productNameLabel != null) productNameLabel.setTextColor(labelColor);
+        if (expiryDateLabel  != null) expiryDateLabel.setTextColor(labelColor);
+        if (categoryLabel    != null) categoryLabel.setTextColor(labelColor);
+        if (quantityLabel    != null) quantityLabel.setTextColor(labelColor);
+        if (notesLabel       != null) notesLabel.setTextColor(labelColor);
 
-        // Apply button background colors
-        if (saveButton != null) {
-            saveButton.setBackgroundColor(primaryColor);
-            saveButton.setTextColor(Color.WHITE);
+        // ── EditText fields ───────────────────────────────────────────────
+        android.view.View[] fieldViews = {
+                productNameEditText, expiryDateEditText, quantityEditText, notesEditText
+        };
+        for (android.view.View fv : fieldViews) {
+            if (fv != null) {
+                android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+                bg.setColor(fieldBgColor);
+                bg.setCornerRadius(8 * dp);
+                bg.setStroke(1, fieldBorderColor);
+                fv.setBackground(bg);
+            }
         }
-
-        if (cancelButton != null) {
-            cancelButton.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
-            cancelButton.setTextColor(Color.WHITE);
+        if (categorySpinner != null) {
+            android.graphics.drawable.GradientDrawable spinBg = new android.graphics.drawable.GradientDrawable();
+            spinBg.setColor(fieldBgColor);
+            spinBg.setCornerRadius(8 * dp);
+            spinBg.setStroke(1, fieldBorderColor);
+            categorySpinner.setBackground(spinBg);
         }
+        // ── Spinner: selected item text + dropdown arrow tint ─────────────
+        android.widget.TextView spinnerSelectedView =
+                (android.widget.TextView) categorySpinner.getSelectedView();
+        if (spinnerSelectedView != null) spinnerSelectedView.setTextColor(textColor);
+        android.widget.ImageView dropdownIcon = findViewById(R.id.dropdownIcon);
+        if (dropdownIcon != null)
+            dropdownIcon.setImageTintList(
+                    android.content.res.ColorStateList.valueOf(textColor));
 
-        // Apply colors to photo buttons
-        if (takePhotoButton != null) {
-            takePhotoButton.setBackgroundColor(primaryColor);
-            takePhotoButton.setTextColor(Color.WHITE);
+        if (productNameEditText != null) { productNameEditText.setTextColor(textColor); productNameEditText.setHintTextColor(hintColor); }
+        if (expiryDateEditText  != null) { expiryDateEditText.setTextColor(textColor);  expiryDateEditText.setHintTextColor(hintColor); }
+        if (quantityEditText    != null) { quantityEditText.setTextColor(textColor);    quantityEditText.setHintTextColor(hintColor); }
+        if (notesEditText       != null) { notesEditText.setTextColor(textColor);       notesEditText.setHintTextColor(hintColor); }
+
+        // ── Scan button container — VIOLET outlined card ────────────────
+        android.view.View scanContainer = findViewById(R.id.scanButtonContainer);
+        if (scanContainer != null) {
+            android.graphics.drawable.GradientDrawable scanBg = new android.graphics.drawable.GradientDrawable();
+            scanBg.setColor(isDark ? Color.argb(25, 98, 0, 238) : Color.argb(12, 98, 0, 238));
+            scanBg.setCornerRadius(10 * dp);
+            scanBg.setStroke(2, accentColor);
+            scanContainer.setBackground(scanBg);
         }
-
-        if (choosePhotoButton != null) {
-            choosePhotoButton.setBackgroundColor(primaryColor);
-            choosePhotoButton.setTextColor(Color.WHITE);
-        }
-
-        if (removePhotoButton != null) {
-            removePhotoButton.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
-            removePhotoButton.setTextColor(Color.WHITE);
-        }
-
-        // NEW: Apply color to scan button
         if (scanProductButton != null) {
-            scanProductButton.setBackgroundColor(primaryColor);
-            scanProductButton.setTextColor(Color.WHITE);
+            scanProductButton.setTextColor(accentColor);
+            scanProductButton.setBackgroundColor(Color.TRANSPARENT);
         }
 
-        // Set date picker button color
-        if (datePickerButton != null) {
-            datePickerButton.setBackgroundColor(primaryColor);
-            datePickerButton.setTextColor(Color.WHITE);
+        // ── Date picker button (plain, no bg) ────────────────────────────
+        if (datePickerButton != null) datePickerButton.setBackgroundColor(Color.TRANSPARENT);
+
+        // ── Take Photo + Gallery — VIOLET text only ───────────────────────
+        if (takePhotoButton   != null) { takePhotoButton.setTextColor(accentColor);   takePhotoButton.setBackgroundColor(Color.TRANSPARENT); }
+        if (choosePhotoButton != null) { choosePhotoButton.setTextColor(accentColor); choosePhotoButton.setBackgroundColor(Color.TRANSPARENT); }
+
+        // ── Remove photo — red text ───────────────────────────────────────
+        if (removePhotoButton != null) {
+            removePhotoButton.setTextColor(Color.parseColor("#E53935"));
+            removePhotoButton.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        // ── Cancel — plain text, no accent ──────────────────────────────
+        if (cancelButton != null) {
+            cancelButton.setTextColor(textColor);
+            cancelButton.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        // ── Save — green background, always white text ──────────────────
+        if (saveButton != null) {
+            android.graphics.drawable.GradientDrawable saveBg = new android.graphics.drawable.GradientDrawable();
+            saveBg.setColor(accentColor);
+            saveBg.setCornerRadius(8 * dp);
+            saveButton.setBackground(saveBg);
+            saveButton.setTextColor(Color.WHITE);
         }
     }
 

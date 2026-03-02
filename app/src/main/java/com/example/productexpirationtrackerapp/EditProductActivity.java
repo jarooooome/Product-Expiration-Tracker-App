@@ -2,13 +2,18 @@ package com.example.productexpirationtrackerapp;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,7 +31,7 @@ public class EditProductActivity extends AppCompatActivity {
     private EditText quantityEdit;
     private EditText notesEdit;
     private Button saveButton;
-    private Button cancelButton;
+    private ImageView cancelButton;   // Changed: ImageView arrow like CategoryDetailActivity
 
     private int productId;
     private String originalName;
@@ -37,6 +42,7 @@ public class EditProductActivity extends AppCompatActivity {
 
     private ProductViewModel productViewModel;
     private Calendar calendar;
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +51,8 @@ public class EditProductActivity extends AppCompatActivity {
 
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+
+        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
         // Initialize views
         initializeViews();
@@ -60,6 +68,9 @@ public class EditProductActivity extends AppCompatActivity {
 
         // Setup click listeners
         setupClickListeners();
+
+        // Apply dark/light theme
+        applyTheme();
     }
 
     private void initializeViews() {
@@ -69,7 +80,7 @@ public class EditProductActivity extends AppCompatActivity {
         quantityEdit = findViewById(R.id.quantityEdit);
         notesEdit = findViewById(R.id.notesEdit);
         saveButton = findViewById(R.id.saveButton);
-        cancelButton = findViewById(R.id.cancelButton);
+        cancelButton = findViewById(R.id.cancelButton);   // ImageView
 
         calendar = Calendar.getInstance();
     }
@@ -168,5 +179,97 @@ public class EditProductActivity extends AppCompatActivity {
 
         setResult(RESULT_OK, resultIntent);
         finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        applyTheme();
+    }
+
+    private void applyTheme() {
+        String theme = preferences.getString("color_theme", "white");
+        boolean isDark = "black".equals(theme);
+        float dp = getResources().getDisplayMetrics().density;
+
+        int mainBg      = isDark ? Color.parseColor("#121212") : Color.parseColor("#F5F7FA");
+        int labelColor  = isDark ? Color.WHITE                 : Color.parseColor("#1A1E2C");
+        int fieldBg     = isDark ? Color.parseColor("#2A2A2A") : Color.WHITE;
+        int fieldText   = isDark ? Color.WHITE                 : Color.parseColor("#1A1E2C");
+        int hintColor   = isDark ? Color.parseColor("#888888") : Color.parseColor("#AAAAAA");
+        int arrowTint   = isDark ? Color.WHITE                 : Color.parseColor("#1A1E2C");
+
+        // Root background
+        LinearLayout rootLayout = findViewById(R.id.rootLayout);
+        if (rootLayout != null) rootLayout.setBackgroundColor(mainBg);
+
+        // ScrollView background
+        View scrollView = (View) rootLayout.getParent();
+        if (scrollView != null) scrollView.setBackgroundColor(mainBg);
+
+        // Back arrow tint
+        if (cancelButton != null)
+            cancelButton.setImageTintList(
+                    android.content.res.ColorStateList.valueOf(arrowTint));
+
+        // Header title
+        TextView headerTitle = findViewById(R.id.headerTitle);
+        if (headerTitle != null) headerTitle.setTextColor(labelColor);
+
+        // All label TextViews — identify by iterating labelIds
+        int[] labelIds = {
+                R.id.productNameLabel, R.id.expiryDateLabel,
+                R.id.categoryLabel, R.id.quantityLabel, R.id.notesLabel
+        };
+        for (int id : labelIds) {
+            TextView lbl = findViewById(id);
+            if (lbl != null) lbl.setTextColor(labelColor);
+        }
+
+        // EditText fields
+        EditText[] fields = { productNameEdit, expiryDateEdit, quantityEdit, notesEdit };
+        for (EditText et : fields) {
+            if (et != null) {
+                et.setTextColor(fieldText);
+                et.setHintTextColor(hintColor);
+                android.graphics.drawable.GradientDrawable bg =
+                        new android.graphics.drawable.GradientDrawable();
+                bg.setColor(fieldBg);
+                bg.setCornerRadius(10 * dp);
+                et.setBackground(bg);
+            }
+        }
+
+        // Spinner background
+        if (categorySpinner != null) {
+            android.graphics.drawable.GradientDrawable spinnerBg =
+                    new android.graphics.drawable.GradientDrawable();
+            spinnerBg.setColor(fieldBg);
+            spinnerBg.setCornerRadius(10 * dp);
+            categorySpinner.setBackground(spinnerBg);
+        }
+
+        // Save button — keep existing blue
+        if (saveButton != null) {
+            saveButton.setBackgroundColor(Color.parseColor("#4361EE"));
+            saveButton.setTextColor(Color.WHITE);
+        }
+
+        // Calendar icon — tint the drawableEnd on expiryDateEdit
+        int iconTint = isDark ? Color.parseColor("#AAAAAA") : Color.parseColor("#8A8F9E");
+        if (expiryDateEdit != null) {
+            android.graphics.drawable.Drawable[] drawables = expiryDateEdit.getCompoundDrawablesRelative();
+            if (drawables[2] != null) { // drawableEnd
+                drawables[2] = drawables[2].mutate();
+                drawables[2].setTint(iconTint);
+                expiryDateEdit.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                        drawables[0], drawables[1], drawables[2], drawables[3]);
+            }
+        }
+        // Dropdown icon — still an ImageView overlay on the spinner
+        ImageView dropdownIcon = findViewById(R.id.dropdownIcon);
+        if (dropdownIcon != null)
+            dropdownIcon.setImageTintList(
+                    android.content.res.ColorStateList.valueOf(iconTint));
     }
 }

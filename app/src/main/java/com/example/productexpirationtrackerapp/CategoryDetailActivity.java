@@ -6,16 +6,15 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,19 +35,15 @@ public class CategoryDetailActivity extends AppCompatActivity {
     private TextView expiredCount;
     private TextView safeCount;
 
-    // Filter Buttons - UPDATED: changed filterUrgent to filterExpired
-    private Button filterAll;
-    private Button filterSafe;
-    private Button filterSoon;
-    private Button filterExpired;  // CHANGED from filterUrgent
-    private View filterAllIndicator;
-    private View filterSafeIndicator;
-    private View filterSoonIndicator;
-    private View filterExpiredIndicator;  // CHANGED from filterUrgentIndicator
+    // Filter Chips
+    private LinearLayout filterDropdownButton;
+    private TextView filterCurrentLabel;
 
     // View Toggle Icons
     private ImageView listViewButton;
     private ImageView gridViewButton;
+    private LinearLayout viewToggleContainer;
+    private ImageView addButton;
     private boolean isListView = true; // Default to list view
 
     // RecyclerView
@@ -75,6 +70,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
     private String categoryName;
     private String categoryCount;
     private ProductViewModel productViewModel;
+    private UserRepository userRepository;
     private SharedPreferences preferences;
 
     // Current filter
@@ -91,6 +87,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
 
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+        userRepository = new UserRepository(getApplication());
 
         // Initialize preferences
         preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
@@ -98,8 +95,8 @@ public class CategoryDetailActivity extends AppCompatActivity {
         // Initialize views
         initializeViews();
 
-        // Setup filter buttons
-        setupFilterButtons();
+        // Setup filter chips
+        setupFilterChips();
 
         // Setup view toggle
         setupViewToggle();
@@ -136,24 +133,20 @@ public class CategoryDetailActivity extends AppCompatActivity {
         }
 
         // Back button click listener
-        TextView backButton = findViewById(R.id.backButton);
+        ImageView backButton = findViewById(R.id.backButton);
         if (backButton != null) {
             backButton.setOnClickListener(v -> finish());
         }
 
-        // Filter Buttons - UPDATED: changed filterUrgent to filterExpired
-        filterAll = findViewById(R.id.filterAll);
-        filterSafe = findViewById(R.id.filterSafe);
-        filterSoon = findViewById(R.id.filterSoon);
-        filterExpired = findViewById(R.id.filterExpired);  // CHANGED
-        filterAllIndicator = findViewById(R.id.filterAllIndicator);
-        filterSafeIndicator = findViewById(R.id.filterSafeIndicator);
-        filterSoonIndicator = findViewById(R.id.filterSoonIndicator);
-        filterExpiredIndicator = findViewById(R.id.filterExpiredIndicator);  // CHANGED
+        // Filter Chips
+        filterDropdownButton = findViewById(R.id.filterDropdownButton);
+        filterCurrentLabel   = findViewById(R.id.filterCurrentLabel);
 
         // View Toggle Icons
         listViewButton = findViewById(R.id.listViewButton);
         gridViewButton = findViewById(R.id.gridViewButton);
+        viewToggleContainer = findViewById(R.id.viewToggleContainer);
+        addButton = findViewById(R.id.addButton);
 
         // RecyclerView
         productsRecyclerView = findViewById(R.id.productsRecyclerView);
@@ -176,60 +169,37 @@ public class CategoryDetailActivity extends AppCompatActivity {
         navSettingsIndicator = findViewById(R.id.navSettingsIndicator);
     }
 
-    private void setupFilterButtons() {
-        // Set All as active by default
-        setActiveFilter(filterAll, filterAllIndicator);
+    private void setupFilterChips() {
+        if (filterDropdownButton == null) return;
 
-        filterAll.setOnClickListener(v -> {
-            setActiveFilter(filterAll, filterAllIndicator);
-            currentFilter = "All";
-            applyFilter();
-        });
+        // Show current filter label on startup
+        updateFilterLabel();
 
-        filterSafe.setOnClickListener(v -> {
-            setActiveFilter(filterSafe, filterSafeIndicator);
-            currentFilter = "Safe";
-            applyFilter();
-        });
+        filterDropdownButton.setOnClickListener(v -> {
+            android.widget.PopupMenu popup = new android.widget.PopupMenu(this, filterDropdownButton);
+            popup.getMenu().add(0, 0, 0, "All");
+            popup.getMenu().add(0, 1, 1, "Safe");
+            popup.getMenu().add(0, 2, 2, "Soon");
+            popup.getMenu().add(0, 3, 3, "Expired");
 
-        filterSoon.setOnClickListener(v -> {
-            setActiveFilter(filterSoon, filterSoonIndicator);
-            currentFilter = "Soon";
-            applyFilter();
-        });
-
-        // UPDATED: Changed from filterUrgent to filterExpired
-        filterExpired.setOnClickListener(v -> {
-            setActiveFilter(filterExpired, filterExpiredIndicator);
-            currentFilter = "Expired";  // CHANGED from "Urgent"
-            applyFilter();
+            popup.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case 0: currentFilter = "All";     break;
+                    case 1: currentFilter = "Safe";    break;
+                    case 2: currentFilter = "Soon";    break;
+                    case 3: currentFilter = "Expired"; break;
+                }
+                updateFilterLabel();
+                applyFilter();
+                return true;
+            });
+            popup.show();
         });
     }
 
-    private void setActiveFilter(Button activeButton, View activeIndicator) {
-        // Reset all - UPDATED: changed filterUrgent to filterExpired
-        resetFilterButton(filterAll, filterAllIndicator);
-        resetFilterButton(filterSafe, filterSafeIndicator);
-        resetFilterButton(filterSoon, filterSoonIndicator);
-        resetFilterButton(filterExpired, filterExpiredIndicator);  // CHANGED
-
-        // Set active
-        if (activeButton != null) {
-            activeButton.setTextColor(Color.parseColor("#4361EE"));
-            activeButton.setTypeface(null, android.graphics.Typeface.BOLD);
-        }
-        if (activeIndicator != null) {
-            activeIndicator.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void resetFilterButton(Button button, View indicator) {
-        if (button != null) {
-            button.setTextColor(Color.parseColor("#999999"));
-            button.setTypeface(null, android.graphics.Typeface.NORMAL);
-        }
-        if (indicator != null) {
-            indicator.setVisibility(View.GONE);
+    private void updateFilterLabel() {
+        if (filterCurrentLabel != null) {
+            filterCurrentLabel.setText(currentFilter);
         }
     }
 
@@ -239,13 +209,10 @@ public class CategoryDetailActivity extends AppCompatActivity {
             listViewButton.setOnClickListener(v -> {
                 if (!isListView) {
                     isListView = true;
-                    // Update icon colors
                     listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#4361EE")));
                     gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#999999")));
-                    // Change layout manager to LinearLayout (list)
-                    LinearLayoutManager layoutManager = new LinearLayoutManager(CategoryDetailActivity.this);
-                    productsRecyclerView.setLayoutManager(layoutManager);
-                    adapter.notifyDataSetChanged();
+                    productsRecyclerView.setLayoutManager(new LinearLayoutManager(CategoryDetailActivity.this));
+                    adapter.setGridView(false);
                 }
             });
         }
@@ -254,13 +221,11 @@ public class CategoryDetailActivity extends AppCompatActivity {
             gridViewButton.setOnClickListener(v -> {
                 if (isListView) {
                     isListView = false;
-                    // Update icon colors
                     gridViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#4361EE")));
                     listViewButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#999999")));
-                    // Change layout manager to GridLayout (2 columns)
-                    GridLayoutManager gridLayoutManager = new GridLayoutManager(CategoryDetailActivity.this, 2);
-                    productsRecyclerView.setLayoutManager(gridLayoutManager);
-                    adapter.notifyDataSetChanged();
+                    // Single-column LinearLayout so each card is full width (as per design sketch)
+                    productsRecyclerView.setLayoutManager(new LinearLayoutManager(CategoryDetailActivity.this));
+                    adapter.setGridView(true);
                 }
             });
         }
@@ -271,6 +236,15 @@ public class CategoryDetailActivity extends AppCompatActivity {
         setInactiveNavItem(navProfile, navProfileIcon, navProfileText, navProfileIndicator);
         setInactiveNavItem(navProducts, navProductsIcon, navProductsText, navProductsIndicator);
         setInactiveNavItem(navSettings, navSettingsIcon, navSettingsText, navSettingsIndicator);
+
+        // FAB click — navigate to Add Product
+        if (addButton != null) {
+            addButton.setOnClickListener(v -> {
+                Intent intent = new Intent(CategoryDetailActivity.this, AddProductActivity.class);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            });
+        }
 
         // Profile click listener
         if (navProfile != null) {
@@ -307,12 +281,14 @@ public class CategoryDetailActivity extends AppCompatActivity {
     }
 
     private void setInactiveNavItem(LinearLayout navItem, ImageView icon, TextView text, View indicator) {
+        String theme = preferences.getString("color_theme", "white");
+        int iconColor = "black".equals(theme) ? Color.WHITE : Color.parseColor("#666666");
         if (icon != null) {
-            icon.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
+            icon.setImageTintList(android.content.res.ColorStateList.valueOf(iconColor));
         }
         if (text != null) {
-            text.setTextColor(Color.WHITE);
-            text.setAlpha(0.8f);
+            text.setTextColor(iconColor);
+            text.setAlpha(1.0f);
             text.setTextSize(12);
         }
         if (indicator != null) {
@@ -325,42 +301,54 @@ public class CategoryDetailActivity extends AppCompatActivity {
         filteredProducts = new ArrayList<>();
         allCategoryProducts = new ArrayList<>();
 
-        // THEN create adapter with initialized list
         adapter = new ProductAdapter(filteredProducts);
 
+        // Card tap — disabled, do nothing (use ⋮ menu to take action)
         adapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                Product product = filteredProducts.get(position);
-                Log.d(TAG, "Opening product details: " + product.getName());
+                // No action on plain card tap
+            }
 
+            @Override
+            public void onItemLongClick(int position) {
+                // No action on long press
+            }
+        });
+
+        // 3-dot ⋮ menu
+        adapter.setOnMenuClickListener(new ProductAdapter.OnMenuClickListener() {
+            @Override
+            public void onEditClick(int position) {
+                // Opens the existing ProductDetailActivity (same screen as before)
+                Product product = filteredProducts.get(position);
                 Intent intent = new Intent(CategoryDetailActivity.this, ProductDetailActivity.class);
                 intent.putExtra("product_id", product.getId());
                 intent.putExtra("product_name", product.getName());
-
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
-
                 startActivity(intent);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
 
             @Override
-            public void onItemLongClick(int position) {
+            public void onDeleteClick(int position) {
                 Product product = filteredProducts.get(position);
-                productViewModel.delete(product);
-
-                Toast.makeText(CategoryDetailActivity.this,
-                        "Removed: " + product.getName(),
-                        Toast.LENGTH_SHORT).show();
-
-                Log.d(TAG, "Item long clicked and removed: " + product.getName());
+                new androidx.appcompat.app.AlertDialog.Builder(CategoryDetailActivity.this)
+                        .setTitle("Delete Product")
+                        .setMessage("Delete \"" + product.getName() + "\" permanently? This cannot be undone.")
+                        .setPositiveButton("DELETE", (dialog, which) -> {
+                            productViewModel.delete(product);
+                            Toast.makeText(CategoryDetailActivity.this,
+                                    "Deleted: " + product.getName(), Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("CANCEL", null)
+                        .show();
             }
         });
 
         if (productsRecyclerView != null) {
-            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-            productsRecyclerView.setLayoutManager(layoutManager);
+            productsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
             productsRecyclerView.setAdapter(adapter);
         }
     }
@@ -429,7 +417,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
                         filteredProducts.add(product);  // 1-7 days left
                     }
                     break;
-                case "Expired":  // CHANGED from "Urgent"
+                case "Expired":
                     if (expiryDate != null && expiryDate.before(today)) {
                         filteredProducts.add(product);  // Past expiry date
                     }
@@ -441,13 +429,108 @@ public class CategoryDetailActivity extends AppCompatActivity {
         Log.d(TAG, "Filter '" + currentFilter + "' applied - showing " + filteredProducts.size() + " products");
     }
 
-    private void applyTheme() {
-        int fabBackgroundColor = preferences.getInt("fab_background_color",
-                getResources().getColor(R.color.color_fab_white));
+    @Override
+    protected void onResume() {
+        super.onResume();
+        applyTheme();
+    }
 
+    private void applyTheme() {
+        // Read theme from database first (same as ProductListActivity), fall back to SharedPreferences
+        User user = userRepository.getUserSync();
+        String theme;
+        if (user != null && user.getColorTheme() != null && !user.getColorTheme().isEmpty()) {
+            theme = user.getColorTheme();
+        } else {
+            theme = preferences.getString("color_theme", "white"); // correct key: "color_theme"
+        }
+        applyThemeColors(theme);
+    }
+
+    private void applyThemeColors(String theme) {
+        boolean isDark = "black".equals(theme);
+        float dp = getResources().getDisplayMetrics().density;
+
+        // --- Exact same color logic as ProductListActivity ---
+        int mainBg        = isDark ? Color.parseColor("#121212")  : Color.parseColor("#F5F5F5");
+        int cardBg        = isDark ? Color.parseColor("#1E1E1E")  : Color.WHITE;
+        int navBg         = isDark ? ContextCompat.getColor(this, R.color.color_nav_background_black)
+                : ContextCompat.getColor(this, R.color.color_nav_background_white);
+        int fabBg         = isDark ? Color.parseColor("#1E1E1E")  // dark: near-black, NOT purple
+                : ContextCompat.getColor(this, R.color.color_fab_white);
+        int primaryText   = isDark ? Color.WHITE                  : Color.parseColor("#1A1E2C");
+        int secondaryText = isDark ? Color.LTGRAY                 : Color.parseColor("#8A8F9E");
+        int navIconColor  = isDark ? Color.WHITE                  : Color.WHITE; // nav always dark bg
+
+        // Root background
+        android.view.View mainLayout = findViewById(R.id.mainLayout);
+        if (mainLayout != null) mainLayout.setBackgroundColor(mainBg);
+
+        // Back arrow tint
+        ImageView backBtn = findViewById(R.id.backButton);
+        if (backBtn != null)
+            backBtn.setImageTintList(android.content.res.ColorStateList.valueOf(primaryText));
+
+        // Header text
+        TextView categoryTitle = findViewById(R.id.categoryTitle);
+        if (categoryTitle != null) categoryTitle.setTextColor(primaryText);
+        TextView itemCount = findViewById(R.id.categoryItemCount);
+        if (itemCount != null) itemCount.setTextColor(secondaryText);
+
+        // Stats card background
+        LinearLayout statsCard = findViewById(R.id.statsCard);
+        if (statsCard != null) {
+            android.graphics.drawable.GradientDrawable statsBg = new android.graphics.drawable.GradientDrawable();
+            statsBg.setColor(cardBg);
+            statsBg.setCornerRadius(24 * dp);
+            if (!isDark) statsBg.setStroke(1, Color.parseColor("#E8EAF0"));
+            statsCard.setBackground(statsBg);
+        }
+
+        // Filter label
+        TextView filterLabel = findViewById(R.id.filterLabel);
+        if (filterLabel != null) filterLabel.setTextColor(primaryText);
+
+        // Filter dropdown text + arrow + button background
+        TextView filterCurrentLabel = findViewById(R.id.filterCurrentLabel);
+        if (filterCurrentLabel != null) filterCurrentLabel.setTextColor(primaryText);
+        ImageView filterArrow = findViewById(R.id.filterDropdownArrow);
+        if (filterArrow != null)
+            filterArrow.setImageTintList(android.content.res.ColorStateList.valueOf(primaryText));
+        LinearLayout filterBtn = findViewById(R.id.filterDropdownButton);
+        if (filterBtn != null) {
+            android.graphics.drawable.GradientDrawable filterBg = new android.graphics.drawable.GradientDrawable();
+            filterBg.setColor(cardBg);
+            filterBg.setCornerRadius(32 * dp);
+            filterBg.setStroke(1, isDark ? Color.parseColor("#444444") : Color.parseColor("#DDDDDD"));
+            filterBtn.setBackground(filterBg);
+        }
+
+        // View toggle container — same dark pill as the filter button
+        if (viewToggleContainer != null) {
+            android.graphics.drawable.GradientDrawable toggleBg = new android.graphics.drawable.GradientDrawable();
+            toggleBg.setColor(cardBg);
+            toggleBg.setCornerRadius(32 * dp);
+            toggleBg.setStroke(1, isDark ? Color.parseColor("#444444") : Color.parseColor("#DDDDDD"));
+            viewToggleContainer.setBackground(toggleBg);
+        }
+
+        // Nav background
         LinearLayout bottomNavigation = findViewById(R.id.bottomNavigation);
-        if (bottomNavigation != null) {
-            bottomNavigation.setBackgroundColor(fabBackgroundColor);
+        if (bottomNavigation != null) bottomNavigation.setBackgroundColor(navBg);
+
+        // Nav icons + text
+        ImageView[] navIcons = {navProfileIcon, navProductsIcon, navSettingsIcon};
+        TextView[] navTexts  = {navProfileText, navProductsText, navSettingsText};
+        for (ImageView icon : navIcons)
+            if (icon != null) icon.setImageTintList(android.content.res.ColorStateList.valueOf(navIconColor));
+        for (TextView text : navTexts)
+            if (text != null) text.setTextColor(navIconColor);
+
+        // FAB — use same color as ProductListActivity (not from prefs which may have stale purple)
+        if (addButton != null) {
+            addButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fabBg));
+            addButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
         }
     }
 }
