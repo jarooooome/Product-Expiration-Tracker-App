@@ -1608,7 +1608,7 @@ public class ProductListActivity extends AppCompatActivity {
             }
 
             if (productList.isEmpty()) {
-                productCountText.setText("No products found" + searchInfo);
+                productCountText.setText("No Products found" + searchInfo);
             } else {
                 productCountText.setText(productList.size() + " product" +
                         (productList.size() == 1 ? "" : "s") +
