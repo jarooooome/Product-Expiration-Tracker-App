@@ -209,10 +209,17 @@ public class AddProductActivity extends AppCompatActivity {
             spinBg.setStroke(1, fieldBorderColor);
             categorySpinner.setBackground(spinBg);
         }
-        // ── Spinner: selected item text + dropdown arrow tint ─────────────
-        android.widget.TextView spinnerSelectedView =
-                (android.widget.TextView) categorySpinner.getSelectedView();
-        if (spinnerSelectedView != null) spinnerSelectedView.setTextColor(textColor);
+        // ── Spinner: force selected text color via post (getSelectedView is null at layout time)
+        final int spinnerTextColor = textColor;
+        if (categorySpinner != null) {
+            categorySpinner.post(() -> {
+                android.view.View sv = categorySpinner.getSelectedView();
+                if (sv instanceof android.widget.TextView) {
+                    ((android.widget.TextView) sv).setTextColor(spinnerTextColor);
+                }
+            });
+        }
+        // ── Dropdown arrow tint ───────────────────────────────────────────
         android.widget.ImageView dropdownIcon = findViewById(R.id.dropdownIcon);
         if (dropdownIcon != null)
             dropdownIcon.setImageTintList(
@@ -356,7 +363,9 @@ public class AddProductActivity extends AppCompatActivity {
                 // Change spinner selected item text color based on theme
                 if (view != null && view instanceof TextView) {
                     User user = userRepository.getUserSync();
-                    String theme = user != null ? user.getColorTheme() : "white";
+                    String theme = (user != null && user.getColorTheme() != null)
+                            ? user.getColorTheme()
+                            : getSharedPreferences("AppPrefs", MODE_PRIVATE).getString("color_theme", "white");
 
                     if (theme.equals("black")) {
                         ((TextView) view).setTextColor(Color.WHITE);

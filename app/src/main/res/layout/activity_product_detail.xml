@@ -11,67 +11,81 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="32dp">
 
-        <!-- Back Button — ImageView above title, same as CategoryDetailActivity -->
-        <ImageView
-            android:id="@+id/backButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_back_arrow"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Go back"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="6dp"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/titleTextView"
+        <!-- ── Header: back arrow + title ────────────────────────────── -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Product Details"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="28dp">
 
-        <!-- Product Photo -->
+            <ImageView
+                android:id="@+id/backButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_back_arrow"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Go back"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:id="@+id/titleTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Product Detail"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.01" />
+
+        </LinearLayout>
+
+        <!-- ── PHOTO label ────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/photoLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Product Photo"
-            android:textSize="18sp"
-            android:layout_marginBottom="12dp" />
+            android:text="PHOTO"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:layout_marginBottom="10dp" />
 
+        <!-- Photo image -->
         <ImageView
             android:id="@+id/productPhoto"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:background="#F0F0F0"
-            android:contentDescription="Product photo"
-            android:layout_gravity="center"
-            android:layout_marginBottom="16dp" />
-
-        <!-- ✅ CONSUME BUTTON - Now under the photo -->
-        <Button
-            android:id="@+id/consumeButton"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="CONSUME PRODUCT"
-            android:textSize="18sp"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="24dp"
-            android:contentDescription="Consume Product" />
+            android:layout_height="220dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/image_rounded_background"
+            android:contentDescription="Product photo"
+            android:layout_marginBottom="20dp"
+            android:clipToOutline="true" />
 
-        <!-- Product Name -->
+        <!-- ── Divider ─────────────────────────────────────────────────── -->
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="20dp" />
+
+        <!-- ── PRODUCT NAME ────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/productNameLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Product Name"
-            android:textSize="18sp"
+            android:text="PRODUCT NAME"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -79,19 +93,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Loading..."
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:padding="12dp"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="24dp" />
+            android:textSize="15sp"
+            android:padding="14dp"
+            android:layout_marginBottom="18dp" />
 
-        <!-- Expiry Date -->
+        <!-- ── EXPIRY DATE ─────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/expiryDateLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Expiry Date"
-            android:textSize="18sp"
+            android:text="EXPIRY DATE"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -99,18 +113,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Loading..."
-            android:textSize="18sp"
-            android:padding="12dp"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="24dp" />
+            android:textSize="15sp"
+            android:padding="14dp"
+            android:layout_marginBottom="18dp" />
 
-        <!-- Days Left -->
+        <!-- ── STATUS ─────────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/daysLeftLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Status"
-            android:textSize="18sp"
+            android:text="STATUS"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -118,18 +133,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Calculating..."
-            android:textSize="18sp"
-            android:padding="12dp"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="24dp" />
+            android:textSize="15sp"
+            android:padding="14dp"
+            android:layout_marginBottom="18dp" />
 
-        <!-- Category -->
+        <!-- ── CATEGORY ────────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/categoryLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Category"
-            android:textSize="18sp"
+            android:text="CATEGORY"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -137,18 +153,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Not specified"
-            android:textSize="16sp"
-            android:padding="12dp"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="24dp" />
+            android:textSize="15sp"
+            android:padding="14dp"
+            android:layout_marginBottom="18dp" />
 
-        <!-- Quantity -->
+        <!-- ── QUANTITY ────────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/quantityLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Quantity"
-            android:textSize="18sp"
+            android:text="QUANTITY"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -156,18 +173,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Not specified"
-            android:textSize="16sp"
-            android:padding="12dp"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="24dp" />
+            android:textSize="15sp"
+            android:padding="14dp"
+            android:layout_marginBottom="18dp" />
 
-        <!-- Notes -->
+        <!-- ── NOTES ───────────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/notesLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Notes"
-            android:textSize="18sp"
+            android:text="NOTES"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -175,37 +193,63 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="No notes"
-            android:textSize="16sp"
-            android:padding="12dp"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="32dp" />
+            android:textSize="15sp"
+            android:padding="14dp"
+            android:minHeight="80dp"
+            android:gravity="top"
+            android:layout_marginBottom="28dp" />
 
-        <!-- Action Buttons -->
+        <!-- ── Divider ─────────────────────────────────────────────────── -->
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── CONSUME button (full width, green) ─────────────────────── -->
+        <Button
+            android:id="@+id/consumeButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Consume Product"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@android:color/transparent"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ── EDIT + DELETE row ───────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/editButton"
                 android:layout_width="0dp"
-                android:layout_height="56dp"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:text="EDIT"
-                android:textSize="18sp"
+                android:text="Edit"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:layout_marginEnd="8dp" />
+                android:backgroundTint="@android:color/transparent"
+                android:stateListAnimator="@null"
+                android:layout_marginEnd="10dp" />
 
             <Button
                 android:id="@+id/deleteButton"
                 android:layout_width="0dp"
-                android:layout_height="56dp"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:text="DELETE"
-                android:textSize="18sp"
+                android:text="Delete"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:layout_marginStart="8dp" />
+                android:backgroundTint="@android:color/transparent"
+                android:stateListAnimator="@null" />
 
         </LinearLayout>
 

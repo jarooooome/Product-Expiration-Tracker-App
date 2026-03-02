@@ -1,120 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="#F5F7FA">
+    android:fillViewport="true">
 
     <LinearLayout
         android:id="@+id/rootLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="32dp">
 
-        <!-- Back Button — ImageView above title, same as CategoryDetailActivity -->
-        <ImageView
-            android:id="@+id/cancelButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_back_arrow"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Go back"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="6dp"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/headerTitle"
+        <!-- ── Header: back arrow + title ────────────────────────────── -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Edit Product"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="#1A1E2C"
-            android:layout_marginBottom="32dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="28dp">
 
-        <!-- Product Name -->
+            <ImageView
+                android:id="@+id/cancelButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_back_arrow"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Go back"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:id="@+id/headerTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Edit Product"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.01" />
+
+        </LinearLayout>
+
+        <!-- ── PRODUCT NAME ────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/productNameLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Product Name"
-            android:textSize="16sp"
+            android:text="PRODUCT NAME"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:textColor="#1A1E2C"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/productNameEdit"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="52dp"
             android:hint="Enter product name"
-            android:padding="16dp"
-            android:background="#FFFFFF"
-            android:elevation="2dp"
-            android:layout_marginBottom="24dp" />
+            android:paddingHorizontal="14dp"
+            android:inputType="textCapSentences"
+            android:textSize="15sp"
+            android:layout_marginBottom="22dp" />
 
-        <!-- Expiry Date -->
+        <!-- ── EXPIRY DATE ─────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/expiryDateLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Expiry Date"
-            android:textSize="16sp"
+            android:text="EXPIRY DATE"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:textColor="#1A1E2C"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
-        <!-- Expiry Date field with calendar icon -->
         <EditText
             android:id="@+id/expiryDateEdit"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="52dp"
             android:hint="Select expiry date"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
-            android:background="#FFFFFF"
-            android:elevation="2dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:focusable="false"
+            android:textSize="15sp"
             android:drawableEnd="@drawable/ic_calendar"
             android:drawablePadding="8dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="22dp" />
 
-        <!-- Category -->
+        <!-- ── CATEGORY ────────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/categoryLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Category"
-            android:textSize="16sp"
+            android:text="CATEGORY"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:textColor="#1A1E2C"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
-        <!-- Category Spinner with dropdown icon -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginBottom="24dp">
+            android:layout_height="52dp"
+            android:layout_marginBottom="22dp">
 
             <Spinner
                 android:id="@+id/categorySpinner"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:background="#FFFFFF"
-                android:elevation="2dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="52dp" />
+                android:layout_height="52dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="48dp" />
 
             <ImageView
                 android:id="@+id/dropdownIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_gravity="center_vertical|end"
                 android:layout_marginEnd="14dp"
                 android:src="@drawable/ic_dropdown_updown"
@@ -125,37 +127,36 @@
 
         </FrameLayout>
 
-        <!-- Quantity -->
+        <!-- ── QUANTITY ────────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/quantityLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Quantity"
-            android:textSize="16sp"
+            android:text="QUANTITY"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:textColor="#1A1E2C"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/quantityEdit"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="52dp"
             android:hint="Enter quantity"
             android:inputType="number"
-            android:padding="16dp"
-            android:background="#FFFFFF"
-            android:elevation="2dp"
-            android:layout_marginBottom="24dp" />
+            android:paddingHorizontal="14dp"
+            android:textSize="15sp"
+            android:layout_marginBottom="22dp" />
 
-        <!-- Notes -->
+        <!-- ── NOTES ───────────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/notesLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Notes"
-            android:textSize="16sp"
+            android:text="NOTES"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:textColor="#1A1E2C"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <EditText
@@ -163,21 +164,32 @@
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:hint="Add notes here..."
-            android:padding="16dp"
-            android:background="#FFFFFF"
-            android:elevation="2dp"
+            android:paddingHorizontal="14dp"
+            android:paddingTop="12dp"
             android:gravity="top"
+            android:inputType="textMultiLine"
+            android:textSize="15sp"
             android:layout_marginBottom="32dp" />
 
-        <!-- Save Button -->
+        <!-- ── Divider ─────────────────────────────────────────────────── -->
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── SAVE CHANGES button (full width, green) ────────────────── -->
         <Button
             android:id="@+id/saveButton"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="SAVE CHANGES"
-            android:textSize="18sp"
+            android:layout_height="50dp"
+            android:text="Save Changes"
+            android:textSize="15sp"
+            android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#4361EE"
+            android:backgroundTint="@android:color/transparent"
+            android:stateListAnimator="@null"
             android:layout_marginBottom="16dp" />
 
     </LinearLayout>

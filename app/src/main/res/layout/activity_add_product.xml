@@ -349,7 +349,7 @@
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="#6200EE"
+                android:backgroundTint="@android:color/transparent"
                 android:stateListAnimator="@null" />
 
         </LinearLayout>
