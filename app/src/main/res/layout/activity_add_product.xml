@@ -11,196 +11,294 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="32dp">
 
-        <!-- Header -->
-        <TextView
-            android:id="@+id/titleTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="➕ Add New Product"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="32dp" />
-
-        <!-- NEW: SCAN PRODUCT BUTTON - Added here -->
-        <Button
-            android:id="@+id/btnScanProduct"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="📷 SCAN PRODUCT WITH CAMERA"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#6200EE"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Product Photo Section -->
-        <TextView
-            android:id="@+id/photoLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Product Photo (Optional)"
-            android:textSize="18sp"
-            android:layout_marginBottom="12dp" />
-
+        <!-- ── Header ──────────────────────────────────────────────── -->
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="28dp">
+
+            <!-- Accent bar -->
+            <View
+                android:layout_width="4dp"
+                android:layout_height="28dp"
+                android:id="@+id/headerAccentBar"
+                android:background="#6200EE"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:id="@+id/titleTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Add Product"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.01" />
+
+        </LinearLayout>
+
+        <!-- ── Scan Button (prominent outlined card) ───────────────── -->
+        <LinearLayout
+            android:id="@+id/scanButtonContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
+            android:layout_marginBottom="28dp">
+
+            <Button
+                android:id="@+id/btnScanProduct"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="📷  SCAN PRODUCT WITH CAMERA"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#6200EE"
+                android:backgroundTint="@android:color/transparent"
+                android:letterSpacing="0.05"
+                style="?attr/borderlessButtonStyle" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tap to auto-fill product details"
+                android:textSize="11sp"
+                android:textColor="#888888"
+                android:layout_marginTop="-4dp" />
+
+        </LinearLayout>
+
+        <!-- ── Photo Section ────────────────────────────────────────── -->
+        <TextView
+            android:id="@+id/photoLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PHOTO"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:layout_marginBottom="10dp" />
+
+        <!-- Photo preview + buttons in a card -->
+        <LinearLayout
+            android:id="@+id/photoCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
             android:layout_marginBottom="24dp">
 
-            <!-- Photo Preview -->
-            <ImageView
-                android:id="@+id/productPhotoPreview"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:background="#F0F0F0"
-                android:scaleType="centerCrop"
-                android:contentDescription="Product photo preview"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Photo Buttons -->
+            <!-- Photo preview (square, rounded) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:gravity="center"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:id="@+id/productPhotoPreview"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Product photo preview" />
+
+            </LinearLayout>
+
+            <!-- Take / Gallery row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/takePhotoButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:text="📸 Take Photo"
-                    android:textSize="16sp"
-                    android:padding="12dp"
-                    android:layout_marginEnd="8dp" />
+                    android:text="Take Photo"
+                    android:textSize="13sp"
+                    android:textColor="#6200EE"
+                    android:backgroundTint="@android:color/transparent"
+                    android:layout_marginEnd="4dp"
+                    style="?attr/borderlessButtonStyle" />
 
                 <Button
                     android:id="@+id/choosePhotoButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:text="🖼️ Choose from Gallery"
-                    android:textSize="16sp"
-                    android:padding="12dp"
-                    android:layout_marginStart="8dp" />
+                    android:text="Gallery"
+                    android:textSize="13sp"
+                    android:textColor="#6200EE"
+                    android:backgroundTint="@android:color/transparent"
+                    android:layout_marginStart="4dp"
+                    style="?attr/borderlessButtonStyle" />
 
             </LinearLayout>
 
-            <!-- Remove Photo Button (hidden by default) -->
+            <!-- Remove photo (hidden by default) -->
             <Button
                 android:id="@+id/removePhotoButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="36dp"
+                android:layout_gravity="center"
                 android:text="Remove Photo"
-                android:textSize="14sp"
-                android:padding="8dp"
-                android:layout_marginTop="8dp"
-                android:visibility="gone" />
+                android:textSize="12sp"
+                android:textColor="#E53935"
+                android:backgroundTint="@android:color/transparent"
+                android:visibility="gone"
+                android:layout_marginTop="4dp"
+                style="?attr/borderlessButtonStyle" />
 
         </LinearLayout>
 
-        <!-- Product Name -->
+        <!-- ── Divider ─────────────────────────────────────────────── -->
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Product Name ──────────────────────────────────────────── -->
         <TextView
             android:id="@+id/productNameLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Product Name *"
-            android:textSize="18sp"
+            android:text="PRODUCT NAME *"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/productNameEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:hint="Enter product name"
-            android:padding="16dp"
+            android:paddingHorizontal="14dp"
             android:background="@drawable/edittext_background"
-            android:layout_marginBottom="24dp" />
+            android:textSize="15sp"
+            android:inputType="textCapSentences"
+            android:layout_marginBottom="22dp" />
 
-        <!-- Expiry Date -->
+        <!-- ── Expiry Date ───────────────────────────────────────────── -->
         <TextView
             android:id="@+id/expiryDateLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Expiry Date *"
-            android:textSize="18sp"
+            android:text="EXPIRY DATE *"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="32dp">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="22dp">
 
             <EditText
                 android:id="@+id/expiryDateEditText"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_weight="1"
                 android:hint="YYYY-MM-DD"
-                android:padding="16dp"
+                android:paddingHorizontal="14dp"
                 android:background="@drawable/edittext_background"
+                android:textSize="15sp"
                 android:inputType="date" />
 
             <Button
                 android:id="@+id/datePickerButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
                 android:text="📅"
-                android:textSize="18sp"
+                android:textSize="20sp"
+                android:backgroundTint="@android:color/transparent"
                 android:layout_marginStart="8dp"
-                android:padding="16dp" />
+                android:padding="0dp"
+                style="?attr/borderlessButtonStyle" />
 
         </LinearLayout>
 
-        <!-- Category (Optional) -->
+        <!-- ── Category ─────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/categoryLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Category (Optional)"
-            android:textSize="18sp"
+            android:text="CATEGORY"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
-        <Spinner
-            android:id="@+id/categorySpinner"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:background="@drawable/edittext_background"
-            android:layout_marginBottom="24dp" />
+            android:layout_height="52dp"
+            android:layout_marginBottom="22dp">
 
-        <!-- Quantity (Optional) -->
+            <Spinner
+                android:id="@+id/categorySpinner"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="48dp"
+                android:background="@drawable/edittext_background" />
+
+            <ImageView
+                android:id="@+id/dropdownIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="14dp"
+                android:src="@drawable/ic_dropdown_updown"
+                android:contentDescription="Select category"
+                android:clickable="false"
+                android:focusable="false"
+                android:elevation="4dp" />
+
+        </FrameLayout>
+
+        <!-- ── Quantity ──────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/quantityLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Quantity (Optional)"
-            android:textSize="18sp"
+            android:text="QUANTITY"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/quantityEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:hint="e.g., 1, 2, 500g, 1L"
-            android:padding="16dp"
+            android:paddingHorizontal="14dp"
             android:background="@drawable/edittext_background"
             android:inputType="text"
-            android:layout_marginBottom="24dp" />
+            android:textSize="15sp"
+            android:layout_marginBottom="22dp" />
 
-        <!-- Notes (Optional) -->
+        <!-- ── Notes ────────────────────────────────────────────────── -->
         <TextView
             android:id="@+id/notesLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Notes (Optional)"
-            android:textSize="18sp"
+            android:text="NOTES"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
         <EditText
@@ -208,37 +306,51 @@
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:hint="Any additional notes..."
-            android:padding="16dp"
+            android:paddingHorizontal="14dp"
+            android:paddingTop="12dp"
             android:background="@drawable/edittext_background"
-            android:gravity="top"
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:textSize="15sp"
             android:layout_marginBottom="32dp" />
 
-        <!-- Add & Cancel Buttons -->
+        <!-- ── Bottom Divider ─────────────────────────────────────────── -->
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Action Buttons ────────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/cancelButton"
                 android:layout_width="0dp"
-                android:layout_height="56dp"
+                android:layout_height="50dp"
                 android:layout_weight="1"
                 android:text="Cancel"
-                android:textSize="18sp"
-                android:textColor="#FFFFFF"
-                android:layout_marginEnd="8dp" />
+                android:textSize="15sp"
+                android:textColor="#6200EE"
+                android:backgroundTint="@android:color/transparent"
+                android:layout_marginEnd="10dp"
+                style="?attr/borderlessButtonStyle" />
 
             <Button
                 android:id="@+id/saveButton"
                 android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:layout_weight="2"
                 android:text="Save Product"
-                android:textSize="18sp"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:layout_marginStart="8dp" />
+                android:backgroundTint="#6200EE"
+                android:stateListAnimator="@null" />
 
         </LinearLayout>
 

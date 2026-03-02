@@ -46,6 +46,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:elevation="4dp"
+                        android:id="@+id/searchBarContainer"
                         android:background="@drawable/search_bar_rounded_shadow">
 
                         <!-- Search Icon -->
@@ -114,9 +115,10 @@
                     android:id="@+id/hiUserTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Hi, User"
+                    android:text="Good morning, User!"
                     android:textSize="25sp"
                     android:textStyle="bold"
+                    android:textColor="@color/greeting_text_color"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="4dp"
                     android:letterSpacing="0.02" />
@@ -594,6 +596,7 @@
             </LinearLayout>
 
             <!-- Product Count with modern styling and History Button -->
+            <!-- Product Count + History + List/Grid Toggle Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -613,21 +616,52 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Total: 0 products"
+                    android:text="Total: 0 Products"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.02" />
 
-                <!-- History Button - Right side of product count -->
+                <!-- History Button -->
                 <ImageView
                     android:id="@+id/historyButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
                     android:src="@drawable/ic_history"
-                    android:padding="8dp"
+                    android:padding="6dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="History"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginEnd="8dp" />
+
+                <!-- List / Grid Toggle -->
+                <LinearLayout
+                    android:id="@+id/viewToggleContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/view_toggle_background"
+                    android:padding="4dp">
+
+                    <ImageView
+                        android:id="@+id/listViewButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_list_view"
+                        android:padding="10dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        app:tint="#4361EE"
+                        android:contentDescription="List view" />
+
+                    <ImageView
+                        android:id="@+id/gridViewButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_grid_view"
+                        android:padding="10dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        app:tint="#999999"
+                        android:contentDescription="Grid view" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
