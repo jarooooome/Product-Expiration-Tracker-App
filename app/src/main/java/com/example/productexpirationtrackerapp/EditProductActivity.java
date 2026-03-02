@@ -102,11 +102,55 @@ public class EditProductActivity extends AppCompatActivity {
     }
 
     private void setupSpinner() {
-        // Create array of categories
         String[] categories = {"Dairy", "Vegetables", "Fruits", "Meats", "Beverages", "Medicine", "Other"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+
+        // Custom adapter that forces correct text color on the selected item view
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
+            @Override
+            public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent) {
+                android.view.View view = super.getView(position, convertView, parent);
+                if (view instanceof android.widget.TextView) {
+                    boolean dark = "black".equals(preferences.getString("color_theme", "white"));
+                    ((android.widget.TextView) view).setTextColor(
+                            dark ? android.graphics.Color.WHITE : android.graphics.Color.parseColor("#1A1A1A")
+                    );
+                }
+                return view;
+            }
+
+            @Override
+            public android.view.View getDropDownView(int position, android.view.View convertView, android.view.ViewGroup parent) {
+                android.view.View view = super.getDropDownView(position, convertView, parent);
+                if (view instanceof android.widget.TextView) {
+                    boolean dark = "black".equals(preferences.getString("color_theme", "white"));
+                    ((android.widget.TextView) view).setTextColor(
+                            dark ? android.graphics.Color.WHITE : android.graphics.Color.parseColor("#1A1A1A")
+                    );
+                    view.setBackgroundColor(
+                            dark ? android.graphics.Color.parseColor("#222222") : android.graphics.Color.WHITE
+                    );
+                }
+                return view;
+            }
+        };
+
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categorySpinner.setAdapter(adapter);
+
+        // Force text color whenever selection changes
+        categorySpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                if (view instanceof android.widget.TextView) {
+                    boolean dark = "black".equals(preferences.getString("color_theme", "white"));
+                    ((android.widget.TextView) view).setTextColor(
+                            dark ? android.graphics.Color.WHITE : android.graphics.Color.parseColor("#1A1A1A")
+                    );
+                }
+            }
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
 
         // Set selected category
         if (originalCategory != null && !originalCategory.equals("Not specified")) {
@@ -192,41 +236,46 @@ public class EditProductActivity extends AppCompatActivity {
         boolean isDark = "black".equals(theme);
         float dp = getResources().getDisplayMetrics().density;
 
-        int mainBg      = isDark ? Color.parseColor("#121212") : Color.parseColor("#F5F7FA");
-        int labelColor  = isDark ? Color.WHITE                 : Color.parseColor("#1A1E2C");
-        int fieldBg     = isDark ? Color.parseColor("#2A2A2A") : Color.WHITE;
-        int fieldText   = isDark ? Color.WHITE                 : Color.parseColor("#1A1E2C");
-        int hintColor   = isDark ? Color.parseColor("#888888") : Color.parseColor("#AAAAAA");
-        int arrowTint   = isDark ? Color.WHITE                 : Color.parseColor("#1A1E2C");
+        // ── Palette ──────────────────────────────────────────────────────
+        int mainBg       = isDark ? Color.parseColor("#121212") : Color.parseColor("#F7F7F7");
+        int labelColor   = isDark ? Color.WHITE                 : Color.parseColor("#888888");
+        int fieldBg      = isDark ? Color.parseColor("#222222") : Color.WHITE;
+        int fieldBorder  = isDark ? Color.parseColor("#3A3A3A") : Color.parseColor("#DEDEDE");
+        int fieldText    = isDark ? Color.WHITE                 : Color.parseColor("#1A1A1A");
+        int hintColor    = isDark ? Color.parseColor("#555555") : Color.parseColor("#AAAAAA");
+        int titleColor   = isDark ? Color.WHITE                 : Color.parseColor("#1A1A1A");
+        int dividerColor = isDark ? Color.parseColor("#2A2A2A") : Color.parseColor("#E8E8E8");
+        int accentGreen  = isDark ? Color.parseColor("#4CAF50") : Color.parseColor("#388E3C");
+        int iconTint     = isDark ? Color.parseColor("#AAAAAA") : Color.parseColor("#888888");
 
-        // Root background
+        // ── Root + scroll background ──────────────────────────────────────
         LinearLayout rootLayout = findViewById(R.id.rootLayout);
         if (rootLayout != null) rootLayout.setBackgroundColor(mainBg);
-
-        // ScrollView background
         View scrollView = (View) rootLayout.getParent();
         if (scrollView != null) scrollView.setBackgroundColor(mainBg);
 
-        // Back arrow tint
+        // ── Back arrow ────────────────────────────────────────────────────
         if (cancelButton != null)
             cancelButton.setImageTintList(
-                    android.content.res.ColorStateList.valueOf(arrowTint));
+                    android.content.res.ColorStateList.valueOf(titleColor));
 
-        // Header title
+        // ── Header title ──────────────────────────────────────────────────
         TextView headerTitle = findViewById(R.id.headerTitle);
-        if (headerTitle != null) headerTitle.setTextColor(labelColor);
+        if (headerTitle != null) headerTitle.setTextColor(titleColor);
 
-        // All label TextViews — identify by iterating labelIds
-        int[] labelIds = {
-                R.id.productNameLabel, R.id.expiryDateLabel,
-                R.id.categoryLabel, R.id.quantityLabel, R.id.notesLabel
-        };
+        // ── Divider ───────────────────────────────────────────────────────
+        android.view.View div1 = findViewById(R.id.divider1);
+        if (div1 != null) div1.setBackgroundColor(dividerColor);
+
+        // ── Section labels (ALL-CAPS small) ───────────────────────────────
+        int[] labelIds = { R.id.productNameLabel, R.id.expiryDateLabel,
+                R.id.categoryLabel, R.id.quantityLabel, R.id.notesLabel };
         for (int id : labelIds) {
             TextView lbl = findViewById(id);
             if (lbl != null) lbl.setTextColor(labelColor);
         }
 
-        // EditText fields
+        // ── EditText fields ───────────────────────────────────────────────
         EditText[] fields = { productNameEdit, expiryDateEdit, quantityEdit, notesEdit };
         for (EditText et : fields) {
             if (et != null) {
@@ -235,41 +284,54 @@ public class EditProductActivity extends AppCompatActivity {
                 android.graphics.drawable.GradientDrawable bg =
                         new android.graphics.drawable.GradientDrawable();
                 bg.setColor(fieldBg);
-                bg.setCornerRadius(10 * dp);
+                bg.setCornerRadius(8 * dp);
+                bg.setStroke(1, fieldBorder);
                 et.setBackground(bg);
             }
         }
 
-        // Spinner background
+        // ── Spinner background ────────────────────────────────────────────
         if (categorySpinner != null) {
             android.graphics.drawable.GradientDrawable spinnerBg =
                     new android.graphics.drawable.GradientDrawable();
             spinnerBg.setColor(fieldBg);
-            spinnerBg.setCornerRadius(10 * dp);
+            spinnerBg.setCornerRadius(8 * dp);
+            spinnerBg.setStroke(1, fieldBorder);
             categorySpinner.setBackground(spinnerBg);
+            // Force selected item text colour
+            categorySpinner.post(() -> {
+                android.view.View sv = categorySpinner.getSelectedView();
+                if (sv instanceof android.widget.TextView)
+                    ((android.widget.TextView) sv).setTextColor(fieldText);
+            });
         }
 
-        // Save button — keep existing blue
-        if (saveButton != null) {
-            saveButton.setBackgroundColor(Color.parseColor("#4361EE"));
-            saveButton.setTextColor(Color.WHITE);
-        }
-
-        // Calendar icon — tint the drawableEnd on expiryDateEdit
-        int iconTint = isDark ? Color.parseColor("#AAAAAA") : Color.parseColor("#8A8F9E");
+        // ── Calendar icon tint ────────────────────────────────────────────
         if (expiryDateEdit != null) {
-            android.graphics.drawable.Drawable[] drawables = expiryDateEdit.getCompoundDrawablesRelative();
-            if (drawables[2] != null) { // drawableEnd
+            android.graphics.drawable.Drawable[] drawables =
+                    expiryDateEdit.getCompoundDrawablesRelative();
+            if (drawables[2] != null) {
                 drawables[2] = drawables[2].mutate();
                 drawables[2].setTint(iconTint);
                 expiryDateEdit.setCompoundDrawablesRelativeWithIntrinsicBounds(
                         drawables[0], drawables[1], drawables[2], drawables[3]);
             }
         }
-        // Dropdown icon — still an ImageView overlay on the spinner
+
+        // ── Dropdown icon tint ────────────────────────────────────────────
         ImageView dropdownIcon = findViewById(R.id.dropdownIcon);
         if (dropdownIcon != null)
             dropdownIcon.setImageTintList(
                     android.content.res.ColorStateList.valueOf(iconTint));
+
+        // ── Save button (green, rounded) ──────────────────────────────────
+        if (saveButton != null) {
+            android.graphics.drawable.GradientDrawable saveBg =
+                    new android.graphics.drawable.GradientDrawable();
+            saveBg.setColor(accentGreen);
+            saveBg.setCornerRadius(8 * dp);
+            saveButton.setBackground(saveBg);
+            saveButton.setTextColor(Color.WHITE);
+        }
     }
 }
