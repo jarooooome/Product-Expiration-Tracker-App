@@ -6,8 +6,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,7 +24,6 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
     private RecyclerView historyRecyclerView;
     private ConsumedHistoryAdapter adapter;
     private ConsumedProductViewModel consumedProductViewModel;
-    private UserRepository userRepository;
 
     private TextView tvConsumedCount, tvDiscardedCount, tvTotalCount;
     private ImageView backButton;
@@ -31,7 +31,8 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
     private View indicatorConsumed, indicatorDiscarded, indicatorAll;
     private LinearLayout mainLayout, headerLayout;
 
-    private String currentFilter = "ALL"; // ALL, CONSUMED, DISCARDED
+    private SharedPreferences preferences;
+    private String currentFilter = "ALL";
     private static final String TAG = "HISTORY_THEME";
 
     @Override
@@ -39,270 +40,256 @@ public class ConsumedHistoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_consumed_history);
 
-        // Initialize UserRepository for theme
-        userRepository = new UserRepository(getApplication());
+        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
-        // Initialize views
         initializeViews();
-
-        // ✅ Apply theme with delay
-        applyThemeFromDatabase();
-
-        // Setup RecyclerView
+        applyTheme();
         setupRecyclerView();
 
-        // Initialize ViewModel
         consumedProductViewModel = new ViewModelProvider(this).get(ConsumedProductViewModel.class);
 
-        // Setup observers
         setupObservers();
-
-        // Setup click listeners
         setupClickListeners();
-
-        // Update counts
         updateCounts();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Reapply theme when returning to this activity
-        applyThemeFromDatabase();
-        Log.d(TAG, "onResume called - theme reapplied");
+        applyTheme();
     }
+
+    // ── Views ─────────────────────────────────────────────────────────────────
 
     private void initializeViews() {
-        mainLayout = findViewById(R.id.mainLayout);
-        headerLayout = findViewById(R.id.headerLayout);
+        mainLayout    = findViewById(R.id.mainLayout);
+        headerLayout  = findViewById(R.id.headerLayout);
 
         historyRecyclerView = findViewById(R.id.historyRecyclerView);
-        tvConsumedCount = findViewById(R.id.tvConsumedCount);
-        tvDiscardedCount = findViewById(R.id.tvDiscardedCount);
-        tvTotalCount = findViewById(R.id.tvTotalCount);
-        backButton = findViewById(R.id.backButton);
+        tvConsumedCount     = findViewById(R.id.tvConsumedCount);
+        tvDiscardedCount    = findViewById(R.id.tvDiscardedCount);
+        tvTotalCount        = findViewById(R.id.tvTotalCount);
+        backButton          = findViewById(R.id.backButton);
 
+        btnAll      = findViewById(R.id.btnAll);
         btnConsumed = findViewById(R.id.btnConsumed);
         btnDiscarded = findViewById(R.id.btnDiscarded);
-        btnAll = findViewById(R.id.btnAll);
 
+        indicatorAll      = findViewById(R.id.indicatorAll);
         indicatorConsumed = findViewById(R.id.indicatorConsumed);
         indicatorDiscarded = findViewById(R.id.indicatorDiscarded);
-        indicatorAll = findViewById(R.id.indicatorAll);
     }
 
-    // Apply theme from database - USING SYNC
-    private void applyThemeFromDatabase() {
-        Log.d(TAG, "applyThemeFromDatabase called");
+    // ── Theme ─────────────────────────────────────────────────────────────────
 
-        // Ipagpaliban ng konti para matapos ang database operations
-        new android.os.Handler().postDelayed(() -> {
-            // Use sync after delay
-            User user = userRepository.getUserSync();
+    private void applyTheme() {
+        String theme = preferences.getString("color_theme", "white");
+        boolean isDark = "black".equals(theme);
+        float dp = getResources().getDisplayMetrics().density;
 
-            if (user != null) {
-                String theme = user.getColorTheme();
-                Log.d(TAG, "✅ Theme from database after delay: " + theme);
-                runOnUiThread(() -> applyThemeColors(theme));
-            } else {
-                Log.d(TAG, "❌ Still no user found after delay");
-                runOnUiThread(() -> applyThemeColors("white"));
+        // ── Palette ───────────────────────────────────────────────────────────
+        int mainBg       = isDark ? Color.parseColor("#121212") : Color.parseColor("#F7F7F7");
+        int headerBg     = isDark ? Color.parseColor("#121212") : Color.parseColor("#F7F7F7");
+        int titleColor   = isDark ? Color.WHITE                 : Color.parseColor("#1A1A1A");
+        int labelColor   = isDark ? Color.parseColor("#888888") : Color.parseColor("#888888");
+        int dividerColor = isDark ? Color.parseColor("#2A2A2A") : Color.parseColor("#E0E0E0");
+        int tabTextActive   = isDark ? Color.WHITE              : Color.parseColor("#1A1A1A");
+        int tabTextInactive = isDark ? Color.parseColor("#666666") : Color.parseColor("#AAAAAA");
+        int accentGreen  = isDark ? Color.parseColor("#4CAF50") : Color.parseColor("#388E3C");
+        int statCardBg   = isDark ? Color.parseColor("#1E1E1E") : Color.WHITE;
+        int statBorder   = isDark ? Color.parseColor("#2E2E2E") : Color.parseColor("#EEEEEE");
+        int statTotalColor = isDark ? Color.WHITE               : Color.parseColor("#1A1A1A");
+
+        // ── Root background ───────────────────────────────────────────────────
+        if (mainLayout != null) mainLayout.setBackgroundColor(mainBg);
+        if (headerLayout != null) headerLayout.setBackgroundColor(headerBg);
+
+        // ── Back arrow ────────────────────────────────────────────────────────
+        if (backButton != null)
+            backButton.setImageTintList(
+                    android.content.res.ColorStateList.valueOf(titleColor));
+
+        // ── Title ─────────────────────────────────────────────────────────────
+        TextView titleView = findViewById(R.id.titleTextView);
+        if (titleView != null) titleView.setTextColor(titleColor);
+
+        // ── Stat card backgrounds ─────────────────────────────────────────────
+        int[] statCardIds = { R.id.statCardTotal, R.id.statCardConsumed, R.id.statCardDiscarded };
+        for (int id : statCardIds) {
+            View card = findViewById(id);
+            if (card != null) {
+                GradientDrawable bg = new GradientDrawable();
+                bg.setColor(statCardBg);
+                bg.setCornerRadius(10 * dp);
+                bg.setStroke(1, statBorder);
+                card.setBackground(bg);
             }
-        }, 500); // 500ms delay
+        }
+
+        // ── Total stat number + label ─────────────────────────────────────────
+        if (tvTotalCount != null) tvTotalCount.setTextColor(statTotalColor);
+        TextView tvTotalLabel = findViewById(R.id.tvTotalLabel);
+        if (tvTotalLabel != null) tvTotalLabel.setTextColor(labelColor);
+
+        // ── Consumed / Discarded stat colors stay fixed (green/red always) ────
+        // tvConsumedCount and tvDiscardedCount keep their green/red from XML
+
+        // ── Stat dividers ─────────────────────────────────────────────────────
+        View sd1 = findViewById(R.id.statDivider1);
+        View sd2 = findViewById(R.id.statDivider2);
+        if (sd1 != null) sd1.setBackgroundColor(dividerColor);
+        if (sd2 != null) sd2.setBackgroundColor(dividerColor);
+
+        // ── Horizontal rule dividers ──────────────────────────────────────────
+        View headerDivider = findViewById(R.id.headerDivider);
+        View tabDivider    = findViewById(R.id.tabDivider);
+        if (headerDivider != null) headerDivider.setBackgroundColor(dividerColor);
+        if (tabDivider != null)    tabDivider.setBackgroundColor(dividerColor);
+
+        // ── Filter tabs ───────────────────────────────────────────────────────
+        // "All" tab is active by default
+        setTabTextColor(R.id.tvAll,      currentFilter.equals("ALL")      ? tabTextActive : tabTextInactive);
+        setTabTextColor(R.id.tvConsumed, currentFilter.equals("CONSUMED") ? tabTextActive : tabTextInactive);
+        setTabTextColor(R.id.tvDiscarded,currentFilter.equals("DISCARDED")? tabTextActive : tabTextInactive);
+
+        // Active indicator = green accent
+        if (indicatorAll != null)       indicatorAll.setBackgroundColor(accentGreen);
+        if (indicatorConsumed != null)  indicatorConsumed.setBackgroundColor(accentGreen);
+        if (indicatorDiscarded != null) indicatorDiscarded.setBackgroundColor(accentGreen);
+
+        // ── Filter layout background ──────────────────────────────────────────
+        LinearLayout filterLayout = findViewById(R.id.filterLayout);
+        if (filterLayout != null) filterLayout.setBackgroundColor(mainBg);
+
+        // ── Empty state text ──────────────────────────────────────────────────
+        TextView emptyTitle = findViewById(R.id.emptyTitleText);
+        TextView emptySub   = findViewById(R.id.emptySubText);
+        if (emptyTitle != null) emptyTitle.setTextColor(isDark ? Color.parseColor("#555555") : Color.parseColor("#AAAAAA"));
+        if (emptySub   != null) emptySub.setTextColor(isDark ? Color.parseColor("#444444") : Color.parseColor("#BBBBBB"));
+
+        Log.d(TAG, "Theme applied: " + theme);
     }
 
-    // Apply theme colors - UPDATED to only White and Black
-    private void applyThemeColors(String theme) {
-        Log.d(TAG, "applyThemeColors called with theme: " + theme);
-
-        int primaryColor;
-        int backgroundColor;
-        int textColor;
-
-        if ("black".equals(theme)) {
-            primaryColor = getResources().getColor(R.color.color_primary_black);
-            backgroundColor = getResources().getColor(R.color.color_background_black);
-            textColor = getResources().getColor(R.color.color_text_black);
-        } else {
-            // Default to white
-            primaryColor = getResources().getColor(R.color.color_primary_white);
-            backgroundColor = getResources().getColor(R.color.color_background_white);
-            textColor = getResources().getColor(R.color.color_text_white);
-        }
-
-        Log.d(TAG, "Colors - Primary: " + primaryColor + ", BG: " + backgroundColor + ", Text: " + textColor);
-
-        // Apply background to main layout
-        if (mainLayout != null) {
-            mainLayout.setBackgroundColor(backgroundColor);
-            Log.d(TAG, "✅ Main layout background set");
-        } else {
-            Log.e(TAG, "❌ mainLayout is NULL!");
-        }
-
-        // Apply header color
-        if (headerLayout != null) {
-            headerLayout.setBackgroundColor(primaryColor);
-            Log.d(TAG, "✅ Header layout background set");
-        } else {
-            Log.e(TAG, "❌ headerLayout is NULL!");
-        }
-
-        // Update filter tab colors
-        updateFilterTabColors(theme, primaryColor, textColor);
+    private void setTabTextColor(int viewId, int color) {
+        TextView tv = findViewById(viewId);
+        if (tv != null) tv.setTextColor(color);
     }
 
-    // Update filter tab colors
-    private void updateFilterTabColors(String theme, int primaryColor, int textColor) {
-        // Update text colors for filter tabs
-        if (btnAll != null && btnAll.getChildAt(0) instanceof TextView) {
-            ((TextView) btnAll.getChildAt(0)).setTextColor(textColor);
-        }
-        if (btnConsumed != null && btnConsumed.getChildAt(0) instanceof TextView) {
-            ((TextView) btnConsumed.getChildAt(0)).setTextColor(textColor);
-        }
-        if (btnDiscarded != null && btnDiscarded.getChildAt(0) instanceof TextView) {
-            ((TextView) btnDiscarded.getChildAt(0)).setTextColor(textColor);
-        }
-
-        // Update indicator colors
-        if (indicatorAll != null) {
-            indicatorAll.setBackgroundColor(primaryColor);
-        }
-        if (indicatorConsumed != null) {
-            indicatorConsumed.setBackgroundColor(primaryColor);
-        }
-        if (indicatorDiscarded != null) {
-            indicatorDiscarded.setBackgroundColor(primaryColor);
-        }
-    }
+    // ── RecyclerView ──────────────────────────────────────────────────────────
 
     private void setupRecyclerView() {
         adapter = new ConsumedHistoryAdapter(this);
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         historyRecyclerView.setAdapter(adapter);
 
-        // Set item click listener
-        adapter.setOnItemClickListener(new ConsumedHistoryAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(ConsumedProduct product) {
+        adapter.setOnItemClickListener(product ->
                 Toast.makeText(ConsumedHistoryActivity.this,
                         product.getProductName() + " - " + product.getActionType(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
+                        Toast.LENGTH_SHORT).show()
+        );
     }
+
+    // ── Observers ─────────────────────────────────────────────────────────────
 
     private void setupObservers() {
-        // Observe all products
-        consumedProductViewModel.getAllConsumedProducts().observe(this, new Observer<List<ConsumedProduct>>() {
-            @Override
-            public void onChanged(List<ConsumedProduct> products) {
-                if (currentFilter.equals("ALL")) {
-                    adapter.setConsumedProducts(products);
-                }
-                updateCounts();
-            }
+        consumedProductViewModel.getAllConsumedProducts().observe(this, products -> {
+            if (currentFilter.equals("ALL")) adapter.setConsumedProducts(products);
+            updateCounts();
         });
 
-        // Observe consumed products
-        consumedProductViewModel.getConsumedProducts().observe(this, new Observer<List<ConsumedProduct>>() {
-            @Override
-            public void onChanged(List<ConsumedProduct> products) {
-                if (currentFilter.equals("CONSUMED")) {
-                    adapter.setConsumedProducts(products);
-                }
-            }
+        consumedProductViewModel.getConsumedProducts().observe(this, products -> {
+            if (currentFilter.equals("CONSUMED")) adapter.setConsumedProducts(products);
         });
 
-        // Observe discarded products
-        consumedProductViewModel.getDiscardedProducts().observe(this, new Observer<List<ConsumedProduct>>() {
-            @Override
-            public void onChanged(List<ConsumedProduct> products) {
-                if (currentFilter.equals("DISCARDED")) {
-                    adapter.setConsumedProducts(products);
-                }
-            }
+        consumedProductViewModel.getDiscardedProducts().observe(this, products -> {
+            if (currentFilter.equals("DISCARDED")) adapter.setConsumedProducts(products);
         });
     }
+
+    // ── Click listeners ───────────────────────────────────────────────────────
 
     private void setupClickListeners() {
         backButton.setOnClickListener(v -> finish());
 
         btnAll.setOnClickListener(v -> {
-            setActiveFilter("ALL");
             currentFilter = "ALL";
+            setActiveFilter("ALL");
             adapter.setConsumedProducts(consumedProductViewModel.getAllConsumedProducts().getValue());
         });
 
         btnConsumed.setOnClickListener(v -> {
-            setActiveFilter("CONSUMED");
             currentFilter = "CONSUMED";
+            setActiveFilter("CONSUMED");
             adapter.setConsumedProducts(consumedProductViewModel.getConsumedProducts().getValue());
         });
 
         btnDiscarded.setOnClickListener(v -> {
-            setActiveFilter("DISCARDED");
             currentFilter = "DISCARDED";
+            setActiveFilter("DISCARDED");
             adapter.setConsumedProducts(consumedProductViewModel.getDiscardedProducts().getValue());
         });
     }
 
     private void setActiveFilter(String filter) {
-        // Reset all indicators
-        indicatorAll.setVisibility(View.GONE);
-        indicatorConsumed.setVisibility(View.GONE);
-        indicatorDiscarded.setVisibility(View.GONE);
+        String theme = preferences.getString("color_theme", "white");
+        boolean isDark = "black".equals(theme);
+        int active   = isDark ? Color.WHITE                 : Color.parseColor("#1A1A1A");
+        int inactive = isDark ? Color.parseColor("#666666") : Color.parseColor("#AAAAAA");
 
-        // Set active
+        // Reset all tab text to inactive
+        setTabTextColor(R.id.tvAll,       inactive);
+        setTabTextColor(R.id.tvConsumed,  inactive);
+        setTabTextColor(R.id.tvDiscarded, inactive);
+
+        // Hide all indicators
+        if (indicatorAll != null)       indicatorAll.setVisibility(View.GONE);
+        if (indicatorConsumed != null)  indicatorConsumed.setVisibility(View.GONE);
+        if (indicatorDiscarded != null) indicatorDiscarded.setVisibility(View.GONE);
+
+        // Activate the selected one
         switch (filter) {
             case "ALL":
-                indicatorAll.setVisibility(View.VISIBLE);
+                setTabTextColor(R.id.tvAll, active);
+                if (indicatorAll != null) indicatorAll.setVisibility(View.VISIBLE);
                 break;
             case "CONSUMED":
-                indicatorConsumed.setVisibility(View.VISIBLE);
+                setTabTextColor(R.id.tvConsumed, active);
+                if (indicatorConsumed != null) indicatorConsumed.setVisibility(View.VISIBLE);
                 break;
             case "DISCARDED":
-                indicatorDiscarded.setVisibility(View.VISIBLE);
+                setTabTextColor(R.id.tvDiscarded, active);
+                if (indicatorDiscarded != null) indicatorDiscarded.setVisibility(View.VISIBLE);
                 break;
         }
     }
 
-    private void updateCounts() {
-        // Get counts from ViewModel
-        consumedProductViewModel.getCount(new ConsumedProductRepository.RepositoryCallback<Integer>() {
-            @Override
-            public void onSuccess(Integer count) {
-                runOnUiThread(() -> tvTotalCount.setText(String.valueOf(count)));
-            }
+    // ── Counts ────────────────────────────────────────────────────────────────
 
-            @Override
-            public void onError(Exception e) {
-                tvTotalCount.setText("0");
+    private void updateCounts() {
+        consumedProductViewModel.getCount(new ConsumedProductRepository.RepositoryCallback<Integer>() {
+            @Override public void onSuccess(Integer count) {
+                runOnUiThread(() -> { if (tvTotalCount != null) tvTotalCount.setText(String.valueOf(count)); });
+            }
+            @Override public void onError(Exception e) {
+                if (tvTotalCount != null) tvTotalCount.setText("0");
             }
         });
 
         consumedProductViewModel.getCountByType("CONSUMED", new ConsumedProductRepository.RepositoryCallback<Integer>() {
-            @Override
-            public void onSuccess(Integer count) {
-                runOnUiThread(() -> tvConsumedCount.setText(String.valueOf(count)));
+            @Override public void onSuccess(Integer count) {
+                runOnUiThread(() -> { if (tvConsumedCount != null) tvConsumedCount.setText(String.valueOf(count)); });
             }
-
-            @Override
-            public void onError(Exception e) {
-                tvConsumedCount.setText("0");
+            @Override public void onError(Exception e) {
+                if (tvConsumedCount != null) tvConsumedCount.setText("0");
             }
         });
 
         consumedProductViewModel.getCountByType("DISCARDED", new ConsumedProductRepository.RepositoryCallback<Integer>() {
-            @Override
-            public void onSuccess(Integer count) {
-                runOnUiThread(() -> tvDiscardedCount.setText(String.valueOf(count)));
+            @Override public void onSuccess(Integer count) {
+                runOnUiThread(() -> { if (tvDiscardedCount != null) tvDiscardedCount.setText(String.valueOf(count)); });
             }
-
-            @Override
-            public void onError(Exception e) {
-                tvDiscardedCount.setText("0");
+            @Override public void onError(Exception e) {
+                if (tvDiscardedCount != null) tvDiscardedCount.setText("0");
             }
         });
     }

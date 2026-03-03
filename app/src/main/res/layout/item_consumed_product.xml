@@ -1,44 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
+    android:orientation="vertical"
+    android:layout_marginBottom="10dp"
     android:foreground="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
 
     <LinearLayout
+        android:id="@+id/cardInner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="14dp">
 
-        <!-- Product Image -->
+        <!-- Product Image (rounded) -->
         <ImageView
             android:id="@+id/productImage"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:scaleType="centerCrop"
-            android:background="#F0F0F0"
             android:src="@drawable/ic_default_product"
-            android:layout_marginEnd="12dp" />
+            android:layout_marginEnd="14dp"
+            android:layout_gravity="center_vertical"
+            android:clipToOutline="true" />
 
-        <!-- Product Details -->
+        <!-- Details column -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical">
 
-            <!-- Product Name and Action Type -->
+            <!-- Name row + badge -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
 
                 <TextView
                     android:id="@+id/productName"
@@ -46,19 +49,26 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Product Name"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
-                    android:textColor="#333333" />
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
+                <!-- Action badge (CONSUMED green / DISCARDED red) -->
                 <TextView
                     android:id="@+id/actionType"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp"
-                    android:textSize="12sp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:textSize="10sp"
                     android:textStyle="bold"
-                    android:textColor="#FFFFFF" />
+                    android:textColor="#FFFFFF"
+                    android:letterSpacing="0.06"
+                    android:layout_marginStart="8dp" />
+
             </LinearLayout>
 
             <!-- Category -->
@@ -67,22 +77,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Category"
-                android:textSize="14sp"
-                android:textColor="#666666"
-                android:layout_marginTop="4dp" />
+                android:textSize="13sp"
+                android:layout_marginBottom="2dp" />
 
-            <!-- Quantity -->
+            <!-- Quantity (shown only when present) -->
             <TextView
                 android:id="@+id/quantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Quantity"
-                android:textSize="14sp"
-                android:textColor="#666666"
-                android:layout_marginTop="2dp"
+                android:textSize="13sp"
+                android:layout_marginBottom="2dp"
                 android:visibility="gone" />
 
-            <!-- Action Date and Expiry Date -->
+            <!-- Dates row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -94,18 +101,28 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Consumed: Jan 1, 2024"
-                    android:textSize="12sp"
-                    android:textColor="#999999" />
+                    android:text="Action: Jan 1, 2024"
+                    android:textSize="11sp" />
 
                 <TextView
                     android:id="@+id/expiryDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Expired: Jan 1, 2024"
-                    android:textSize="12sp"
-                    android:textColor="#999999" />
+                    android:textSize="11sp" />
+
             </LinearLayout>
+
         </LinearLayout>
+
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+
+    <!-- Bottom border line (subtle separator) -->
+    <View
+        android:id="@+id/cardDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="14dp" />
+
+</LinearLayout>

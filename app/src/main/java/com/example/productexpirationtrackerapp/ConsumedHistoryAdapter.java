@@ -1,13 +1,16 @@
 package com.example.productexpirationtrackerapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -23,24 +27,28 @@ public class ConsumedHistoryAdapter extends RecyclerView.Adapter<ConsumedHistory
     private List<ConsumedProduct> consumedProducts = new ArrayList<>();
     private Context context;
     private OnItemClickListener listener;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
     public interface OnItemClickListener {
         void onItemClick(ConsumedProduct product);
-    }
-
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
     }
 
     public ConsumedHistoryAdapter(Context context) {
         this.context = context;
     }
 
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
+    public void setConsumedProducts(List<ConsumedProduct> products) {
+        this.consumedProducts = products != null ? products : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_consumed_product, parent, false);
         return new ViewHolder(view);
     }
@@ -48,75 +56,7 @@ public class ConsumedHistoryAdapter extends RecyclerView.Adapter<ConsumedHistory
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ConsumedProduct product = consumedProducts.get(position);
-
-        // Set product name
-        holder.productName.setText(product.getProductName());
-
-        // Set category
-        String category = product.getCategory();
-        holder.category.setText(category != null && !category.isEmpty() ? category : "No category");
-
-        // Set quantity
-        String quantity = product.getQuantity();
-        if (quantity != null && !quantity.isEmpty()) {
-            holder.quantity.setVisibility(View.VISIBLE);
-            holder.quantity.setText("Qty: " + quantity);
-        } else {
-            holder.quantity.setVisibility(View.GONE);
-        }
-
-        // Set action type with color
-        String actionType = product.getActionType();
-        holder.actionType.setText(actionType);
-
-        // Set background color based on action type
-        if ("CONSUMED".equals(actionType)) {
-            holder.actionType.setBackgroundColor(Color.parseColor("#4CAF50")); // Green
-        } else {
-            holder.actionType.setBackgroundColor(Color.parseColor("#F44336")); // Red
-        }
-
-        // Set dates
-        holder.actionDate.setText("Action: " + dateFormat.format(product.getActionDate()));
-        holder.expiryDate.setText("Expired: " + dateFormat.format(product.getExpiryDate()));
-
-        // Set product image
-        if (product.hasPhoto()) {
-            byte[] photoBytes = product.getPhoto();
-            Bitmap bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
-            holder.productImage.setImageBitmap(bitmap);
-        } else {
-            // Set placeholder based on category
-            int placeholderRes = getPlaceholderForCategory(product.getCategory());
-            holder.productImage.setImageResource(placeholderRes);
-        }
-
-        // Set click listener
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(product);
-            }
-        });
-    }
-
-    private int getPlaceholderForCategory(String category) {
-        if (category == null) return R.drawable.ic_default_product;
-
-        switch (category) {
-            case "Dairy":
-            case "Vegetables":
-            case "Fruits":
-            case "Meats":
-                return R.drawable.ic_food_placeholder;
-            case "Beverages":
-                return R.drawable.ic_drinks_placeholder;
-            case "Medicine":
-                return R.drawable.ic_medicine_placeholder;
-            case "Other":
-                return R.drawable.ic_other_placeholder;
-            default:
-                return R.drawable.ic_default_product;
-        }
+        holder.bind(product);
     }
 
     @Override
@@ -124,29 +64,151 @@ public class ConsumedHistoryAdapter extends RecyclerView.Adapter<ConsumedHistory
         return consumedProducts.size();
     }
 
-    public void setConsumedProducts(List<ConsumedProduct> products) {
-        this.consumedProducts = products;
-        notifyDataSetChanged();
-    }
+    // ── ViewHolder ────────────────────────────────────────────────────────────
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
+
+        LinearLayout cardInner;
         ImageView productImage;
-        TextView productName;
-        TextView category;
-        TextView quantity;
-        TextView actionType;
-        TextView actionDate;
-        TextView expiryDate;
+        TextView productName, actionType, category, quantity, actionDate, expiryDate;
+        View cardDivider;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
+            cardInner    = itemView.findViewById(R.id.cardInner);
             productImage = itemView.findViewById(R.id.productImage);
-            productName = itemView.findViewById(R.id.productName);
-            category = itemView.findViewById(R.id.category);
-            quantity = itemView.findViewById(R.id.quantity);
-            actionType = itemView.findViewById(R.id.actionType);
-            actionDate = itemView.findViewById(R.id.actionDate);
-            expiryDate = itemView.findViewById(R.id.expiryDate);
+            productName  = itemView.findViewById(R.id.productName);
+            actionType   = itemView.findViewById(R.id.actionType);
+            category     = itemView.findViewById(R.id.category);
+            quantity     = itemView.findViewById(R.id.quantity);
+            actionDate   = itemView.findViewById(R.id.actionDate);
+            expiryDate   = itemView.findViewById(R.id.expiryDate);
+            cardDivider  = itemView.findViewById(R.id.cardDivider);
+        }
+
+        void bind(ConsumedProduct product) {
+            float dp = context.getResources().getDisplayMetrics().density;
+            SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+            boolean isDark = "black".equals(prefs.getString("color_theme", "white"));
+
+            // ── Palette ───────────────────────────────────────────────────────
+            int cardBg      = isDark ? Color.parseColor("#1E1E1E") : Color.WHITE;
+            int cardBorder  = isDark ? Color.parseColor("#2E2E2E") : Color.parseColor("#EEEEEE");
+            int textPrimary = isDark ? Color.WHITE                 : Color.parseColor("#1A1A1A");
+            int textSecond  = isDark ? Color.parseColor("#888888") : Color.parseColor("#888888");
+            int textMeta    = isDark ? Color.parseColor("#555555") : Color.parseColor("#BBBBBB");
+            int imageBg     = isDark ? Color.parseColor("#2A2A2A") : Color.parseColor("#F0F0F0");
+            int dividerColor = isDark ? Color.parseColor("#262626") : Color.parseColor("#F3F3F3");
+
+            // ── Card background (rounded) ─────────────────────────────────────
+            GradientDrawable cardBgDrawable = new GradientDrawable();
+            cardBgDrawable.setColor(cardBg);
+            cardBgDrawable.setCornerRadius(12 * dp);
+            cardBgDrawable.setStroke(1, cardBorder);
+            if (cardInner != null) cardInner.setBackground(cardBgDrawable);
+
+            // ── Bottom separator ──────────────────────────────────────────────
+            if (cardDivider != null) cardDivider.setBackgroundColor(dividerColor);
+
+            // ── Product image ─────────────────────────────────────────────────
+            if (productImage != null) {
+                GradientDrawable imgBg = new GradientDrawable();
+                imgBg.setColor(imageBg);
+                imgBg.setCornerRadius(8 * dp);
+                productImage.setBackground(imgBg);
+
+                if (product.getPhoto() != null && product.getPhoto().length > 0) {
+                    try {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(
+                                product.getPhoto(), 0, product.getPhoto().length);
+                        if (bitmap != null) {
+                            productImage.setImageBitmap(bitmap);
+                            productImage.setBackground(null);
+                        } else {
+                            productImage.setImageResource(R.drawable.ic_default_product);
+                        }
+                    } catch (Exception e) {
+                        productImage.setImageResource(R.drawable.ic_default_product);
+                    }
+                } else {
+                    productImage.setImageResource(R.drawable.ic_default_product);
+                }
+            }
+
+            // ── Product name ──────────────────────────────────────────────────
+            if (productName != null) {
+                productName.setText(product.getProductName() != null
+                        ? product.getProductName() : "Unknown");
+                productName.setTextColor(textPrimary);
+            }
+
+            // ── Action badge (CONSUMED = green, DISCARDED = red) ──────────────
+            if (actionType != null) {
+                String action = product.getActionType();
+                boolean isConsumed = "CONSUMED".equalsIgnoreCase(action);
+
+                String label     = isConsumed ? "CONSUMED" : "DISCARDED";
+                int badgeBgColor = isConsumed
+                        ? Color.parseColor("#388E3C")   // green
+                        : Color.parseColor("#C62828");  // red
+
+                actionType.setText(label);
+                actionType.setTextColor(Color.WHITE);
+
+                GradientDrawable badgeBg = new GradientDrawable();
+                badgeBg.setColor(badgeBgColor);
+                badgeBg.setCornerRadius(4 * dp);
+                actionType.setBackground(badgeBg);
+            }
+
+            // ── Category ──────────────────────────────────────────────────────
+            if (category != null) {
+                String cat = product.getCategory();
+                category.setText(cat != null && !cat.isEmpty() ? cat : "No category");
+                category.setTextColor(textSecond);
+            }
+
+            // ── Quantity (show if present) ────────────────────────────────────
+            if (quantity != null) {
+                String qty = product.getQuantity();
+                if (qty != null && !qty.isEmpty() && !qty.equals("0")) {
+                    quantity.setText("Qty: " + qty);
+                    quantity.setTextColor(textSecond);
+                    quantity.setVisibility(View.VISIBLE);
+                } else {
+                    quantity.setVisibility(View.GONE);
+                }
+            }
+
+            // ── Dates ─────────────────────────────────────────────────────────
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+
+            if (actionDate != null) {
+                String prefix = "CONSUMED".equalsIgnoreCase(product.getActionType())
+                        ? "Action: " : "Action: ";
+                try {
+                    Date date = product.getActionDate();
+                    actionDate.setText(date != null ? prefix + sdf.format(date) : prefix + "—");
+                } catch (Exception e) {
+                    actionDate.setText(prefix + "—");
+                }
+                actionDate.setTextColor(textMeta);
+            }
+
+            if (expiryDate != null) {
+                try {
+                    Date date = product.getExpiryDate();
+                    expiryDate.setText(date != null ? "Expired: " + sdf.format(date) : "");
+                } catch (Exception e) {
+                    expiryDate.setText("");
+                }
+                expiryDate.setTextColor(textMeta);
+            }
+
+            // ── Item click ────────────────────────────────────────────────────
+            itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onItemClick(product);
+            });
         }
     }
 }
