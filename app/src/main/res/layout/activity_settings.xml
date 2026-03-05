@@ -492,6 +492,7 @@
                 android:layout_height="wrap_content"
                 android:text="Profile"
                 android:textSize="11sp"
+                android:textStyle="bold"
                 android:layout_marginTop="3dp"
                 android:letterSpacing="0.03" />
 
@@ -530,6 +531,7 @@
                 android:layout_height="wrap_content"
                 android:text="Products"
                 android:textSize="11sp"
+                android:textStyle="bold"
                 android:layout_marginTop="3dp"
                 android:letterSpacing="0.03" />
 

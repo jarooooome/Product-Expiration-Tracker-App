@@ -287,15 +287,12 @@ public class SettingsActivity extends AppCompatActivity {
         // ── Bottom navigation ─────────────────────────────────────────────────
         LinearLayout bottomNav = findViewById(R.id.bottomNavigation);
         if (bottomNav != null) {
-            GradientDrawable navBgDrawable = new GradientDrawable();
-            navBgDrawable.setColor(navBg);
-            // Top border
-            navBgDrawable.setStroke(0, Color.TRANSPARENT);
-            bottomNav.setBackgroundColor(navBg);
-
-            // Top border line
+            android.graphics.drawable.GradientDrawable navRounded = new android.graphics.drawable.GradientDrawable();
+            navRounded.setColor(navBg);
+            float[] navRadii = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f};
+            navRounded.setCornerRadii(navRadii);
+            bottomNav.setBackground(navRounded);
             bottomNav.setPadding(0, (int)(1 * dp), 0, 0);
-            bottomNav.setBackgroundColor(navBg);
         }
 
         // Nav border via parent background
@@ -324,13 +321,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void applyNavColors(int active, int inactive, int accent, int navBg, int border, float dp) {
-        // Nav background + top border
+        // Nav background — rounded top corners
         LinearLayout bottomNav = findViewById(R.id.bottomNavigation);
         if (bottomNav != null) {
             GradientDrawable bg = new GradientDrawable();
             bg.setColor(navBg);
+            float[] radii = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f};
+            bg.setCornerRadii(radii);
             bottomNav.setBackground(bg);
-            // Top 1dp border via a wrapper — use elevation shadow instead
         }
 
         // Settings = active, others = inactive

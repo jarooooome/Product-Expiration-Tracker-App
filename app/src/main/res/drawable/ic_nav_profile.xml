@@ -7,17 +7,19 @@
 
     <!-- Head circle -->
     <path
-        android:pathData="M12,12 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0"
-        android:strokeColor="?attr/colorControlNormal"
+        android:pathData="M12,4 C9.8,4 8,5.8 8,8 C8,10.2 9.8,12 12,12 C14.2,12 16,10.2 16,8 C16,5.8 14.2,4 12,4 Z"
+        android:strokeColor="#FFFFFF"
         android:strokeWidth="1.8"
+        android:strokeLineJoin="round"
         android:fillColor="@android:color/transparent" />
 
-    <!-- Body / shoulders arc -->
+    <!-- Body / shoulders -->
     <path
-        android:pathData="M4,20 C4,16 7.6,13.5 12,13.5 C16.4,13.5 20,16 20,20"
-        android:strokeColor="?attr/colorControlNormal"
+        android:pathData="M4,21 C4,17 7.6,14 12,14 C16.4,14 20,17 20,21"
+        android:strokeColor="#FFFFFF"
         android:strokeWidth="1.8"
         android:strokeLineCap="round"
+        android:strokeLineJoin="round"
         android:fillColor="@android:color/transparent" />
 
 </vector>

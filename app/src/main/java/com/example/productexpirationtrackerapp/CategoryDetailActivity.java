@@ -515,9 +515,15 @@ public class CategoryDetailActivity extends AppCompatActivity {
             viewToggleContainer.setBackground(toggleBg);
         }
 
-        // Nav background
+        // Nav background — rounded top corners
         LinearLayout bottomNavigation = findViewById(R.id.bottomNavigation);
-        if (bottomNavigation != null) bottomNavigation.setBackgroundColor(navBg);
+        if (bottomNavigation != null) {
+            android.graphics.drawable.GradientDrawable navRounded = new android.graphics.drawable.GradientDrawable();
+            navRounded.setColor(navBg);
+            float[] navRadii = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f};
+            navRounded.setCornerRadii(navRadii);
+            bottomNavigation.setBackground(navRounded);
+        }
 
         // Nav icons + text
         ImageView[] navIcons = {navProfileIcon, navProductsIcon, navSettingsIcon};

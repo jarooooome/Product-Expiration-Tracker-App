@@ -751,16 +751,15 @@
         app:tint="?attr/fabIconColor"
         android:scaleType="fitCenter" />
 
-    <!-- Modern Bottom Navigation Bar -->
+    <!-- Bottom Navigation Bar -->
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="64dp"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
         android:background="?attr/bottomNavColor"
-        android:elevation="12dp"
-        android:paddingVertical="8dp">
+        android:elevation="12dp">
 
         <!-- Profile Button (Active) -->
         <LinearLayout
@@ -776,28 +775,29 @@
 
             <ImageView
                 android:id="@+id/navProfileIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_nav_profile"
-                app:tint="?attr/bottomNavIconColor" />
+                app:tint="#FFFFFF"
+                android:contentDescription="Profile" />
 
             <TextView
                 android:id="@+id/navProfileText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Profile"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="?attr/bottomNavTextColor"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <View
                 android:id="@+id/navProfileIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
+                android:layout_width="28dp"
+                android:layout_height="2dp"
                 android:background="?attr/bottomNavIndicatorColor"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="3dp"
                 android:alpha="0.8" />
         </LinearLayout>
 
@@ -815,27 +815,29 @@
 
             <ImageView
                 android:id="@+id/navProductsIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_nav_products"
-                app:tint="?attr/bottomNavIconColor" />
+                app:tint="?attr/bottomNavIconColor"
+                android:contentDescription="Products" />
 
             <TextView
                 android:id="@+id/navProductsText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Products"
-                android:textSize="12sp"
+                android:textSize="11sp"
+                android:textStyle="bold"
                 android:textColor="?attr/bottomNavTextColor"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <View
                 android:id="@+id/navProductsIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
+                android:layout_width="28dp"
+                android:layout_height="2dp"
                 android:background="?attr/bottomNavIndicatorColor"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="3dp"
                 android:alpha="0.8"
                 android:visibility="gone" />
         </LinearLayout>
@@ -854,8 +856,8 @@
 
             <ImageView
                 android:id="@+id/navSettingsIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_nav_settings"
                 app:tint="?attr/bottomNavIconColor" />
 
@@ -864,17 +866,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Settings"
-                android:textSize="12sp"
+                android:textSize="11sp"
+                android:textStyle="bold"
                 android:textColor="?attr/bottomNavTextColor"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <View
                 android:id="@+id/navSettingsIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
+                android:layout_width="28dp"
+                android:layout_height="2dp"
                 android:background="?attr/bottomNavIndicatorColor"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="3dp"
                 android:alpha="0.8"
                 android:visibility="gone" />
         </LinearLayout>

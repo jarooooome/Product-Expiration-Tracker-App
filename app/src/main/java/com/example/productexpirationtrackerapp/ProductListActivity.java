@@ -1430,8 +1430,12 @@ public class ProductListActivity extends AppCompatActivity {
 
         if (bottomNavigation != null) {
             if (isBlackTheme) {
-                // Black theme: Navigation bar black
-                bottomNavigation.setBackgroundColor(Color.parseColor("#121212"));
+                // Rounded top corners nav background matching Settings (#1A1A1A)
+                android.graphics.drawable.GradientDrawable navBgDark = new android.graphics.drawable.GradientDrawable();
+                navBgDark.setColor(Color.parseColor("#1A1A1A"));
+                float[] radii = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f}; // top corners only
+                navBgDark.setCornerRadii(radii);
+                bottomNavigation.setBackground(navBgDark);
 
                 // For black theme, icons and text should be white
                 if (navProfileIcon != null) navProfileIcon.setColorFilter(Color.WHITE);
@@ -1454,8 +1458,12 @@ public class ProductListActivity extends AppCompatActivity {
                 }
 
             } else {
-                // White theme: Navigation bar DARK, icons and text WHITE
-                bottomNavigation.setBackgroundColor(Color.parseColor("#1E1E1E"));
+                // Rounded top corners nav background (light mode)
+                android.graphics.drawable.GradientDrawable navBgLight = new android.graphics.drawable.GradientDrawable();
+                navBgLight.setColor(Color.parseColor("#1A1A1A"));
+                float[] radiiL = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f}; // top corners only
+                navBgLight.setCornerRadii(radiiL);
+                bottomNavigation.setBackground(navBgLight);
                 bottomNavigation.setElevation(8f);
 
                 if (navProfileIcon != null) navProfileIcon.setColorFilter(Color.WHITE);

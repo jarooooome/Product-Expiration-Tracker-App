@@ -656,7 +656,11 @@ public class ProfileActivity extends AppCompatActivity {
         // Apply to bottom navigation
         LinearLayout bottomNavigation = findViewById(R.id.bottomNavigation);
         if (bottomNavigation != null) {
-            bottomNavigation.setBackgroundColor(bottomNavColor);
+            android.graphics.drawable.GradientDrawable navRounded = new android.graphics.drawable.GradientDrawable();
+            navRounded.setColor(bottomNavColor);
+            float[] navRadii = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f};
+            navRounded.setCornerRadii(navRadii);
+            bottomNavigation.setBackground(navRounded);
         }
 
         // Apply to FAB
