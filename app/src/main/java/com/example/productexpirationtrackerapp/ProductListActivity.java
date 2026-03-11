@@ -39,7 +39,8 @@ public class ProductListActivity extends AppCompatActivity {
 
     private static final String TAG = "ProductListDebug";
     private static final int NOTIFICATION_PERMISSION_CODE = 1001;
-    private static final int VIBRATE_PERMISSION_CODE = 1002;
+    private static final int VIBRATE_PERMISSION_CODE      = 1002;
+    private static final int SCAN_FROM_LIST_REQUEST_CODE  = 300;
 
     // UI Components
     private TextView hiUserTextView;
@@ -350,8 +351,9 @@ public class ProductListActivity extends AppCompatActivity {
             barcodeScannerButton = findViewById(R.id.barcodeScannerButton);
             if (barcodeScannerButton != null) {
                 barcodeScannerButton.setOnClickListener(v -> {
-                    android.widget.Toast.makeText(this,
-                            "Barcode Scanner coming soon!", android.widget.Toast.LENGTH_SHORT).show();
+                    Intent scanIntent = new Intent(ProductListActivity.this,
+                            ProductScannerActivity.class);
+                    startActivityForResult(scanIntent, SCAN_FROM_LIST_REQUEST_CODE);
                 });
             }
             categoryScrollView = findViewById(R.id.categoryScrollView);
@@ -1605,6 +1607,18 @@ public class ProductListActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+
+        // Handle scan result from the shortcut barcode button
+        if (requestCode == SCAN_FROM_LIST_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            // Forward all scanned extras directly to AddProductActivity
+            Intent addIntent = new Intent(ProductListActivity.this, AddProductActivity.class);
+            if (data.hasExtra("barcode"))      addIntent.putExtra("barcode",      data.getStringExtra("barcode"));
+            if (data.hasExtra("product_name")) addIntent.putExtra("product_name", data.getStringExtra("product_name"));
+            if (data.hasExtra("category"))     addIntent.putExtra("category",     data.getStringExtra("category"));
+            if (data.hasExtra("expiry_date"))  addIntent.putExtra("expiry_date",  data.getStringExtra("expiry_date"));
+            if (data.hasExtra("batch_number")) addIntent.putExtra("batch_number", data.getStringExtra("batch_number"));
+            startActivityForResult(addIntent, 200);
         }
     }
 

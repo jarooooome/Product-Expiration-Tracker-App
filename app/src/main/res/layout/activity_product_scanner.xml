@@ -1,150 +1,243 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#121212">
+    android:background="#000000">
 
-    <!-- Header -->
+    <!-- Fullscreen Camera Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:scaleType="fillCenter" />
+
+    <!-- Dark vignette top -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:background="@drawable/scanner_vignette_top" />
+
+    <!-- Dark vignette bottom -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/scanner_vignette_bottom" />
+
+    <!-- TOP BAR -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="#6200EE">
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="44dp"
+        android:paddingBottom="12dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_back_arrow"
+            app:tint="#FFFFFF"
+            android:padding="10dp"
+            android:contentDescription="Back"
+            android:background="@drawable/scanner_icon_bg" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="📷 Scan Product"
-            android:textSize="20sp"
+            android:text="Scan Product"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cancel"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#FF0000"
-            android:visibility="gone" />
+            android:gravity="center"
+            android:letterSpacing="0.03" />
+
+        <ImageView
+            android:id="@+id/btnFlash"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_flash_off"
+            app:tint="#FFFFFF"
+            android:padding="11dp"
+            android:contentDescription="Flash"
+            android:background="@drawable/scanner_icon_bg"
+            android:layout_marginEnd="8dp" />
+
+        <ImageView
+            android:id="@+id/btnFlipCamera"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_flip_camera"
+            app:tint="#FFFFFF"
+            android:padding="10dp"
+            android:contentDescription="Flip camera"
+            android:background="@drawable/scanner_icon_bg" />
 
     </LinearLayout>
 
-    <!-- Camera Preview -->
+    <!-- SCAN FRAME + LASER -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
 
-        <androidx.camera.view.PreviewView
-            android:id="@+id/previewView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <com.example.productexpirationtrackerapp.ScanFrameView
+            android:id="@+id/scanFrameView"
+            android:layout_width="280dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="80dp"
+            android:contentDescription="Scan frame" />
 
-        <!-- Scanning Overlay -->
         <View
-            android:id="@+id/scanningOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#33000000" />
+            android:id="@+id/laserLine"
+            android:layout_width="256dp"
+            android:layout_height="2dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="80dp"
+            android:background="@drawable/scanner_laser" />
 
-        <!-- Scanning Frame -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center">
+        <TextView
+            android:id="@+id/tvInstruction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="400dp"
+            android:text="Point camera at product label"
+            android:textSize="13sp"
+            android:textColor="#CCFFFFFF"
+            android:letterSpacing="0.03"
+            android:gravity="center" />
 
-            <TextView
-                android:id="@+id/tvInstruction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📷 Point camera at product label"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:background="#AA000000"
-                android:padding="16dp"
-                android:layout_margin="16dp" />
-
-        </LinearLayout>
+        <!-- focusRing is defined at CoordinatorLayout level below -->
 
     </FrameLayout>
 
-    <!-- Results Panel -->
+    <!-- BOTTOM PANEL -->
     <LinearLayout
+        android:id="@+id/bottomPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="#1E1E1E">
+        android:gravity="center_horizontal"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="40dp">
 
-        <TextView
+        <!-- Detected info card -->
+        <LinearLayout
+            android:id="@+id/detectedCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Detected Information:"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="12dp" />
+            android:orientation="vertical"
+            android:background="@drawable/scanner_card_bg"
+            android:padding="14dp"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone">
 
-        <TextView
-            android:id="@+id/tvBarcodeResult"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📋 Barcode: "
-            android:textSize="14sp"
-            android:textColor="#4CAF50"
-            android:padding="4dp"
-            android:visibility="gone" />
+            <!-- Lookup status row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
 
-        <TextView
-            android:id="@+id/tvNameResult"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📦 Product: "
-            android:textSize="14sp"
-            android:textColor="#4CAF50"
-            android:padding="4dp"
-            android:visibility="gone" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DETECTED"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#80FFFFFF"
+                    android:letterSpacing="0.12" />
 
-        <TextView
-            android:id="@+id/tvExpiryResult"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="⏰ Expiry: "
-            android:textSize="14sp"
-            android:textColor="#4CAF50"
-            android:padding="4dp"
-            android:visibility="gone" />
+                <ProgressBar
+                    android:id="@+id/lookupProgress"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone"
+                    style="?android:attr/progressBarStyleSmall" />
 
-        <TextView
-            android:id="@+id/tvBatchResult"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🔢 Batch: "
-            android:textSize="14sp"
-            android:textColor="#4CAF50"
-            android:padding="4dp"
-            android:visibility="gone" />
+                <TextView
+                    android:id="@+id/tvLookupStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:textSize="11sp"
+                    android:textColor="#AAAAAA"
+                    android:visibility="gone" />
 
-        <!-- Capture Button -->
-        <Button
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvBarcodeResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvNameResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvExpiryResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#4CAF50"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvBatchResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#AAAAAA"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <!-- Circle capture button -->
+        <ImageView
             android:id="@+id/btnCapture"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="CAPTURE PRODUCT DATA"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#6200EE"
-            android:layout_marginTop="16dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:src="@drawable/ic_camera_capture"
+            android:contentDescription="Capture"
+            android:background="@drawable/capture_btn_bg"
+            android:padding="16dp"
             android:enabled="false"
-            android:alpha="0.5" />
+            android:alpha="0.45"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 
-</LinearLayout>
+    <!-- Focus ring (shown briefly on tap-to-focus) -->
+    <View
+        android:id="@+id/focusRing"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/scanner_focus_ring"
+        android:visibility="gone" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
