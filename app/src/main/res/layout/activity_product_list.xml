@@ -129,10 +129,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="these are your products"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:textStyle="normal"
                     android:alpha="0.9"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="16dp"
                     android:letterSpacing="0.02" />
 
                 <!-- Category Label - Bold Text -->
@@ -140,11 +140,11 @@
                     android:id="@+id/categoryLabelTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Categories"
-                    android:textSize="14sp"
+                    android:text="CATEGORIES"
+                    android:textSize="11sp"
                     android:textStyle="bold"
-                    android:letterSpacing="0.08"
-                    android:layout_marginBottom="8dp"
+                    android:letterSpacing="0.12"
+                    android:layout_marginBottom="12dp"
                     android:layout_marginStart="4dp" />
 
                 <!-- Category Filter Chips -->
@@ -535,7 +535,7 @@
                 </HorizontalScrollView>
             </LinearLayout>
 
-            <!-- BULK ACTION BAR - ADDED HERE -->
+            <!-- BULK ACTION BAR -->
             <LinearLayout
                 android:id="@+id/bulkActionLayout"
                 android:layout_width="match_parent"
@@ -595,7 +595,6 @@
 
             </LinearLayout>
 
-            <!-- Product Count with modern styling and History Button -->
             <!-- Product Count + History + List/Grid Toggle Row -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -679,15 +678,15 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Modern Bottom Navigation Bar - NO BACKGROUND ATTRIBUTE -->
+    <!-- Bottom Navigation Bar -->
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="64dp"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:elevation="12dp"
-        android:paddingVertical="8dp">
+        android:background="@drawable/nav_bg_rounded"
+        android:elevation="12dp">
 
         <!-- Profile Button -->
         <LinearLayout
@@ -703,30 +702,33 @@
 
             <ImageView
                 android:id="@+id/navProfileIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ic_nav_profile" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_nav_profile"
+                app:tint="#FFFFFF"
+                android:contentDescription="Profile" />
 
             <TextView
                 android:id="@+id/navProfileText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Profile"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <!-- Profile Indicator -->
             <View
                 android:id="@+id/navProfileIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
-                android:layout_marginTop="4dp"
-                android:alpha="0.8"
+                android:layout_width="28dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="3dp"
                 android:visibility="gone" />
+
         </LinearLayout>
 
-        <!-- Products Button (Active) -->
+        <!-- Products Button -->
         <LinearLayout
             android:id="@+id/navProducts"
             android:layout_width="0dp"
@@ -740,27 +742,30 @@
 
             <ImageView
                 android:id="@+id/navProductsIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ic_nav_products" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_nav_products"
+                app:tint="#FFFFFF"
+                android:contentDescription="Products" />
 
             <TextView
                 android:id="@+id/navProductsText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Products"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <!-- Products Indicator -->
             <View
                 android:id="@+id/navProductsIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
-                android:layout_marginTop="4dp"
+                android:layout_width="28dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="3dp"
                 android:alpha="0.8" />
+
         </LinearLayout>
 
         <!-- Settings Button -->
@@ -777,25 +782,28 @@
 
             <ImageView
                 android:id="@+id/navSettingsIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ic_nav_settings" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_nav_settings"
+                app:tint="#FFFFFF"
+                android:contentDescription="Settings" />
 
             <TextView
                 android:id="@+id/navSettingsText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Settings"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <!-- Settings Indicator -->
             <View
                 android:id="@+id/navSettingsIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
-                android:layout_marginTop="4dp"
+                android:layout_width="28dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="3dp"
                 android:alpha="0.8"
                 android:visibility="gone" />
         </LinearLayout>

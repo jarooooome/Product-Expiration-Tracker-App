@@ -14,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -28,7 +29,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.ViewGroup;
 
+import androidx.core.content.FileProvider;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -75,6 +80,7 @@ public class AddProductActivity extends AppCompatActivity {
 
     private Bitmap productPhotoBitmap;
     private String productPhotoPath;
+    private Uri photoUri;          // URI of the file written by the camera
     private String selectedCategory = "";
 
     @Override
@@ -103,6 +109,9 @@ public class AddProductActivity extends AppCompatActivity {
 
         // Setup click listeners
         setupClickListeners();
+
+        // Pre-fill form if launched from scanner shortcut on product list screen
+        prefillFromIntent(getIntent());
     }
 
     @Override
@@ -447,19 +456,48 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void openCamera() {
-        // Check camera permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
                     CAMERA_PERMISSION_CODE);
+            return;
+        }
+
+        // Create a temp file for the full-resolution photo
+        File photoFile = createImageFile();
+        if (photoFile == null) {
+            Toast.makeText(this, "Could not create image file", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        photoUri = FileProvider.getUriForFile(
+                this,
+                getPackageName() + ".fileprovider",
+                photoFile);
+
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
         } else {
-            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-            } else {
-                Toast.makeText(this, "No camera app found", Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(this, "No camera app found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private File createImageFile() {
+        try {
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                    .format(new Date());
+            String fileName = "PRODUCT_" + timeStamp;
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File image = File.createTempFile(fileName, ".jpg", storageDir);
+            productPhotoPath = image.getAbsolutePath();
+            return image;
+        } catch (IOException e) {
+            Log.e(TAG, "Error creating image file: " + e.getMessage());
+            return null;
         }
     }
 
@@ -483,16 +521,26 @@ public class AddProductActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == CAMERA_REQUEST_CODE && data != null) {
-                // Handle camera photo
-                try {
-                    productPhotoBitmap = (Bitmap) data.getExtras().get("data");
-                    if (productPhotoBitmap != null) {
-                        productPhotoPreview.setImageBitmap(productPhotoBitmap);
-                        removePhotoButton.setVisibility(View.VISIBLE);
+            if (requestCode == CAMERA_REQUEST_CODE) {
+                // Load the full-resolution photo from the file we told the camera to write to
+                if (photoUri != null) {
+                    try {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inSampleSize = 2; // scale down slightly to save memory
+                        InputStream inputStream = getContentResolver().openInputStream(photoUri);
+                        productPhotoBitmap = BitmapFactory.decodeStream(inputStream, null, options);
+                        if (inputStream != null) inputStream.close();
+
+                        if (productPhotoBitmap != null) {
+                            productPhotoPreview.setImageBitmap(productPhotoBitmap);
+                            removePhotoButton.setVisibility(View.VISIBLE);
+                        } else {
+                            Toast.makeText(this, "Could not load photo", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error loading camera photo: " + e.getMessage());
+                        Toast.makeText(this, "Error loading photo", Toast.LENGTH_SHORT).show();
                     }
-                } catch (Exception e) {
-                    Toast.makeText(this, "Error loading camera photo", Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == GALLERY_REQUEST_CODE && data != null) {
                 // Handle gallery photo
@@ -522,66 +570,84 @@ public class AddProductActivity extends AppCompatActivity {
         }
     }
 
-    // NEW: Method to handle scanned data
+    // Handle scanned data returned from ProductScannerActivity
     private void handleScanResult(Intent data) {
-        String barcode = data.getStringExtra("barcode");
+        String barcode     = data.getStringExtra("barcode");
         String productName = data.getStringExtra("product_name");
-        String expiryDate = data.getStringExtra("expiry_date");
+        String expiryDate  = data.getStringExtra("expiry_date");
         String batchNumber = data.getStringExtra("batch_number");
+        String category    = data.getStringExtra("category"); // from Open Food Facts API
 
-        // Auto-fill the form
+        // ── Product name ───────────────────────────────────────────────
         if (productName != null && !productName.isEmpty()) {
             productNameEditText.setText(productName);
         }
 
-        if (barcode != null && !barcode.isEmpty()) {
-            // You might want to add a barcode field or store in notes temporarily
-            // For now, we'll add it to notes
-            String currentNotes = notesEditText.getText().toString();
-            if (currentNotes.isEmpty()) {
-                notesEditText.setText("Barcode: " + barcode);
-            } else {
-                notesEditText.setText(currentNotes + "\nBarcode: " + barcode);
-            }
-        }
-
+        // ── Expiry date ────────────────────────────────────────────────
         if (expiryDate != null && !expiryDate.isEmpty()) {
-            // Validate if it's in correct format
             try {
-                // Try to parse and reformat if needed
-                SimpleDateFormat scanFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                Date date = scanFormat.parse(expiryDate);
-                if (date != null) {
-                    expiryDateEditText.setText(scanFormat.format(date));
-                }
+                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date date = fmt.parse(expiryDate);
+                if (date != null) expiryDateEditText.setText(fmt.format(date));
             } catch (ParseException e) {
-                // If format is different, still try to use it
                 expiryDateEditText.setText(expiryDate);
             }
         }
 
-        if (batchNumber != null && !batchNumber.isEmpty()) {
-            // Add batch to notes if not already there
-            String currentNotes = notesEditText.getText().toString();
-            if (currentNotes.contains("Batch:")) {
-                // Replace existing batch
-                String[] lines = currentNotes.split("\n");
-                StringBuilder newNotes = new StringBuilder();
-                for (String line : lines) {
-                    if (!line.startsWith("Batch:")) {
-                        newNotes.append(line).append("\n");
-                    }
+        // ── Category — auto-select spinner ─────────────────────────────
+        if (category != null && !category.isEmpty()) {
+            String[] categories = {
+                    "Select a category","Dairy","Vegetables","Fruits",
+                    "Meats","Beverages","Medicine","Other"
+            };
+            for (int i = 0; i < categories.length; i++) {
+                if (categories[i].equalsIgnoreCase(category)) {
+                    categorySpinner.setSelection(i);
+                    selectedCategory = categories[i];
+                    break;
                 }
-                newNotes.append("Batch: ").append(batchNumber);
-                notesEditText.setText(newNotes.toString().trim());
-            } else if (currentNotes.isEmpty()) {
-                notesEditText.setText("Batch: " + batchNumber);
-            } else {
-                notesEditText.setText(currentNotes + "\nBatch: " + batchNumber);
             }
         }
 
-        Toast.makeText(this, "Product data scanned successfully!", Toast.LENGTH_SHORT).show();
+        // ── Barcode → notes ────────────────────────────────────────────
+        if (barcode != null && !barcode.isEmpty()) {
+            String notes = notesEditText.getText().toString();
+            String barcodeNote = "Barcode: " + barcode;
+            if (!notes.contains(barcodeNote)) {
+                notesEditText.setText(notes.isEmpty() ? barcodeNote : notes + "\n" + barcodeNote);
+            }
+        }
+
+        // ── Batch → notes ──────────────────────────────────────────────
+        if (batchNumber != null && !batchNumber.isEmpty()) {
+            String notes = notesEditText.getText().toString();
+            String batchNote = "Batch: " + batchNumber;
+            if (!notes.contains(batchNote)) {
+                notesEditText.setText(notes.isEmpty() ? batchNote : notes + "\n" + batchNote);
+            }
+        }
+
+        // ── Toast feedback ─────────────────────────────────────────────
+        if (productName != null && !productName.isEmpty()) {
+            Toast.makeText(this, "✓ Product info auto-filled!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Barcode scanned — please enter product name manually",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Pre-fills the form when AddProductActivity is launched directly from the
+     * product list barcode shortcut (extras forwarded from ProductScannerActivity).
+     */
+    private void prefillFromIntent(Intent intent) {
+        if (intent == null) return;
+        boolean hasData = intent.hasExtra("barcode")
+                || intent.hasExtra("product_name")
+                || intent.hasExtra("category")
+                || intent.hasExtra("expiry_date")
+                || intent.hasExtra("batch_number");
+        if (hasData) handleScanResult(intent);
     }
 
     @Override

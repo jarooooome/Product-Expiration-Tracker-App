@@ -2,471 +2,471 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:layout_height="match_parent">
 
+    <!-- ── Scrollable content ─────────────────────────────────────────── -->
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bottomNavigation"
-        android:fillViewport="true"
-        android:padding="20dp">
+        android:fillViewport="true">
 
         <LinearLayout
+            android:id="@+id/mainLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="28dp"
+            android:paddingBottom="24dp">
 
-            <!-- Header -->
+            <!-- ── Page title ─────────────────────────────────────────── -->
             <TextView
+                android:id="@+id/pageTitleText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Settings"
-                android:textSize="28sp"
+                android:textSize="22sp"
                 android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="32dp"
-                android:textColor="#1A1E2C" />
+                android:letterSpacing="0.01"
+                android:layout_marginBottom="28dp" />
 
-            <!-- User Profile Card -->
-            <androidx.cardview.widget.CardView
+            <!-- ══════════════════════════════════════════════════════════
+                 SECTION: USER PROFILE
+            ═══════════════════════════════════════════════════════════ -->
+            <TextView
+                android:id="@+id/sectionLabelProfile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="12dp">
+                android:text="USER PROFILE"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.12"
+                android:layout_marginBottom="12dp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="User Profile"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#1A1E2C"
-                        android:layout_marginBottom="16dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="16dp">
-
-                        <TextView
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="Name:"
-                            android:textSize="16sp"
-                            android:textColor="#666666" />
-
-                        <TextView
-                            android:id="@+id/userNameText"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Loading..."
-                            android:textSize="16sp"
-                            android:textColor="#1A1E2C"
-                            android:textStyle="bold" />
-
-                        <Button
-                            android:id="@+id/editNameButton"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginStart="8dp"
-                            android:backgroundTint="#6200EE"
-                            android:text="edit"
-                            android:textSize="16sp"
-                            tools:ignore="TouchTargetSizeCheck" />
-                    </LinearLayout>
-
-                    <EditText
-                        android:id="@+id/nameEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:hint="Enter your name"
-                        android:padding="16dp"
-                        android:background="#F0F0F0"
-                        android:visibility="gone"
-                        android:layout_marginBottom="8dp" />
-
-                    <LinearLayout
-                        android:id="@+id/nameEditButtons"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:visibility="gone">
-
-                        <Button
-                            android:id="@+id/saveNameButton"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:text="Save"
-                            android:textSize="14sp"
-                            android:textColor="#FFFFFF"
-                            android:backgroundTint="#4CAF50"
-                            android:layout_marginEnd="4dp" />
-
-                        <Button
-                            android:id="@+id/cancelNameButton"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:text="Cancel"
-                            android:textSize="14sp"
-                            android:textColor="#FFFFFF"
-                            android:backgroundTint="#757575"
-                            android:layout_marginStart="4dp" />
-                    </LinearLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Reminder Frequency Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Reminder Frequency"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#1A1E2C"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="How many days before expiry should we notify you?"
-                        android:textSize="14sp"
-                        android:textColor="#666666"
-                        android:layout_marginBottom="16dp" />
-
-                    <TextView
-                        android:id="@+id/frequencyValueText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="3 days before"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#6200EE"
-                        android:gravity="center"
-                        android:layout_marginBottom="16dp" />
-
-                    <SeekBar
-                        android:id="@+id/reminderFrequencySeekBar"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:max="30"
-                        android:progress="3"
-                        android:progressTint="#6200EE"
-                        android:thumbTint="#6200EE" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Same day"
-                            android:textSize="12sp"
-                            android:textColor="#999999" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="15 days"
-                            android:textSize="12sp"
-                            android:textColor="#999999" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="30 days"
-                            android:textSize="12sp"
-                            android:textColor="#999999"
-                            android:gravity="right" />
-                    </LinearLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Vibration Pattern Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Vibration Pattern"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#1A1E2C"
-                        android:layout_marginBottom="16dp" />
-
-                    <RadioGroup
-                        android:id="@+id/vibrationRadioGroup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <RadioButton
-                            android:id="@+id/vibration_default"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Default (recommended)"
-                            android:textSize="16sp"
-                            android:textColor="#1A1E2C"
-                            android:checked="true"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/vibration_short"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Short pulse"
-                            android:textSize="16sp"
-                            android:textColor="#1A1E2C"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/vibration_long"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Long pulse"
-                            android:textSize="16sp"
-                            android:textColor="#1A1E2C"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/vibration_none"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="No vibration"
-                            android:textSize="16sp"
-                            android:textColor="#1A1E2C"
-                            android:paddingVertical="8dp" />
-
-                    </RadioGroup>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Choose how your device vibrates when you receive expiry notifications"
-                        android:textSize="12sp"
-                        android:textColor="#666666"
-                        android:layout_marginTop="12dp" />
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Theme Selection Card - UPDATED to only White and Black -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="App Theme"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#1A1E2C"
-                        android:layout_marginBottom="16dp" />
-
-                    <RadioGroup
-                        android:id="@+id/themeRadioGroup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <RadioButton
-                            android:id="@+id/theme_white"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="☀️ Light (default)"
-                            android:textSize="16sp"
-                            android:textColor="#1A1E2C"
-                            android:checked="true"
-                            android:paddingVertical="8dp" />
-
-                        <RadioButton
-                            android:id="@+id/theme_black"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="🌙 Dark"
-                            android:textSize="16sp"
-                            android:textColor="#1A1E2C"
-                            android:paddingVertical="8dp" />
-
-                    </RadioGroup>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Choose your preferred app color theme"
-                        android:textSize="12sp"
-                        android:textColor="#666666"
-                        android:layout_marginTop="12dp" />
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Notification Time Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Notification Time"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#1A1E2C"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="What time should we notify you?"
-                        android:textSize="14sp"
-                        android:textColor="#666666"
-                        android:layout_marginBottom="16dp" />
-
-                    <TextView
-                        android:id="@+id/notificationTimeText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="9:00 AM"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:textColor="#6200EE"
-                        android:gravity="center"
-                        android:layout_marginBottom="16dp" />
-
-                    <Button
-                        android:id="@+id/notificationTimeButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="Change Time"
-                        android:textSize="16sp"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#6200EE" />
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Buttons -->
+            <!-- Name row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/nameLabelText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Name"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/userNameText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Loading..."
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp" />
+
+                </LinearLayout>
+
+                <!-- Edit label button -->
+                <TextView
+                    android:id="@+id/editNameButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="Edit name"
+                    android:focusable="true"
+                    android:letterSpacing="0.08"
+                    android:paddingStart="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="6dp"
+                    android:text="EDIT"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+            </LinearLayout>
+
+            <!-- Name edit field (hidden by default) -->
+            <EditText
+                android:id="@+id/nameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:hint="Enter your name"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textSize="15sp"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Save / Cancel name buttons -->
+            <LinearLayout
+                android:id="@+id/nameEditButtons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/saveNameButton"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="Save"
+                    android:textSize="14sp"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="@android:color/transparent"
+                    android:stateListAnimator="@null"
+                    android:layout_marginEnd="6dp" />
+
+                <Button
+                    android:id="@+id/cancelNameButton"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="Cancel"
+                    android:textSize="14sp"
+                    android:backgroundTint="@android:color/transparent"
+                    android:stateListAnimator="@null"
+                    android:layout_marginStart="6dp" />
+
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- ══════════════════════════════════════════════════════════
+                 SECTION: REMINDER FREQUENCY
+            ═══════════════════════════════════════════════════════════ -->
+            <TextView
+                android:id="@+id/sectionLabelReminder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="REMINDER FREQUENCY"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.12"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/reminderDescText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="How many days before expiry to notify you"
+                android:textSize="13sp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/frequencyValueText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="3 days before"
+                android:textSize="20sp"
+                android:textStyle="bold"
                 android:gravity="center"
+                android:layout_marginBottom="12dp" />
+
+            <SeekBar
+                android:id="@+id/reminderFrequencySeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="30"
+                android:progress="3"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Same day"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="15 days"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="30 days"
+                    android:textSize="11sp"
+                    android:gravity="right" />
+
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="24dp" />
+
+            <!-- ══════════════════════════════════════════════════════════
+                 SECTION: VIBRATION PATTERN
+            ═══════════════════════════════════════════════════════════ -->
+            <TextView
+                android:id="@+id/sectionLabelVibration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="VIBRATION PATTERN"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.12"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/vibrationDescText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="How your device vibrates for expiry alerts"
+                android:textSize="13sp"
+                android:layout_marginBottom="14dp" />
+
+            <RadioGroup
+                android:id="@+id/vibrationRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/vibration_default"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Default (recommended)"
+                    android:textSize="15sp"
+                    android:checked="true"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp" />
+
+                <RadioButton
+                    android:id="@+id/vibration_short"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Short pulse"
+                    android:textSize="15sp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp" />
+
+                <RadioButton
+                    android:id="@+id/vibration_long"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Long pulse"
+                    android:textSize="15sp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp" />
+
+                <RadioButton
+                    android:id="@+id/vibration_none"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No vibration"
+                    android:textSize="15sp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp" />
+
+            </RadioGroup>
+
+            <!-- Divider -->
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- ══════════════════════════════════════════════════════════
+                 SECTION: APP THEME
+            ═══════════════════════════════════════════════════════════ -->
+            <TextView
+                android:id="@+id/sectionLabelTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="APP THEME"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.12"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/themeDescText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choose your preferred color theme"
+                android:textSize="13sp"
+                android:layout_marginBottom="14dp" />
+
+            <RadioGroup
+                android:id="@+id/themeRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/theme_white"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="☀️  Light (default)"
+                    android:textSize="15sp"
+                    android:checked="true"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_black"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🌙  Dark"
+                    android:textSize="15sp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp" />
+
+            </RadioGroup>
+
+            <!-- Divider -->
+            <View
+                android:id="@+id/divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- ══════════════════════════════════════════════════════════
+                 SECTION: NOTIFICATION TIME
+            ═══════════════════════════════════════════════════════════ -->
+            <TextView
+                android:id="@+id/sectionLabelNotif"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NOTIFICATION TIME"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.12"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/notifDescText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="What time should we send expiry alerts?"
+                android:textSize="13sp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/notificationTimeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="9:00 AM"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/notificationTimeButton"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Change Time"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="@android:color/transparent"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="28dp" />
+
+            <!-- Divider -->
+            <View
+                android:id="@+id/divider5"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- ── Cancel + Save row ──────────────────────────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
 
                 <Button
                     android:id="@+id/cancelButton"
                     android:layout_width="0dp"
-                    android:layout_height="56dp"
+                    android:layout_height="50dp"
                     android:layout_weight="1"
                     android:text="Cancel"
-                    android:textSize="16sp"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#757575"
-                    android:layout_marginEnd="8dp" />
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:backgroundTint="@android:color/transparent"
+                    android:stateListAnimator="@null"
+                    android:layout_marginEnd="10dp" />
 
                 <Button
                     android:id="@+id/saveButton"
                     android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
+                    android:layout_height="50dp"
+                    android:layout_weight="2"
                     android:text="Save Settings"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="#6200EE"
-                    android:layout_marginStart="8dp" />
+                    android:backgroundTint="@android:color/transparent"
+                    android:stateListAnimator="@null" />
 
             </LinearLayout>
 
-            <!-- Version Info -->
+            <!-- Version -->
             <TextView
+                android:id="@+id/versionText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Version 1.0.0"
-                android:textSize="12sp"
-                android:textColor="#999999"
+                android:textSize="11sp"
                 android:gravity="center"
-                android:layout_marginBottom="20dp" />
+                android:layout_marginBottom="8dp" />
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Navigation Bar -->
+    <!-- ── Bottom Navigation ──────────────────────────────────────────── -->
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="64dp"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:background="@drawable/bottom_nav_gradient"
-        android:elevation="12dp"
-        android:paddingVertical="8dp">
+        android:elevation="12dp">
 
-        <!-- Profile Button -->
+        <!-- Profile -->
         <LinearLayout
             android:id="@+id/navProfile"
             android:layout_width="0dp"
@@ -480,8 +480,8 @@
 
             <ImageView
                 android:id="@+id/navProfileIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_nav_profile"
                 app:tint="#FFFFFF"
                 android:contentDescription="Profile" />
@@ -491,22 +491,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Profile"
-                android:textSize="12sp"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <View
                 android:id="@+id/navProfileIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
-                android:background="#FFFFFF"
-                android:layout_marginTop="4dp"
-                android:alpha="0.8"
+                android:layout_width="28dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="3dp"
                 android:visibility="gone" />
+
         </LinearLayout>
 
-        <!-- Products Button -->
+        <!-- Products -->
         <LinearLayout
             android:id="@+id/navProducts"
             android:layout_width="0dp"
@@ -520,8 +519,8 @@
 
             <ImageView
                 android:id="@+id/navProductsIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_nav_products"
                 app:tint="#FFFFFF"
                 android:contentDescription="Products" />
@@ -531,22 +530,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Products"
-                android:textSize="12sp"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <View
                 android:id="@+id/navProductsIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
-                android:background="#FFFFFF"
-                android:layout_marginTop="4dp"
-                android:alpha="0.8"
+                android:layout_width="28dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="3dp"
                 android:visibility="gone" />
+
         </LinearLayout>
 
-        <!-- Settings Button (Active) -->
+        <!-- Settings (active) -->
         <LinearLayout
             android:id="@+id/navSettings"
             android:layout_width="0dp"
@@ -560,8 +558,8 @@
 
             <ImageView
                 android:id="@+id/navSettingsIcon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_nav_settings"
                 app:tint="#FFFFFF"
                 android:contentDescription="Settings" />
@@ -571,20 +569,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Settings"
-                android:textSize="12sp"
-                android:textColor="#FFFFFF"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:letterSpacing="0.05" />
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.03" />
 
             <View
                 android:id="@+id/navSettingsIndicator"
-                android:layout_width="30dp"
-                android:layout_height="3dp"
-                android:background="#FFFFFF"
-                android:layout_marginTop="4dp"
-                android:alpha="0.8" />
+                android:layout_width="28dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="3dp"
+                android:visibility="visible" />
+
         </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>

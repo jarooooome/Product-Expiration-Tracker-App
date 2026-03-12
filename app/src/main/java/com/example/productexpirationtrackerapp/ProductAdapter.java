@@ -213,7 +213,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                 if (pos == RecyclerView.NO_POSITION) return;
 
                 PopupMenu popup = new PopupMenu(ctx, v);
-                popup.getMenu().add(0, 0, 0, "Edit");
+                popup.getMenu().add(0, 0, 0, "See Product");
                 popup.getMenu().add(0, 1, 1, "Delete");
                 popup.setOnMenuItemClickListener(item -> {
                     if (menuListener != null) {

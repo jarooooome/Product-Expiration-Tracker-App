@@ -71,4 +71,7 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.4.2")
     implementation("androidx.camera:camera-view:1.4.2")
     implementation("androidx.camera:camera-mlkit-vision:1.4.2")
+
+    // Guava - required by MlKitAnalyzer
+    implementation("com.google.guava:guava:32.0.1-android")
 }

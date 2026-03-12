@@ -39,7 +39,8 @@ public class ProductListActivity extends AppCompatActivity {
 
     private static final String TAG = "ProductListDebug";
     private static final int NOTIFICATION_PERMISSION_CODE = 1001;
-    private static final int VIBRATE_PERMISSION_CODE = 1002;
+    private static final int VIBRATE_PERMISSION_CODE      = 1002;
+    private static final int SCAN_FROM_LIST_REQUEST_CODE  = 300;
 
     // UI Components
     private TextView hiUserTextView;
@@ -350,8 +351,9 @@ public class ProductListActivity extends AppCompatActivity {
             barcodeScannerButton = findViewById(R.id.barcodeScannerButton);
             if (barcodeScannerButton != null) {
                 barcodeScannerButton.setOnClickListener(v -> {
-                    android.widget.Toast.makeText(this,
-                            "Barcode Scanner coming soon!", android.widget.Toast.LENGTH_SHORT).show();
+                    Intent scanIntent = new Intent(ProductListActivity.this,
+                            ProductScannerActivity.class);
+                    startActivityForResult(scanIntent, SCAN_FROM_LIST_REQUEST_CODE);
                 });
             }
             categoryScrollView = findViewById(R.id.categoryScrollView);
@@ -1430,8 +1432,12 @@ public class ProductListActivity extends AppCompatActivity {
 
         if (bottomNavigation != null) {
             if (isBlackTheme) {
-                // Black theme: Navigation bar black
-                bottomNavigation.setBackgroundColor(Color.parseColor("#121212"));
+                // Rounded top corners nav background matching Settings (#1A1A1A)
+                android.graphics.drawable.GradientDrawable navBgDark = new android.graphics.drawable.GradientDrawable();
+                navBgDark.setColor(Color.parseColor("#1A1A1A"));
+                float[] radii = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f}; // top corners only
+                navBgDark.setCornerRadii(radii);
+                bottomNavigation.setBackground(navBgDark);
 
                 // For black theme, icons and text should be white
                 if (navProfileIcon != null) navProfileIcon.setColorFilter(Color.WHITE);
@@ -1454,8 +1460,12 @@ public class ProductListActivity extends AppCompatActivity {
                 }
 
             } else {
-                // White theme: Navigation bar DARK, icons and text WHITE
-                bottomNavigation.setBackgroundColor(Color.parseColor("#1E1E1E"));
+                // Rounded top corners nav background (light mode)
+                android.graphics.drawable.GradientDrawable navBgLight = new android.graphics.drawable.GradientDrawable();
+                navBgLight.setColor(Color.parseColor("#1A1A1A"));
+                float[] radiiL = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f}; // top corners only
+                navBgLight.setCornerRadii(radiiL);
+                bottomNavigation.setBackground(navBgLight);
                 bottomNavigation.setElevation(8f);
 
                 if (navProfileIcon != null) navProfileIcon.setColorFilter(Color.WHITE);
@@ -1598,6 +1608,18 @@ public class ProductListActivity extends AppCompatActivity {
                 }
             }
         }
+
+        // Handle scan result from the shortcut barcode button
+        if (requestCode == SCAN_FROM_LIST_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            // Forward all scanned extras directly to AddProductActivity
+            Intent addIntent = new Intent(ProductListActivity.this, AddProductActivity.class);
+            if (data.hasExtra("barcode"))      addIntent.putExtra("barcode",      data.getStringExtra("barcode"));
+            if (data.hasExtra("product_name")) addIntent.putExtra("product_name", data.getStringExtra("product_name"));
+            if (data.hasExtra("category"))     addIntent.putExtra("category",     data.getStringExtra("category"));
+            if (data.hasExtra("expiry_date"))  addIntent.putExtra("expiry_date",  data.getStringExtra("expiry_date"));
+            if (data.hasExtra("batch_number")) addIntent.putExtra("batch_number", data.getStringExtra("batch_number"));
+            startActivityForResult(addIntent, 200);
+        }
     }
 
     private void updateProductCount() {
@@ -1608,7 +1630,7 @@ public class ProductListActivity extends AppCompatActivity {
             }
 
             if (productList.isEmpty()) {
-                productCountText.setText("No products found" + searchInfo);
+                productCountText.setText("No Products found" + searchInfo);
             } else {
                 productCountText.setText(productList.size() + " product" +
                         (productList.size() == 1 ? "" : "s") +
