@@ -144,24 +144,48 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             int badgeColor;
 
             if (product.getExpiryDate().before(today)) {
-                badgeText  = "EXPIRED";
-                badgeColor = Color.parseColor("#D50000");          // red
-            } else if (daysLeft <= 7) {
-                badgeText  = daysLeft + " day" + (daysLeft == 1 ? "" : "s") + " left";
-                badgeColor = Color.parseColor("#FF6D00");          // orange
-            } else {
-                badgeText  = daysLeft + " days left";
-                badgeColor = Color.parseColor("#00C853");          // GREEN = safe
+                // 🔴 RED - Expired
+                badgeText = "EXPIRED";
+                badgeColor = Color.parseColor("#D50000");
+            }
+            else if (daysLeft <= 7) {
+                // 🟠 ORANGE - 1 to 7 days
+                badgeText = daysLeft + " day" + (daysLeft == 1 ? "" : "s") + " left";
+                badgeColor = Color.parseColor("#FF6D00");
+            }
+            else if (daysLeft <= 30) {
+                // 🟡 YELLOW - 8 to 30 days
+                badgeText = daysLeft + " days left";
+                badgeColor = Color.parseColor("#FFED29"); // Yellow
+            }
+            else {
+                // TRANSPARENT - 31+ days (no color)
+                badgeText = daysLeft + " days left";
+                badgeColor = Color.TRANSPARENT;
             }
 
             holder.productDaysLeft.setText(badgeText);
-            holder.productDaysLeft.setTextColor(Color.WHITE);
 
-            GradientDrawable badge = new GradientDrawable();
-            badge.setShape(GradientDrawable.RECTANGLE);
-            badge.setCornerRadius(50 * dp);
-            badge.setColor(badgeColor);
-            holder.productDaysLeft.setBackground(badge);
+            // Set text color based on badge visibility
+            if (badgeColor == Color.TRANSPARENT) {
+                // For transparent, use theme text color (dark gray/light gray)
+                boolean isBlackTheme = theme.equals("black");
+                holder.productDaysLeft.setTextColor(isBlackTheme ? Color.WHITE : Color.DKGRAY);
+            } else {
+                holder.productDaysLeft.setTextColor(Color.WHITE);
+            }
+
+            // Only set background if not transparent
+            if (badgeColor != Color.TRANSPARENT) {
+                GradientDrawable badge = new GradientDrawable();
+                badge.setShape(GradientDrawable.RECTANGLE);
+                badge.setCornerRadius(50 * dp);
+                badge.setColor(badgeColor);
+                holder.productDaysLeft.setBackground(badge);
+            } else {
+                // Remove background for transparent
+                holder.productDaysLeft.setBackground(null);
+            }
         }
 
         // statusIndicator is gone in new layouts — just zero it out safely

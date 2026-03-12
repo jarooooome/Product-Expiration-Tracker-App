@@ -84,7 +84,7 @@
                     android:id="@+id/userNameLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Your Name (Optional)"
+                    android:text="Your Name"
                     android:textSize="16sp"
                     android:textColor="#424242"
                     android:textStyle="bold"
@@ -264,19 +264,6 @@
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-        <!-- Debug Database Button -->
-        <Button
-            android:id="@+id/debugDbButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🔧 Debug Database"
-            android:textColor="#757575"
-            android:background="@drawable/debug_button_background"
-            android:textSize="14sp"
-            android:layout_marginBottom="16dp"
-            android:padding="12dp"
-            android:textAllCaps="false" />
 
         <!-- Finish Button -->
         <Button
