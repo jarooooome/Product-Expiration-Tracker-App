@@ -23,7 +23,6 @@ public class SetupActivity extends AppCompatActivity {
     private Switch notificationSwitch;
     private EditText userNameEditText;
     private Button finishButton;
-    private Button debugDbButton;
     private SharedPreferences preferences;
     private AppDatabase appDatabase;
     private UserRepository userRepository;
@@ -56,7 +55,6 @@ public class SetupActivity extends AppCompatActivity {
         notificationSwitch = findViewById(R.id.notificationSwitch);
         userNameEditText = findViewById(R.id.userNameEditText);
         finishButton = findViewById(R.id.finishButton);
-        debugDbButton = findViewById(R.id.debugDbButton);
 
         // Initialize layout containers for background changes
         mainLayout = findViewById(R.id.mainLayout);
@@ -80,16 +78,15 @@ public class SetupActivity extends AppCompatActivity {
         finishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Validate name is not empty
+                String userName = userNameEditText.getText().toString().trim();
+                if (userName.isEmpty()) {
+                    userNameEditText.setError("Name is required");
+                    userNameEditText.requestFocus();
+                    return;
+                }
                 savePreferences();
                 completeSetup();
-            }
-        });
-
-        // Debug Database button
-        debugDbButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                debugDatabase();
             }
         });
     }
@@ -316,8 +313,6 @@ public class SetupActivity extends AppCompatActivity {
         // Update EditText text color
         userNameEditText.setTextColor(textColor);
 
-        // Update debug button text color
-        debugDbButton.setTextColor(textColor);
     }
 
     private void savePreferences() {
