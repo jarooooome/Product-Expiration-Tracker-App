@@ -3,23 +3,15 @@ package com.example.productexpirationtrackerapp;
 public class OnboardingPage {
     private String title;
     private String description;
-    private String icon;
+    private int iconResId;
 
-    public OnboardingPage(String title, String description, String icon) {
+    public OnboardingPage(String title, String description, int iconResId) {
         this.title = title;
         this.description = description;
-        this.icon = icon;
+        this.iconResId = iconResId;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public int getIconResId() { return iconResId; }
 }

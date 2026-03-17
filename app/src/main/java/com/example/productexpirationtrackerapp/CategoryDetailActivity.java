@@ -457,12 +457,12 @@ public class CategoryDetailActivity extends AppCompatActivity {
         int mainBg        = isDark ? Color.parseColor("#121212")  : Color.parseColor("#F5F5F5");
         int cardBg        = isDark ? Color.parseColor("#1E1E1E")  : Color.WHITE;
         int navBg         = isDark ? ContextCompat.getColor(this, R.color.color_nav_background_black)
-                : ContextCompat.getColor(this, R.color.color_nav_background_white);
-        int fabBg         = isDark ? Color.parseColor("#1E1E1E")  // dark: near-black, NOT purple
-                : ContextCompat.getColor(this, R.color.color_fab_white);
+                : Color.WHITE;                          // light: white nav like Settings/Profile
+        int fabBg         = isDark ? Color.parseColor("#1E1E1E")  // dark: near-black
+                : Color.parseColor("#4CAF50");          // light: green FAB like other screens
         int primaryText   = isDark ? Color.WHITE                  : Color.parseColor("#1A1E2C");
         int secondaryText = isDark ? Color.LTGRAY                 : Color.parseColor("#8A8F9E");
-        int navIconColor  = isDark ? Color.WHITE                  : Color.WHITE; // nav always dark bg
+        int navIconColor  = isDark ? Color.WHITE                  : Color.BLACK; // light: black on white nav
 
         // Root background
         android.view.View mainLayout = findViewById(R.id.mainLayout);

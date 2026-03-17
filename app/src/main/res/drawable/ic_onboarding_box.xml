@@ -1,0 +1,66 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Drop shadow beneath box -->
+    <path
+        android:pathData="M18,82 Q50,90 82,82 L82,88 Q50,95 18,88 Z"
+        android:fillColor="#000000"
+        android:fillAlpha="0.25"/>
+
+    <!-- Right side face — darkest (shadow side) -->
+    <path
+        android:pathData="M74,35 L86,22 L86,70 L74,79 Z"
+        android:fillColor="#9E6030"/>
+
+    <!-- Front face — medium tan -->
+    <path
+        android:pathData="M14,35 L74,35 L74,79 L14,79 Z"
+        android:fillColor="#CC9050"/>
+
+    <!-- Top face — lightest (light source top-left) -->
+    <path
+        android:pathData="M14,35 L74,35 L86,22 L26,22 Z"
+        android:fillColor="#EECC80"/>
+
+    <!-- Tape strip — vertical on front face -->
+    <path
+        android:pathData="M44,35 L50,35 L50,79 L44,79 Z"
+        android:fillColor="#F5E090"
+        android:fillAlpha="0.9"/>
+
+    <!-- Tape strip — top face continuation -->
+    <path
+        android:pathData="M44,35 L50,35 L53,22 L47,22 Z"
+        android:fillColor="#F5E090"
+        android:fillAlpha="0.9"/>
+
+    <!-- Inner glow — top-left edge highlight -->
+    <path
+        android:pathData="M14,35 L74,35"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:fillColor="#00000000"
+        android:strokeAlpha="0.45"/>
+    <path
+        android:pathData="M14,35 L26,22"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:strokeAlpha="0.35"/>
+    <path
+        android:pathData="M26,22 L86,22"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:fillColor="#00000000"
+        android:strokeAlpha="0.25"/>
+
+    <!-- Subtle highlight on top face — soft inner glow -->
+    <path
+        android:pathData="M18,34 L42,34 L45,23 L21,23 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.12"/>
+
+</vector>

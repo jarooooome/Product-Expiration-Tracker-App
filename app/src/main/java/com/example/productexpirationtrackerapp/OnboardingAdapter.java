@@ -38,7 +38,7 @@ public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.On
         OnboardingPage page = pages.get(position);
         holder.titleText.setText(page.getTitle());
         holder.descriptionText.setText(page.getDescription());
-        holder.iconView.setText(page.getIcon());
+        if (holder.iconView != null) holder.iconView.setImageResource(page.getIconResId());
 
         // Set exact per-screen dark background — emoji floats directly on it, no overlay
         if (holder.iconCard != null) {
@@ -52,13 +52,14 @@ public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.On
     }
 
     static class OnboardingViewHolder extends RecyclerView.ViewHolder {
-        TextView titleText, descriptionText, iconView;
+        TextView titleText, descriptionText;
+        android.widget.ImageView iconView;
         CardView iconCard;
         public OnboardingViewHolder(@NonNull View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.titleText);
             descriptionText = itemView.findViewById(R.id.descriptionText);
-            iconView = itemView.findViewById(R.id.iconView);
+            iconView = (android.widget.ImageView) itemView.findViewById(R.id.iconView);
             iconCard = itemView.findViewById(R.id.iconCard);
         }
     }
