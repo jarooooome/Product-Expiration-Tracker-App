@@ -47,6 +47,8 @@ public class ProductViewModel extends AndroidViewModel {
         productRepository.findProductById(productId, searchResults);
     }
 
+
+
     // NEW: Add category filtering method
     public LiveData<List<Product>> getProductsByCategory(String category) {
         return productRepository.getProductsByCategory(category);

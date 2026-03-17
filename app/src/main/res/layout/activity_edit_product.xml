@@ -187,8 +187,9 @@
             android:text="Save Changes"
             android:textSize="15sp"
             android:textStyle="bold"
+            android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:backgroundTint="@android:color/transparent"
+            android:backgroundTint="#BB86FC"
             android:stateListAnimator="@null"
             android:layout_marginBottom="16dp" />
 

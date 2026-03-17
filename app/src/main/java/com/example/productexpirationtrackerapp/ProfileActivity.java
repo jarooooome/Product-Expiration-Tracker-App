@@ -124,15 +124,21 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Apply background color synchronously from SharedPrefs BEFORE setContentView to prevent blink
+        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String quickTheme = preferences.getString("color_theme", "white");
+        int quickBg = "black".equals(quickTheme)
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#F5F5F5");
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(quickBg));
+
         setContentView(R.layout.activity_profile);
 
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
         userRepository = new UserRepository(getApplication());
-
-        // Initialize preferences
-        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
         // Initialize all views
         initializeViews();
@@ -268,7 +274,7 @@ public class ProfileActivity extends AppCompatActivity {
         root.setPadding(pad, pad, pad, pad);
 
         // Detect current theme for dialog colors
-        String theme = preferences.getString("selected_theme", "white");
+        String theme = preferences.getString("color_theme", "white");
         boolean isDark = "black".equals(theme);
         int dialogBg    = isDark ? android.graphics.Color.parseColor("#1E1E1E") : android.graphics.Color.WHITE;
         int textPrimary = isDark ? android.graphics.Color.WHITE  : android.graphics.Color.parseColor("#212121");
@@ -339,27 +345,37 @@ public class ProfileActivity extends AppCompatActivity {
 
         // ── Colour Coding ─────────────────────────────────────────────────
         addSection.accept("Colour Coding");
-        addColorRow.accept(android.graphics.Color.parseColor("#00C853"), "Safe — product is well within its expiry date");
-        addColorRow.accept(android.graphics.Color.parseColor("#FF6D00"), "Expiring Soon — expires within the next 3 days");
-        addColorRow.accept(android.graphics.Color.parseColor("#D50000"), "Expired — product is past its expiry date");
+        addColorRow.accept(android.graphics.Color.TRANSPARENT, "No badge — 30 or more days remaining");
+        addColorRow.accept(android.graphics.Color.parseColor("#FFC107"), "Yellow — 8 to 30 days remaining");
+        addColorRow.accept(android.graphics.Color.parseColor("#FF6D00"), "Orange — 1 to 7 days remaining");
+        addColorRow.accept(android.graphics.Color.parseColor("#D50000"), "Red — expired (past expiry date)");
 
         // ── Categories ────────────────────────────────────────────────────
         addSection.accept("Categories");
         addNote.accept("Dairy, Vegetables, Fruits, Meats, Beverages, Medicine, Other");
-        addNote.accept("Tap a category card to filter your product list");
+        addNote.accept("Tap a category card on this screen to open its full product list");
+        addNote.accept("Use the category chips on the Products screen to filter by type");
 
         // ── How to use ────────────────────────────────────────────────────
         addSection.accept("💡  Quick Tips");
         addNote.accept("Tap + to add a new product with its expiry date");
-        addNote.accept("Use the barcode scanner (in Products) to look up items quickly");
+        addNote.accept("Use the barcode scanner (in Products) to auto-fill product details");
         addNote.accept("Use the search bar to find specific products by name");
-        addNote.accept("Tap the history icon to view recently viewed items");
-        addNote.accept("Products are sorted by expiry date by default");
+        addNote.accept("Tap the history icon in Products to view your consumed product history");
+        addNote.accept("Products are sorted by expiry date — soonest expiring first");
+        addNote.accept("Long-press a product card to enter bulk selection mode");
+
+        // ── Settings ──────────────────────────────────────────────────────
+        addSection.accept("⚙️  Settings");
+        addNote.accept("Set your nickname (up to 8 letters) in Settings → User Profile");
+        addNote.accept("Adjust how many days before expiry you get notified via the reminder slider");
+        addNote.accept("Choose Light or Dark theme under App Theme");
+        addNote.accept("Set a daily notification time for expiry alerts");
 
         // ── Expiry Logic ──────────────────────────────────────────────────
         addSection.accept("Expiry Rules");
-        addNote.accept("'Expiring Soon' triggers when 3 days remain");
-        addNote.accept("'Expired' shows products with a past expiry date");
+        addNote.accept("'Expiring Soon' triggers based on your reminder frequency in Settings (default: 3 days)");
+        addNote.accept("'Expired' shows products whose expiry date has already passed");
         addNote.accept("Check the Products page regularly to avoid waste");
 
         // Build & show dialog
@@ -499,7 +515,6 @@ public class ProfileActivity extends AppCompatActivity {
                 Log.d(TAG, "Add button clicked - opening AddProductActivity");
                 Intent intent = new Intent(ProfileActivity.this, AddProductActivity.class);
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
@@ -517,9 +532,9 @@ public class ProfileActivity extends AppCompatActivity {
             navProducts.setOnClickListener(v -> {
                 Log.d(TAG, "Products navigation clicked");
                 Intent intent = new Intent(ProfileActivity.this, ProductListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
+                overridePendingTransition(0, 0);
             });
         }
 
@@ -527,8 +542,9 @@ public class ProfileActivity extends AppCompatActivity {
             navSettings.setOnClickListener(v -> {
                 Log.d(TAG, "Settings navigation clicked");
                 Intent intent = new Intent(ProfileActivity.this, SettingsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                overridePendingTransition(0, 0);
             });
         }
     }
@@ -540,7 +556,7 @@ public class ProfileActivity extends AppCompatActivity {
         intent.putExtra("category_name", categoryName);
         intent.putExtra("category_count", itemCount);
         startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        overridePendingTransition(0, 0);
     }
 
     private void applyTheme() {
@@ -615,7 +631,7 @@ public class ProfileActivity extends AppCompatActivity {
             bottomNavColor = ContextCompat.getColor(this, R.color.color_nav_background_black);
             textColor = Color.WHITE;
             iconColor = Color.WHITE;
-            indicatorColor = Color.WHITE;
+            indicatorColor = Color.parseColor("#4CAF50");
             backgroundColor = ContextCompat.getColor(this, R.color.color_background_black);
             primaryTextColor = Color.WHITE;
             secondaryTextColor = Color.LTGRAY;
@@ -629,11 +645,11 @@ public class ProfileActivity extends AppCompatActivity {
             categoryOtherColor = ContextCompat.getColor(this, R.color.category_other_dark);
         } else {
             // White theme (default)
-            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_white);
-            bottomNavColor = ContextCompat.getColor(this, R.color.color_nav_background_white);
+            fabBackgroundColor = Color.parseColor("#4CAF50");
+            bottomNavColor = Color.WHITE;
             textColor = Color.BLACK;
             iconColor = Color.BLACK;
-            indicatorColor = Color.parseColor("#6200EE");
+            indicatorColor = Color.parseColor("#388E3C");
             backgroundColor = ContextCompat.getColor(this, R.color.color_background_white);
             primaryTextColor = Color.BLACK;
             secondaryTextColor = Color.DKGRAY;
@@ -697,7 +713,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Apply to stat numbers
         if (totalItemsCount != null) totalItemsCount.setTextColor(primaryTextColor);
-        if (safeCount != null) safeCount.setTextColor(ContextCompat.getColor(this, R.color.color_safe));
+        if (safeCount != null) safeCount.setTextColor(primaryTextColor); // transparent badge = normal text
         if (expiringSoonCount != null) expiringSoonCount.setTextColor(ContextCompat.getColor(this, R.color.color_soon));
         if (expiredCount != null) expiredCount.setTextColor(ContextCompat.getColor(this, R.color.color_expired));
 
@@ -794,7 +810,9 @@ public class ProfileActivity extends AppCompatActivity {
                     int otherCount = 0;
 
                     Date today = new Date();
-                    long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L;
+                    long oneDayInMillis    = 24 * 60 * 60 * 1000L;
+                    long sevenDaysInMillis = 7  * oneDayInMillis;
+                    long thirtyDaysInMillis= 30 * oneDayInMillis;
 
                     for (Product product : products) {
                         // Count by category
@@ -828,12 +846,13 @@ public class ProfileActivity extends AppCompatActivity {
                         // Count expired, expiring soon, and safe items
                         Date expiryDate = product.getExpiryDate();
                         if (expiryDate != null) {
+                            long diff = expiryDate.getTime() - today.getTime();
                             if (expiryDate.before(today)) {
                                 expiredItems++;
-                            } else if (expiryDate.getTime() - today.getTime() <= sevenDaysInMillis) {
-                                expiringSoonItems++;
+                            } else if (diff <= sevenDaysInMillis) {
+                                expiringSoonItems++; // orange: 1-7 days
                             } else {
-                                safeItems++;
+                                safeItems++; // yellow (8-30 days) + transparent (30+)
                             }
                         }
                     }

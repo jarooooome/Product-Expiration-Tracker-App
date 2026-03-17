@@ -65,6 +65,8 @@ public class OnboardingActivity extends AppCompatActivity {
         getStartedButton = findViewById(R.id.getStartedButton);
         dotsLayout = findViewById(R.id.dotsLayout);
 
+
+
         // Setup onboarding pages
         List<OnboardingPage> pages = new ArrayList<>();
         pages.add(new OnboardingPage(

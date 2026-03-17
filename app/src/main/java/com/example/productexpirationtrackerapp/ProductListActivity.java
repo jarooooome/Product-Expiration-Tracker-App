@@ -121,6 +121,14 @@ public class ProductListActivity extends AppCompatActivity {
 
         Log.d(TAG, "ProductListActivity onCreate started");
 
+        // Apply background color synchronously from SharedPrefs BEFORE setContentView to prevent blink
+        android.content.SharedPreferences quickPrefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String quickTheme = quickPrefs.getString("color_theme", "white");
+        int quickBg = "black".equals(quickTheme)
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#F5F5F5");
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(quickBg));
+
         try {
             setContentView(R.layout.activity_product_list);
             Log.d(TAG, "Layout set successfully");
@@ -296,40 +304,39 @@ public class ProductListActivity extends AppCompatActivity {
             return;
         }
 
-        // Show time-based placeholder immediately while DB loads
-        hiUserTextView.setText(getTimeBasedGreeting() + ", ...");
+        // Always read a FRESH SharedPreferences instance so name changes saved
+        // in Settings are immediately visible here on every resume — never stale
+        String freshName = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+                .getString("user_name", "").trim();
 
-        userRepository.getUser(new UserRepository.UserRepositoryCallback() {
-            @Override
-            public void onUserLoaded(User user) {
-                String userName = "User";
-                String source   = "default";
-
-                if (user != null) {
-                    String dbName = user.getUserName();
-                    if (dbName != null && !dbName.trim().isEmpty()) {
-                        userName = dbName.trim();
-                        source   = "database";
-                    } else {
-                        String spName = preferences.getString("user_name", "").trim();
-                        if (!spName.isEmpty()) { userName = spName; source = "SharedPreferences (db empty)"; }
+        if (!freshName.isEmpty()) {
+            // SharedPreferences has a name — use it instantly, no async DB call needed
+            String greeting = getTimeBasedGreeting() + ", " + freshName + "!";
+            hiUserTextView.setText(greeting);
+            Log.d(TAG, "Greeting set from SharedPreferences: " + greeting);
+        } else {
+            // No name in SharedPreferences yet — fall back to DB asynchronously
+            hiUserTextView.setText(getTimeBasedGreeting() + ", ...");
+            userRepository.getUser(new UserRepository.UserRepositoryCallback() {
+                @Override
+                public void onUserLoaded(User user) {
+                    String userName = "User";
+                    if (user != null) {
+                        String dbName = user.getUserName();
+                        if (dbName != null && !dbName.trim().isEmpty()) {
+                            userName = dbName.trim();
+                        }
                     }
-                } else {
-                    String spName = preferences.getString("user_name", "").trim();
-                    if (!spName.isEmpty()) { userName = spName; source = "SharedPreferences (no db user)"; }
+                    final String finalText = getTimeBasedGreeting() + ", " + userName + "!";
+                    runOnUiThread(() -> {
+                        if (hiUserTextView != null) {
+                            hiUserTextView.setText(finalText);
+                            Log.d(TAG, "Greeting set from database: " + finalText);
+                        }
+                    });
                 }
-
-                Log.d(TAG, "Greeting source: " + source + " -> " + userName);
-
-                final String finalText = getTimeBasedGreeting() + ", " + userName + "!";
-                runOnUiThread(() -> {
-                    if (hiUserTextView != null) {
-                        hiUserTextView.setText(finalText);
-                        Log.d(TAG, "Greeting set: " + finalText);
-                    }
-                });
-            }
-        });
+            });
+        }
     }
 
     private void initializeViews() {
@@ -535,7 +542,6 @@ public class ProductListActivity extends AppCompatActivity {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 intent.putExtra("expiry_date", sdf.format(product.getExpiryDate()));
                 startActivityForResult(intent, 100);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
 
             @Override
@@ -686,7 +692,6 @@ public class ProductListActivity extends AppCompatActivity {
                     Log.d(TAG, "Add button clicked - opening AddProductActivity");
                     Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
                     startActivityForResult(intent, 200);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
             });
         }
@@ -723,7 +728,6 @@ public class ProductListActivity extends AppCompatActivity {
                     Log.d(TAG, "History button clicked - opening ConsumedHistoryActivity");
                     Intent intent = new Intent(ProductListActivity.this, ConsumedHistoryActivity.class);
                     startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
             });
         }
@@ -860,8 +864,9 @@ public class ProductListActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Log.d(TAG, "Profile navigation clicked - opening ProfileActivity");
                     Intent intent = new Intent(ProductListActivity.this, ProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    overridePendingTransition(0, 0);
                 }
             });
         }
@@ -884,8 +889,9 @@ public class ProductListActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Log.d(TAG, "Settings navigation clicked");
                     Intent intent = new Intent(ProductListActivity.this, SettingsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    overridePendingTransition(0, 0);
                 }
             });
         }
@@ -1110,7 +1116,7 @@ public class ProductListActivity extends AppCompatActivity {
             primaryColor = Color.parseColor("#6200EE");
             textColor = Color.BLACK; // Solid black text
             backgroundColor = Color.parseColor("#F5F5F5"); // Light gray background
-            fabBackgroundColor = Color.parseColor("#6200EE");
+            fabBackgroundColor = Color.parseColor("#4CAF50");
             fabIconColor = Color.WHITE;
 
             // Set header text to black
@@ -1159,30 +1165,30 @@ public class ProductListActivity extends AppCompatActivity {
                 viewToggleContainer.setBackground(toggleBg);
             }
 
-            // Set category text to white (readable on colored backgrounds)
+            // Set category text to black (readable on light pastel backgrounds)
             if (categoryAllTitle != null) categoryAllTitle.setTextColor(Color.BLACK);
             if (categoryAllCount != null) categoryAllCount.setTextColor(Color.DKGRAY);
-            if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(Color.WHITE);
-            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(Color.WHITE);
-            if (categoryDairyCount != null) categoryDairyCount.setTextColor(Color.parseColor("#DDDDDD"));
-            if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(Color.WHITE);
-            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(Color.WHITE);
-            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(Color.parseColor("#DDDDDD"));
-            if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(Color.WHITE);
-            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(Color.WHITE);
-            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(Color.parseColor("#DDDDDD"));
-            if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(Color.WHITE);
-            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(Color.WHITE);
-            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(Color.parseColor("#DDDDDD"));
-            if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(Color.WHITE);
-            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(Color.WHITE);
-            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(Color.parseColor("#DDDDDD"));
-            if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(Color.WHITE);
-            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(Color.WHITE);
-            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(Color.parseColor("#DDDDDD"));
-            if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(Color.WHITE);
-            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(Color.WHITE);
-            if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.parseColor("#DDDDDD"));
+            if (categoryDairyIcon != null) categoryDairyIcon.setTextColor(Color.BLACK);
+            if (categoryDairyTitle != null) categoryDairyTitle.setTextColor(Color.BLACK);
+            if (categoryDairyCount != null) categoryDairyCount.setTextColor(Color.DKGRAY);
+            if (categoryVegetablesIcon != null) categoryVegetablesIcon.setTextColor(Color.BLACK);
+            if (categoryVegetablesTitle != null) categoryVegetablesTitle.setTextColor(Color.BLACK);
+            if (categoryVegetablesCount != null) categoryVegetablesCount.setTextColor(Color.DKGRAY);
+            if (categoryFruitsIcon != null) categoryFruitsIcon.setTextColor(Color.BLACK);
+            if (categoryFruitsTitle != null) categoryFruitsTitle.setTextColor(Color.BLACK);
+            if (categoryFruitsCount != null) categoryFruitsCount.setTextColor(Color.DKGRAY);
+            if (categoryMeatsIcon != null) categoryMeatsIcon.setTextColor(Color.BLACK);
+            if (categoryMeatsTitle != null) categoryMeatsTitle.setTextColor(Color.BLACK);
+            if (categoryMeatsCount != null) categoryMeatsCount.setTextColor(Color.DKGRAY);
+            if (categoryBeveragesIcon != null) categoryBeveragesIcon.setTextColor(Color.BLACK);
+            if (categoryBeveragesTitle != null) categoryBeveragesTitle.setTextColor(Color.BLACK);
+            if (categoryBeveragesCount != null) categoryBeveragesCount.setTextColor(Color.DKGRAY);
+            if (categoryMedicineIcon != null) categoryMedicineIcon.setTextColor(Color.BLACK);
+            if (categoryMedicineTitle != null) categoryMedicineTitle.setTextColor(Color.BLACK);
+            if (categoryMedicineCount != null) categoryMedicineCount.setTextColor(Color.DKGRAY);
+            if (categoryOtherIcon != null) categoryOtherIcon.setTextColor(Color.BLACK);
+            if (categoryOtherTitle != null) categoryOtherTitle.setTextColor(Color.BLACK);
+            if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.DKGRAY);
         }
 
         Log.d(TAG, "Theme: " + theme);
@@ -1274,7 +1280,8 @@ public class ProductListActivity extends AppCompatActivity {
 
     private void setActiveCategoryButton(LinearLayout activeButton, int fabColor) {
         User user = userRepository.getUserSync();
-        boolean isBlackTheme = user != null && "black".equals(user.getColorTheme());
+        String savedTheme = getSharedPreferences("AppPrefs", MODE_PRIVATE).getString("color_theme", "white");
+        boolean isBlackTheme = (user != null && "black".equals(user.getColorTheme())) || "black".equals(savedTheme);
 
         // Per-category profile light colors (matches Profile activity)
         int[] categoryColors = {
@@ -1286,6 +1293,16 @@ public class ProductListActivity extends AppCompatActivity {
                 ContextCompat.getColor(this, R.color.category_beverages_dark),
                 ContextCompat.getColor(this, R.color.category_medicine_dark),
                 ContextCompat.getColor(this, R.color.category_other_dark)
+        };
+        int[] categoryColorsLight = {
+                0, // All — handled separately
+                ContextCompat.getColor(this, R.color.category_dairy_light),
+                ContextCompat.getColor(this, R.color.category_vegetables_light),
+                ContextCompat.getColor(this, R.color.category_fruits_light),
+                ContextCompat.getColor(this, R.color.category_meats_light),
+                ContextCompat.getColor(this, R.color.category_beverages_light),
+                ContextCompat.getColor(this, R.color.category_medicine_light),
+                ContextCompat.getColor(this, R.color.category_other_light)
         };
         LinearLayout[] allButtons = {
                 categoryAllButton, categoryDairyButton, categoryVegetablesButton,
@@ -1331,7 +1348,7 @@ public class ProductListActivity extends AppCompatActivity {
             if (categoryOtherCount != null) categoryOtherCount.setTextColor(Color.WHITE);
 
         } else {
-            // Light mode: "All" grey, other buttons use profile light colors
+            // Light mode: "All" grey, other buttons use profile light (pastel) colors
             if (categoryAllButton != null) {
                 boolean isActive = categoryAllButton == activeButton;
                 categoryAllButton.setBackground(makeRoundedBg(
@@ -1341,19 +1358,17 @@ public class ProductListActivity extends AppCompatActivity {
                 LinearLayout btn = allButtons[i];
                 if (btn != null) {
                     if (btn == activeButton) {
-                        android.graphics.drawable.GradientDrawable activeBg = makeRoundedBg(categoryColors[i], false);
-                        activeBg.setStroke(3, Color.WHITE);
+                        android.graphics.drawable.GradientDrawable activeBg = makeRoundedBg(categoryColorsLight[i], false);
+                        activeBg.setStroke(3, Color.parseColor("#AAAAAA"));
                         btn.setBackground(activeBg);
                     } else {
-                        btn.setBackground(makeRoundedBg(categoryColors[i], false));
+                        btn.setBackground(makeRoundedBg(categoryColorsLight[i], false));
                     }
                 }
             }
-            // Active button text white (on blue), inactive text black
-            // Exception: Other always white (dark navy background)
-            // All category buttons have colored backgrounds — always white text
-            if (categoryAllTitle != null) categoryAllTitle.setTextColor(categoryAllButton == activeButton ? Color.WHITE : Color.BLACK);
-            if (categoryAllCount  != null) categoryAllCount.setTextColor(categoryAllButton == activeButton ? Color.WHITE : Color.DKGRAY);
+            // Light pastel backgrounds → use dark text for readability
+            if (categoryAllTitle != null) categoryAllTitle.setTextColor(Color.BLACK);
+            if (categoryAllCount  != null) categoryAllCount.setTextColor(Color.DKGRAY);
             LinearLayout[] textBtns = {categoryDairyButton, categoryVegetablesButton, categoryFruitsButton,
                     categoryMeatsButton, categoryBeveragesButton, categoryMedicineButton, categoryOtherButton};
             TextView[][] textViews = {
@@ -1366,7 +1381,7 @@ public class ProductListActivity extends AppCompatActivity {
                     {categoryOtherIcon, categoryOtherTitle, categoryOtherCount}
             };
             for (int j = 0; j < textBtns.length; j++) {
-                for (TextView tv : textViews[j]) { if (tv != null) tv.setTextColor(Color.WHITE); }
+                for (TextView tv : textViews[j]) { if (tv != null) tv.setTextColor(Color.BLACK); }
             }
         }
 
@@ -1424,8 +1439,8 @@ public class ProductListActivity extends AppCompatActivity {
                 addButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#1E1E1E")));
                 addButton.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
             } else {
-                // White theme: FAB background purple, icon white
-                addButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fabBackgroundColor));
+                // White theme: FAB background green, icon white
+                addButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#4CAF50")));
                 addButton.setImageTintList(android.content.res.ColorStateList.valueOf(fabIconColor));
             }
         }
@@ -1447,11 +1462,9 @@ public class ProductListActivity extends AppCompatActivity {
                 if (navSettingsIcon != null) navSettingsIcon.setColorFilter(Color.WHITE);
                 if (navSettingsText != null) navSettingsText.setTextColor(Color.WHITE);
 
-                if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(Color.WHITE);
-                if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(Color.WHITE);
-                if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(Color.WHITE);
-
-                if (searchEmoji != null) searchEmoji.setColorFilter(Color.WHITE);
+                if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(Color.parseColor("#4CAF50"));
+                if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(Color.parseColor("#4CAF50"));
+                if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(Color.parseColor("#4CAF50"));
                 if (clearSearchButton != null) clearSearchButton.setColorFilter(Color.WHITE);
 
                 // OPTION 2: History icon - WHITE in dark mode
@@ -1460,24 +1473,24 @@ public class ProductListActivity extends AppCompatActivity {
                 }
 
             } else {
-                // Rounded top corners nav background (light mode)
+                // Rounded top corners nav background (light mode) — white like Settings
                 android.graphics.drawable.GradientDrawable navBgLight = new android.graphics.drawable.GradientDrawable();
-                navBgLight.setColor(Color.parseColor("#1A1A1A"));
+                navBgLight.setColor(Color.WHITE);
                 float[] radiiL = {48f, 48f, 48f, 48f, 0f, 0f, 0f, 0f}; // top corners only
                 navBgLight.setCornerRadii(radiiL);
                 bottomNavigation.setBackground(navBgLight);
                 bottomNavigation.setElevation(8f);
 
-                if (navProfileIcon != null) navProfileIcon.setColorFilter(Color.WHITE);
-                if (navProfileText != null) navProfileText.setTextColor(Color.WHITE);
-                if (navProductsIcon != null) navProductsIcon.setColorFilter(Color.WHITE);
-                if (navProductsText != null) navProductsText.setTextColor(Color.WHITE);
-                if (navSettingsIcon != null) navSettingsIcon.setColorFilter(Color.WHITE);
-                if (navSettingsText != null) navSettingsText.setTextColor(Color.WHITE);
+                if (navProfileIcon != null) navProfileIcon.setColorFilter(Color.BLACK);
+                if (navProfileText != null) navProfileText.setTextColor(Color.BLACK);
+                if (navProductsIcon != null) navProductsIcon.setColorFilter(Color.BLACK);
+                if (navProductsText != null) navProductsText.setTextColor(Color.BLACK);
+                if (navSettingsIcon != null) navSettingsIcon.setColorFilter(Color.BLACK);
+                if (navSettingsText != null) navSettingsText.setTextColor(Color.BLACK);
 
-                if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(Color.WHITE);
-                if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(Color.WHITE);
-                if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(Color.WHITE);
+                if (navProfileIndicator != null) navProfileIndicator.setBackgroundColor(Color.parseColor("#388E3C"));
+                if (navProductsIndicator != null) navProductsIndicator.setBackgroundColor(Color.parseColor("#388E3C"));
+                if (navSettingsIndicator != null) navSettingsIndicator.setBackgroundColor(Color.parseColor("#388E3C"));
 
                 if (searchEmoji != null) searchEmoji.setColorFilter(Color.DKGRAY);
                 if (barcodeScannerButton != null) {
@@ -1607,6 +1620,8 @@ public class ProductListActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 }
             }
+            // Product was edited — DB already updated by EditProductActivity;
+            // LiveData observers will auto-refresh the list
         }
 
         // Handle scan result from the shortcut barcode button
@@ -1632,7 +1647,7 @@ public class ProductListActivity extends AppCompatActivity {
             if (productList.isEmpty()) {
                 productCountText.setText("No Products found" + searchInfo);
             } else {
-                productCountText.setText(productList.size() + " product" +
+                productCountText.setText(productList.size() + " Product" +
                         (productList.size() == 1 ? "" : "s") +
                         " in " + currentCategory + searchInfo);
             }

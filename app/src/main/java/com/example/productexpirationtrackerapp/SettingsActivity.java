@@ -79,6 +79,15 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Apply background color synchronously from SharedPrefs BEFORE setContentView to prevent blink
+        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String quickTheme = preferences.getString("color_theme", "white");
+        int quickBg = "black".equals(quickTheme)
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#F5F5F5");
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(quickBg));
+
         setContentView(R.layout.activity_settings);
 
         preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
@@ -157,7 +166,7 @@ public class SettingsActivity extends AppCompatActivity {
         int accentGreen   = isDark ? Color.parseColor("#4CAF50") : Color.parseColor("#388E3C");
         int navBg         = isDark ? Color.parseColor("#1A1A1A") : Color.WHITE;
         int navActive     = isDark ? Color.WHITE                 : Color.parseColor("#1A1A1A");
-        int navInactive   = isDark ? Color.WHITE                 : Color.parseColor("#AAAAAA");
+        int navInactive   = isDark ? Color.WHITE                 : Color.parseColor("#1A1A1A");
         int navBorder     = isDark ? Color.parseColor("#2A2A2A") : Color.parseColor("#E8E8E8");
 
         // ── Root + scroll background ──────────────────────────────────────────
@@ -356,16 +365,18 @@ public class SettingsActivity extends AppCompatActivity {
     private void setupBottomNavigation() {
         if (navProfile != null) {
             navProfile.setOnClickListener(v -> {
-                startActivity(new Intent(this, ProfileActivity.class));
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
+                Intent intent = new Intent(this, ProfileActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
             });
         }
         if (navProducts != null) {
             navProducts.setOnClickListener(v -> {
-                startActivity(new Intent(this, ProductListActivity.class));
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
+                Intent intent = new Intent(this, ProductListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
             });
         }
         // navSettings: already on this screen, do nothing
@@ -481,11 +492,26 @@ public class SettingsActivity extends AppCompatActivity {
             saveNameButton.setOnClickListener(v -> {
                 if (nameEditText != null) {
                     String newName = nameEditText.getText().toString().trim();
-                    if (!newName.isEmpty()) {
-                        if (userNameText != null) userNameText.setText(newName);
-                        preferences.edit().putString("user_name", newName).apply();
-                        Toast.makeText(this, "Name updated", Toast.LENGTH_SHORT).show();
+                    if (newName.isEmpty()) {
+                        Toast.makeText(this, "Nickname cannot be empty", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    if (newName.length() > 8) {
+                        Toast.makeText(this, "Nickname must be 8 letters or less", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    // Update UI immediately
+                    if (userNameText != null) userNameText.setText(newName);
+                    // Save to SharedPreferences
+                    preferences.edit().putString("user_name", newName).apply();
+                    // Save to database so ProductList greeting also updates
+                    userRepository.getUser(user -> {
+                        if (user != null) {
+                            user.setUserName(newName);
+                            userRepository.updateUser(user);
+                        }
+                    });
+                    Toast.makeText(this, "Nickname updated!", Toast.LENGTH_SHORT).show();
                 }
                 hideNameEdit();
             });
