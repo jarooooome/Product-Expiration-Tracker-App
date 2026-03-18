@@ -520,6 +520,38 @@ public class SettingsActivity extends AppCompatActivity {
         if (cancelNameButton != null) {
             cancelNameButton.setOnClickListener(v -> hideNameEdit());
         }
+
+        // Vibration preview — fire haptic when user selects a pattern
+        if (vibrationRadioGroup != null) {
+            vibrationRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                android.os.Vibrator vibrator =
+                        (android.os.Vibrator) getSystemService(VIBRATOR_SERVICE);
+                if (vibrator == null || !vibrator.hasVibrator()) return;
+
+                if (checkedId == R.id.vibration_none) {
+                    // No vibration — do nothing
+                    return;
+                }
+
+                long[] pattern;
+                if (checkedId == R.id.vibration_short) {
+                    pattern = new long[]{0, 200, 100, 200};
+                } else if (checkedId == R.id.vibration_long) {
+                    pattern = new long[]{0, 800, 200, 800};
+                } else {
+                    // default
+                    pattern = new long[]{0, 500, 200, 500};
+                }
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    android.os.VibrationEffect effect =
+                            android.os.VibrationEffect.createWaveform(pattern, -1);
+                    vibrator.vibrate(effect);
+                } else {
+                    vibrator.vibrate(pattern, -1);
+                }
+            });
+        }
     }
 
     private void hideNameEdit() {
@@ -564,12 +596,25 @@ public class SettingsActivity extends AppCompatActivity {
     private void recreateNotificationChannel(String vibPattern) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager mgr = getSystemService(NotificationManager.class);
+
+            // Must delete before recreating — Android ignores setting changes on existing channels
             mgr.deleteNotificationChannel("expiry_channel");
+
+            // Use a new channel ID each time so OS doesn't restore old cached settings
+            String channelId = "expiry_channel_" + vibPattern;
+            // Also delete any previous pattern-specific channel
+            for (String old : new String[]{"expiry_channel_default","expiry_channel_short",
+                    "expiry_channel_long","expiry_channel_none"}) {
+                mgr.deleteNotificationChannel(old);
+            }
+
             NotificationChannel ch = new NotificationChannel(
-                    "expiry_channel", "Expiry Notifications", NotificationManager.IMPORTANCE_HIGH);
+                    channelId, "Expiry Notifications", NotificationManager.IMPORTANCE_HIGH);
             ch.setDescription("Get notified when products are about to expire");
+
             if ("none".equals(vibPattern)) {
                 ch.enableVibration(false);
+                ch.setVibrationPattern(new long[]{0});
             } else {
                 ch.enableVibration(true);
                 switch (vibPattern) {
@@ -579,6 +624,9 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
             mgr.createNotificationChannel(ch);
+
+            // Persist the channel ID so the notification scheduler uses the right one
+            preferences.edit().putString("notification_channel_id", channelId).apply();
         }
     }
 }
