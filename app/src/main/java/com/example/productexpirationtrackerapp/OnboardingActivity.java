@@ -65,27 +65,29 @@ public class OnboardingActivity extends AppCompatActivity {
         getStartedButton = findViewById(R.id.getStartedButton);
         dotsLayout = findViewById(R.id.dotsLayout);
 
+
+
         // Setup onboarding pages
         List<OnboardingPage> pages = new ArrayList<>();
         pages.add(new OnboardingPage(
-                "Welcome to ExpiryTrack",
-                "Never let your products expire again! Track all your items in one place.",
-                "📦"
+                "Track what expires.",
+                "Add your products once. We'll handle the rest.",
+                R.drawable.ic_onboarding_box
         ));
         pages.add(new OnboardingPage(
-                "Track Your Products",
-                "Add products with expiry dates and get organized. Add manually the dates.",
-                "📅"
+                "Always up to date.",
+                "Set expiry dates manually or scan a barcode.",
+                R.drawable.ic_onboarding_calendar
         ));
         pages.add(new OnboardingPage(
-                "Get Smart Notifications",
-                "We'll remind you before products expire. Never waste food or money again!",
-                "🔔"
+                "Never miss a thing.",
+                "Get notified before anything expires.",
+                R.drawable.ic_onboarding_bell
         ));
         pages.add(new OnboardingPage(
-                "Customize Your Experience",
-                "Choose your theme and notification preferences. Make it yours!",
-                "🎨"
+                "Make it yours.",
+                "Pick a theme and set your preferences.",
+                R.drawable.ic_onboarding_palette
         ));
 
         // Setup adapter
@@ -133,7 +135,7 @@ public class OnboardingActivity extends AppCompatActivity {
         if (currentView != null) {
             TextView title = currentView.findViewById(R.id.titleText);
             TextView description = currentView.findViewById(R.id.descriptionText);
-            TextView icon = currentView.findViewById(R.id.iconView);
+            View icon = currentView.findViewById(R.id.iconView);
 
             if (title != null) {
                 title.setAlpha(0f);

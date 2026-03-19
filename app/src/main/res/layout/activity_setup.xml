@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
     android:fillViewport="true">
 
     <LinearLayout
@@ -12,135 +11,167 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="52dp"
+        android:paddingBottom="32dp">
 
-        <!-- Theme Preview Header with Card Style -->
+        <!-- Header wrapper — Java uses headerCard for setCardBackgroundColor -->
         <androidx.cardview.widget.CardView
             android:id="@+id/headerCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp">
+            android:layout_marginBottom="40dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:id="@+id/headerLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="4dp">
 
-                <!-- Icon -->
+                <!-- Hidden icon — kept so Java's headerIcon ref doesn't crash -->
                 <ImageView
                     android:id="@+id/headerIcon"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:layout_gravity="center"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"
                     android:src="@drawable/ic_palette"
-                    android:layout_marginBottom="16dp"
                     app:tint="#4CAF50" />
 
                 <TextView
                     android:id="@+id/titleTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Customize Your App"
+                    android:text="Welcome"
                     android:textSize="28sp"
                     android:textStyle="bold"
                     android:textColor="#1A1A1A"
-                    android:gravity="center"
-                    android:layout_marginBottom="8dp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:letterSpacing="0.01"
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/subtitleTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Preview how your theme will look"
-                    android:textSize="16sp"
-                    android:textColor="#757575"
-                    android:gravity="center"
-                    android:fontFamily="sans-serif-light" />
+                    android:text="Set up your preferences to get started"
+                    android:textSize="14sp"
+                    android:textColor="#757575" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- User Name Card -->
+        <!-- ══ YOUR PROFILE ══════════════════════════════════════════════ -->
+        <TextView
+            android:id="@+id/sectionLabelProfile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="YOUR PROFILE"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Name wrapper — Java uses nameCard for setCardBackgroundColor -->
         <androidx.cardview.widget.CardView
             android:id="@+id/nameCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="2dp">
 
                 <TextView
                     android:id="@+id/userNameLabel"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your Name"
-                    android:textSize="16sp"
-                    android:textColor="#424242"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:text="What should we call you?"
+                    android:textSize="13sp"
+                    android:textColor="#757575"
+                    android:layout_marginBottom="8dp" />
 
                 <EditText
                     android:id="@+id/userNameEditText"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Enter your name"
-                    android:padding="16dp"
-                    android:background="@drawable/edittext_background"
-                    android:textSize="16sp"
+                    android:layout_height="52dp"
+                    android:hint="Enter your name (max 8 letters)"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:textSize="15sp"
                     android:textColor="#1A1A1A"
                     android:textColorHint="#9E9E9E"
                     android:inputType="textPersonName"
-                    android:maxLines="1" />
+                    android:maxLength="8"
+                    android:maxLines="1"
+                    android:background="@drawable/edittext_background" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Color Theme Selection Card -->
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ══ APP THEME ═════════════════════════════════════════════════ -->
+        <TextView
+            android:id="@+id/sectionLabelTheme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="APP THEME"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/themeDescText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Choose your preferred color theme"
+            android:textSize="13sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="14dp" />
+
+        <!-- Theme wrapper — Java uses themeCard for setCardBackgroundColor -->
         <androidx.cardview.widget.CardView
             android:id="@+id/themeCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="2dp">
 
+                <!-- Hidden label — kept so Java's themeLabel ref doesn't crash -->
                 <TextView
                     android:id="@+id/themeLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Choose Color Theme"
-                    android:textSize="16sp"
-                    android:textColor="#424242"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="16dp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:visibility="gone" />
 
-                <!-- Theme Selection using RadioGroup -->
                 <RadioGroup
                     android:id="@+id/themeGroup"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- White/Light Theme (DEFAULT) -->
                     <LinearLayout
                         android:id="@+id/optionWhiteLayout"
                         android:layout_width="match_parent"
@@ -148,15 +179,8 @@
                         android:orientation="horizontal"
                         android:background="@drawable/theme_option_background"
                         android:padding="12dp"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/color_circle"
-                            android:backgroundTint="#FFFFFF"
-                            android:layout_marginEnd="12dp" />
 
                         <RadioButton
                             android:id="@+id/themeWhite"
@@ -164,13 +188,13 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:checked="true"
-                            android:text="Light (Default)"
-                            android:textSize="16sp"
+                            android:text="☀️  Light (Default)"
+                            android:textSize="15sp"
                             android:textColor="#333333"
-                            android:paddingVertical="8dp" />
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp" />
                     </LinearLayout>
 
-                    <!-- Black/Dark Theme -->
                     <LinearLayout
                         android:id="@+id/optionBlackLayout"
                         android:layout_width="match_parent"
@@ -180,68 +204,80 @@
                         android:padding="12dp"
                         android:gravity="center_vertical">
 
-                        <View
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/color_circle"
-                            android:backgroundTint="#212121"
-                            android:layout_marginEnd="12dp" />
-
                         <RadioButton
                             android:id="@+id/themeBlack"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Dark"
-                            android:textSize="16sp"
+                            android:text="🌙  Dark"
+                            android:textSize="15sp"
                             android:textColor="#333333"
-                            android:paddingVertical="8dp" />
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp" />
                     </LinearLayout>
 
                 </RadioGroup>
-
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Notifications Card -->
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ══ NOTIFICATIONS ═════════════════════════════════════════════ -->
+        <TextView
+            android:id="@+id/sectionLabelNotif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="NOTIFICATIONS"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/notifDescText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get alerts before your products expire"
+            android:textSize="13sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="14dp" />
+
+        <!-- Notification wrapper — Java uses notificationCard for setCardBackgroundColor -->
         <androidx.cardview.widget.CardView
             android:id="@+id/notificationCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="2dp">
 
+                <!-- Hidden label — kept so Java's notificationLabel ref doesn't crash -->
                 <TextView
                     android:id="@+id/notificationLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Notifications"
-                    android:textSize="16sp"
-                    android:textColor="#424242"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/notificationLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_notifications"
-                        android:layout_marginEnd="12dp"
-                        app:tint="#757575" />
+                    android:gravity="center_vertical"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
 
                     <TextView
                         android:id="@+id/notificationText"
@@ -249,8 +285,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Enable expiry reminders"
-                        android:textSize="16sp"
-                        android:textColor="#666666" />
+                        android:textSize="15sp"
+                        android:textColor="#333333" />
 
                     <Switch
                         android:id="@+id/notificationSwitch"
@@ -258,28 +294,34 @@
                         android:layout_height="wrap_content"
                         android:checked="true"
                         android:thumbTint="#4CAF50"
-                        android:trackTint="#C8E6C9"
+                        android:trackTint="#AAAAAA"
                         tools:ignore="TouchTargetSizeCheck" />
-                </LinearLayout>
 
+                </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Finish Button -->
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp" />
+
+        <!-- ── Finish Button ─────────────────────────────────────────── -->
         <Button
             android:id="@+id/finishButton"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="50dp"
             android:text="Finish Setup"
-            android:textSize="18sp"
+            android:textSize="15sp"
             android:textColor="#FFFFFF"
-            android:background="@drawable/finish_button_background"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="32dp"
-            android:elevation="4dp"
             android:textStyle="bold"
             android:textAllCaps="false"
-            android:fontFamily="sans-serif-medium" />
+            android:background="@drawable/finish_button_background"
+            android:layout_marginBottom="16dp"
+            android:stateListAnimator="@null" />
 
     </LinearLayout>
 </ScrollView>

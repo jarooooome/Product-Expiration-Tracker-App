@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class EditProductActivity extends AppCompatActivity {
@@ -213,14 +214,59 @@ public class EditProductActivity extends AppCompatActivity {
             }
         }
 
-        // Create intent to return data
+        final int finalQuantity = quantity;
+        final String finalNotes = notes;
+        final String finalName = name;
+        final String finalCategory = category;
+        final String finalExpiry = expiry;
+
+        // Persist to DB: scan getAllProducts() for this product ID, update, then save
+        if (productId != -1) {
+            androidx.lifecycle.LiveData<List<Product>> allLive = productViewModel.getAllProducts();
+
+            allLive.observe(this, new androidx.lifecycle.Observer<List<Product>>() {
+                @Override
+                public void onChanged(List<Product> products) {
+                    allLive.removeObserver(this); // one-shot — never accumulates
+                    if (products != null) {
+                        for (Product p : products) {
+                            if (p.getId() == productId) {
+                                p.setName(finalName);
+                                p.setCategory(finalCategory);
+                                // setQuantity takes String in the Product model
+                                p.setQuantity(finalQuantity + (finalQuantity == 1 ? " item" : " items"));
+                                p.setNotes(finalNotes.isEmpty() ? "" : finalNotes);
+                                try {
+                                    java.text.SimpleDateFormat sdf =
+                                            new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+                                    p.setExpiryDate(sdf.parse(finalExpiry));
+                                } catch (Exception e) {
+                                    android.util.Log.e("EditProduct", "Date parse error: " + e.getMessage());
+                                }
+                                productViewModel.update(p);
+                                break;
+                            }
+                        }
+                    }
+                    // Return updated values to caller for immediate UI refresh
+                    deliverResult(finalName, finalExpiry, finalCategory, finalQuantity, finalNotes);
+                }
+            });
+        } else {
+            deliverResult(name, expiry, category, finalQuantity, finalNotes);
+        }
+    }
+
+    /** Sends result back to the caller and finishes this activity. */
+    private void deliverResult(String name, String expiry, String category,
+                               int quantity, String notes) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra("product_name", name);
         resultIntent.putExtra("expiry_date", expiry);
         resultIntent.putExtra("category", category);
         resultIntent.putExtra("quantity", quantity + (quantity == 1 ? " item" : " items"));
         resultIntent.putExtra("notes", notes.isEmpty() ? "No notes" : notes);
-
+        resultIntent.putExtra("product_id", productId);
         setResult(RESULT_OK, resultIntent);
         finish();
     }
@@ -328,7 +374,7 @@ public class EditProductActivity extends AppCompatActivity {
         if (saveButton != null) {
             android.graphics.drawable.GradientDrawable saveBg =
                     new android.graphics.drawable.GradientDrawable();
-            saveBg.setColor(accentGreen);
+            saveBg.setColor(Color.parseColor("#BB86FC")); // light violet — matches app accent
             saveBg.setCornerRadius(8 * dp);
             saveButton.setBackground(saveBg);
             saveButton.setTextColor(Color.WHITE);

@@ -108,8 +108,7 @@
                 android:layout_height="wrap_content"
                 android:text="0"
                 android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="#4CAF50" />
+                android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/tvConsumedLabel"
@@ -119,7 +118,6 @@
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.1"
-                android:textColor="#4CAF50"
                 android:layout_marginTop="2dp" />
 
         </LinearLayout>

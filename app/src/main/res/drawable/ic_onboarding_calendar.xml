@@ -1,0 +1,79 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Drop shadow -->
+    <path
+        android:pathData="M20,84 Q50,92 80,84 L80,90 Q50,96 20,90 Z"
+        android:fillColor="#000000"
+        android:fillAlpha="0.25"/>
+
+    <!-- Calendar depth / right edge -->
+    <path
+        android:pathData="M82,20 Q86,20 86,24 L86,84 Q86,88 82,88 L82,20 Z"
+        android:fillColor="#90AACF"/>
+
+    <!-- Calendar body -->
+    <path
+        android:pathData="M18,20 Q18,16 22,16 L78,16 Q82,16 82,20 L82,86 Q82,90 78,90 L22,90 Q18,90 18,86 Z"
+        android:fillColor="#EEF4FF"/>
+
+    <!-- Header bar -->
+    <path
+        android:pathData="M18,16 Q18,12 22,12 L78,12 Q82,12 82,16 L82,38 L18,38 Z"
+        android:fillColor="#5090D8"/>
+
+    <!-- Ring binding — left -->
+    <path
+        android:pathData="M31,8 Q31,6 34,6 Q37,6 37,8 L37,22 Q37,24 34,24 Q31,24 31,22 Z"
+        android:fillColor="#2456A8"/>
+
+    <!-- Ring binding — right -->
+    <path
+        android:pathData="M63,8 Q63,6 66,6 Q69,6 66,8 L69,8 L69,22 Q69,24 66,24 Q63,24 63,22 Z"
+        android:fillColor="#2456A8"/>
+
+    <!-- Header inner glow -->
+    <path
+        android:pathData="M20,12 L48,12"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:strokeAlpha="0.4"/>
+
+    <!-- Day grid row 1 -->
+    <path android:pathData="M22,44 L28,44 L28,50 L22,50 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M32,44 L38,44 L38,50 L32,50 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M42,44 L48,44 L48,50 L42,50 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M52,44 L58,44 L58,50 L52,50 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M62,44 L68,44 L68,50 L62,50 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M72,44 L78,44 L78,50 L72,50 Z" android:fillColor="#B8C8E4"/>
+
+    <!-- Day grid row 2 -->
+    <path android:pathData="M22,54 L28,54 L28,60 L22,60 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M32,54 L38,54 L38,60 L32,60 Z" android:fillColor="#B8C8E4"/>
+    <!-- Highlighted day — filled blue circle -->
+    <path
+        android:pathData="M42,54 m -6,0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"
+        android:fillColor="#5090D8"/>
+    <!-- White number "17" hint — two thin white rectangles -->
+    <path android:pathData="M40,55 L42,55 L42,59 L40,59 Z" android:fillColor="#FFFFFF" android:fillAlpha="0.9"/>
+    <path android:pathData="M43,55 L45,55 L45,59 L43,59 Z" android:fillColor="#FFFFFF" android:fillAlpha="0.9"/>
+    <path android:pathData="M52,54 L58,54 L58,60 L52,60 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M62,54 L68,54 L68,60 L62,60 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M72,54 L78,54 L78,60 L72,60 Z" android:fillColor="#B8C8E4"/>
+
+    <!-- Day grid row 3 -->
+    <path android:pathData="M22,64 L28,64 L28,70 L22,70 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M32,64 L38,64 L38,70 L32,70 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M42,64 L48,64 L48,70 L42,70 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M52,64 L58,64 L58,70 L52,70 Z" android:fillColor="#B8C8E4"/>
+
+    <!-- Day grid row 4 (partial) -->
+    <path android:pathData="M22,74 L28,74 L28,80 L22,80 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M32,74 L38,74 L38,80 L32,80 Z" android:fillColor="#B8C8E4"/>
+    <path android:pathData="M42,74 L48,74 L48,80 L42,80 Z" android:fillColor="#B8C8E4"/>
+
+</vector>

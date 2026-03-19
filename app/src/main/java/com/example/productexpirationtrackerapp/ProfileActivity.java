@@ -124,15 +124,21 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Apply background color synchronously from SharedPrefs BEFORE setContentView to prevent blink
+        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String quickTheme = preferences.getString("color_theme", "white");
+        int quickBg = "black".equals(quickTheme)
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#F5F5F5");
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(quickBg));
+
         setContentView(R.layout.activity_profile);
 
         // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
         userRepository = new UserRepository(getApplication());
-
-        // Initialize preferences
-        preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
         // Initialize all views
         initializeViews();
@@ -261,123 +267,154 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void showInfoDialog() {
-        // Build a custom dialog view
+        float dp = getResources().getDisplayMetrics().density;
+
+        // Theme colors
+        String theme = preferences.getString("color_theme", "white");
+        boolean isDark = "black".equals(theme);
+        int dialogBg    = isDark ? android.graphics.Color.parseColor("#1A1A1A") : android.graphics.Color.parseColor("#F9F9F9");
+        int textPrimary = isDark ? android.graphics.Color.WHITE                  : android.graphics.Color.parseColor("#1A1A1A");
+        int textSec     = isDark ? android.graphics.Color.parseColor("#AAAAAA")  : android.graphics.Color.parseColor("#757575");
+        int dividerColor= isDark ? android.graphics.Color.parseColor("#2A2A2A")  : android.graphics.Color.parseColor("#E8E8E8");
+        int accentColor = android.graphics.Color.parseColor("#4CAF50");
+
+        // Root container
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
-        int pad = (int)(20 * getResources().getDisplayMetrics().density);
-        root.setPadding(pad, pad, pad, pad);
-
-        // Detect current theme for dialog colors
-        String theme = preferences.getString("selected_theme", "white");
-        boolean isDark = "black".equals(theme);
-        int dialogBg    = isDark ? android.graphics.Color.parseColor("#1E1E1E") : android.graphics.Color.WHITE;
-        int textPrimary = isDark ? android.graphics.Color.WHITE  : android.graphics.Color.parseColor("#212121");
-        int textSec     = isDark ? android.graphics.Color.LTGRAY : android.graphics.Color.parseColor("#757575");
+        int padH = (int)(20 * dp), padV = (int)(24 * dp);
+        root.setPadding(padH, padV, padH, padV);
         root.setBackgroundColor(dialogBg);
 
-        // Helper to add a section title
-        java.util.function.Consumer<String> addSection = title -> {
+        // ── Helper: ALL-CAPS section label ────────────────────────────────
+        java.util.function.Consumer<String> addLabel = label -> {
             android.widget.TextView tv = new android.widget.TextView(this);
-            tv.setText(title);
-            tv.setTextColor(textPrimary);
-            tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15);
+            tv.setText(label);
+            tv.setTextColor(accentColor);
+            tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 10);
             tv.setTypeface(null, android.graphics.Typeface.BOLD);
-            int topMargin = (int)(14 * getResources().getDisplayMetrics().density);
-            android.widget.LinearLayout.LayoutParams lp =
-                    new android.widget.LinearLayout.LayoutParams(
-                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
-            lp.topMargin = topMargin;
+            tv.setLetterSpacing(0.12f);
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = (int)(20 * dp);
+            lp.bottomMargin = (int)(10 * dp);
             tv.setLayoutParams(lp);
             root.addView(tv);
         };
 
-        // Helper to add a colour-dot row
+        // ── Helper: divider ───────────────────────────────────────────────
+        java.lang.Runnable addDivider = () -> {
+            android.view.View div = new android.view.View(this);
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT, (int)(1 * dp));
+            lp.topMargin    = (int)(16 * dp);
+            lp.bottomMargin = (int)(4 * dp);
+            div.setLayoutParams(lp);
+            div.setBackgroundColor(dividerColor);
+            root.addView(div);
+        };
+
+        // ── Helper: colour-dot row ────────────────────────────────────────
         java.util.function.BiConsumer<Integer, String> addColorRow = (color, desc) -> {
             android.widget.LinearLayout row = new android.widget.LinearLayout(this);
             row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
             row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-            int rowPad = (int)(6 * getResources().getDisplayMetrics().density);
-            row.setPadding(0, rowPad, 0, rowPad);
+            android.widget.LinearLayout.LayoutParams rowLp = new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+            rowLp.bottomMargin = (int)(8 * dp);
+            row.setLayoutParams(rowLp);
 
-            // Colour dot
+            // Dot — skip for transparent
             android.view.View dot = new android.view.View(this);
-            int dotSize = (int)(16 * getResources().getDisplayMetrics().density);
+            int dotSize = (int)(10 * dp);
             android.widget.LinearLayout.LayoutParams dotLp =
                     new android.widget.LinearLayout.LayoutParams(dotSize, dotSize);
-            dotLp.setMarginEnd((int)(12 * getResources().getDisplayMetrics().density));
+            dotLp.setMarginEnd((int)(12 * dp));
+            dotLp.topMargin = (int)(2 * dp);
             dot.setLayoutParams(dotLp);
-            android.graphics.drawable.GradientDrawable circle = new android.graphics.drawable.GradientDrawable();
-            circle.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-            circle.setColor(color);
-            dot.setBackground(circle);
+            if (color != android.graphics.Color.TRANSPARENT) {
+                android.graphics.drawable.GradientDrawable circle =
+                        new android.graphics.drawable.GradientDrawable();
+                circle.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+                circle.setColor(color);
+                dot.setBackground(circle);
+            }
             row.addView(dot);
 
             android.widget.TextView tv = new android.widget.TextView(this);
             tv.setText(desc);
             tv.setTextColor(textSec);
             tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
+            tv.setLineSpacing(0, 1.3f);
             row.addView(tv);
             root.addView(row);
         };
 
-        // Helper for plain text rows
-        java.util.function.Consumer<String> addNote = note -> {
+        // ── Helper: plain row ─────────────────────────────────────────────
+        java.util.function.Consumer<String> addRow = text -> {
             android.widget.TextView tv = new android.widget.TextView(this);
-            tv.setText("• " + note);
+            tv.setText(text);
             tv.setTextColor(textSec);
             tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
-            int topM = (int)(4 * getResources().getDisplayMetrics().density);
-            android.widget.LinearLayout.LayoutParams lp =
-                    new android.widget.LinearLayout.LayoutParams(
-                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
-            lp.topMargin = topM;
+            tv.setLineSpacing(0, 1.4f);
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.bottomMargin = (int)(6 * dp);
             tv.setLayoutParams(lp);
             root.addView(tv);
         };
 
-        // ── Colour Coding ─────────────────────────────────────────────────
-        addSection.accept("Colour Coding");
+        // ══ EXPIRY BADGES ══════════════════════════════════════════════════
+        addLabel.accept("EXPIRY BADGES");
+        addColorRow.accept(android.graphics.Color.TRANSPARENT,          "30+ days — no badge");
         addColorRow.accept(android.graphics.Color.parseColor("#00C853"), "Safe — product is well within its expiry date");
-        addColorRow.accept(android.graphics.Color.parseColor("#FF6D00"), "Expiring Soon — expires within the next 3 days");
-        addColorRow.accept(android.graphics.Color.parseColor("#D50000"), "Expired — product is past its expiry date");
+        addColorRow.accept(android.graphics.Color.parseColor("#FFC107"), "Caution — 8 to 30 days remaining");
+        addColorRow.accept(android.graphics.Color.parseColor("#FF6D00"), "Warning — 1 to 7 days remaining");
+        addColorRow.accept(android.graphics.Color.parseColor("#D50000"), "Past expiry — red");
 
-        // ── Categories ────────────────────────────────────────────────────
-        addSection.accept("Categories");
-        addNote.accept("Dairy, Vegetables, Fruits, Meats, Beverages, Medicine, Other");
-        addNote.accept("Tap a category card to filter your product list");
+        addDivider.run();
 
-        // ── How to use ────────────────────────────────────────────────────
-        addSection.accept("💡  Quick Tips");
-        addNote.accept("Tap + to add a new product with its expiry date");
-        addNote.accept("Use the barcode scanner (in Products) to look up items quickly");
-        addNote.accept("Use the search bar to find specific products by name");
-        addNote.accept("Tap the history icon to view recently viewed items");
-        addNote.accept("Products are sorted by expiry date by default");
+        // ══ CATEGORIES ═════════════════════════════════════════════════════
+        addLabel.accept("CATEGORIES");
+        addRow.accept("Dairy · Vegetables · Fruits · Meats · Beverages · Medicine · Other");
+        addRow.accept("Tap a category card here to browse its products");
+        addRow.accept("Use category chips in Products to filter the list");
 
-        // ── Expiry Logic ──────────────────────────────────────────────────
-        addSection.accept("Expiry Rules");
-        addNote.accept("'Expiring Soon' triggers when 3 days remain");
-        addNote.accept("'Expired' shows products with a past expiry date");
-        addNote.accept("Check the Products page regularly to avoid waste");
+        addDivider.run();
+
+        // ══ QUICK TIPS ═════════════════════════════════════════════════════
+        addLabel.accept("QUICK TIPS");
+        addRow.accept("Tap + to add a product");
+        addRow.accept("Barcode scanner auto-fills product details");
+        addRow.accept("Search bar finds products by name");
+        addRow.accept("History icon shows consumed product history");
+        addRow.accept("Long-press a card for bulk actions");
+
+        addDivider.run();
+
+        // ══ SETTINGS ═══════════════════════════════════════════════════════
+        addLabel.accept("SETTINGS");
+        addRow.accept("Nickname — up to 8 letters");
+        addRow.accept("Reminder slider — days before expiry to notify you");
+        addRow.accept("App Theme — Light or Dark");
+        addRow.accept("Notification Time — daily alert time");
 
         // Build & show dialog
         androidx.appcompat.app.AlertDialog.Builder builder =
                 new androidx.appcompat.app.AlertDialog.Builder(this);
-        builder.setTitle("App Guide & Information");
         builder.setView(new android.widget.ScrollView(this) {{
             addView(root);
         }});
-        builder.setPositiveButton("Got it!", null);
+        builder.setPositiveButton("Got it", null);
         androidx.appcompat.app.AlertDialog dialog = builder.create();
         dialog.show();
 
-        // Style dialog background to match theme
         if (dialog.getWindow() != null) {
             android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
             bg.setColor(dialogBg);
-            bg.setCornerRadius(24f);
+            bg.setCornerRadius(20 * dp);
             dialog.getWindow().setBackgroundDrawable(bg);
         }
     }
@@ -499,7 +536,6 @@ public class ProfileActivity extends AppCompatActivity {
                 Log.d(TAG, "Add button clicked - opening AddProductActivity");
                 Intent intent = new Intent(ProfileActivity.this, AddProductActivity.class);
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
@@ -517,9 +553,9 @@ public class ProfileActivity extends AppCompatActivity {
             navProducts.setOnClickListener(v -> {
                 Log.d(TAG, "Products navigation clicked");
                 Intent intent = new Intent(ProfileActivity.this, ProductListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
+                overridePendingTransition(0, 0);
             });
         }
 
@@ -527,8 +563,9 @@ public class ProfileActivity extends AppCompatActivity {
             navSettings.setOnClickListener(v -> {
                 Log.d(TAG, "Settings navigation clicked");
                 Intent intent = new Intent(ProfileActivity.this, SettingsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                overridePendingTransition(0, 0);
             });
         }
     }
@@ -540,7 +577,7 @@ public class ProfileActivity extends AppCompatActivity {
         intent.putExtra("category_name", categoryName);
         intent.putExtra("category_count", itemCount);
         startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        overridePendingTransition(0, 0);
     }
 
     private void applyTheme() {
@@ -615,7 +652,7 @@ public class ProfileActivity extends AppCompatActivity {
             bottomNavColor = ContextCompat.getColor(this, R.color.color_nav_background_black);
             textColor = Color.WHITE;
             iconColor = Color.WHITE;
-            indicatorColor = Color.WHITE;
+            indicatorColor = Color.parseColor("#4CAF50");
             backgroundColor = ContextCompat.getColor(this, R.color.color_background_black);
             primaryTextColor = Color.WHITE;
             secondaryTextColor = Color.LTGRAY;
@@ -629,11 +666,11 @@ public class ProfileActivity extends AppCompatActivity {
             categoryOtherColor = ContextCompat.getColor(this, R.color.category_other_dark);
         } else {
             // White theme (default)
-            fabBackgroundColor = ContextCompat.getColor(this, R.color.color_fab_white);
-            bottomNavColor = ContextCompat.getColor(this, R.color.color_nav_background_white);
+            fabBackgroundColor = Color.parseColor("#4CAF50");
+            bottomNavColor = Color.WHITE;
             textColor = Color.BLACK;
             iconColor = Color.BLACK;
-            indicatorColor = Color.parseColor("#6200EE");
+            indicatorColor = Color.parseColor("#388E3C");
             backgroundColor = ContextCompat.getColor(this, R.color.color_background_white);
             primaryTextColor = Color.BLACK;
             secondaryTextColor = Color.DKGRAY;
@@ -697,7 +734,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Apply to stat numbers
         if (totalItemsCount != null) totalItemsCount.setTextColor(primaryTextColor);
-        if (safeCount != null) safeCount.setTextColor(ContextCompat.getColor(this, R.color.color_safe));
+        if (safeCount != null) safeCount.setTextColor(primaryTextColor); // transparent badge = normal text
         if (expiringSoonCount != null) expiringSoonCount.setTextColor(ContextCompat.getColor(this, R.color.color_soon));
         if (expiredCount != null) expiredCount.setTextColor(ContextCompat.getColor(this, R.color.color_expired));
 
@@ -794,7 +831,9 @@ public class ProfileActivity extends AppCompatActivity {
                     int otherCount = 0;
 
                     Date today = new Date();
-                    long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L;
+                    long oneDayInMillis    = 24 * 60 * 60 * 1000L;
+                    long sevenDaysInMillis = 7  * oneDayInMillis;
+                    long thirtyDaysInMillis= 30 * oneDayInMillis;
 
                     for (Product product : products) {
                         // Count by category
@@ -828,12 +867,13 @@ public class ProfileActivity extends AppCompatActivity {
                         // Count expired, expiring soon, and safe items
                         Date expiryDate = product.getExpiryDate();
                         if (expiryDate != null) {
+                            long diff = expiryDate.getTime() - today.getTime();
                             if (expiryDate.before(today)) {
                                 expiredItems++;
-                            } else if (expiryDate.getTime() - today.getTime() <= sevenDaysInMillis) {
-                                expiringSoonItems++;
+                            } else if (diff <= sevenDaysInMillis) {
+                                expiringSoonItems++; // orange: 1-7 days
                             } else {
-                                safeItems++;
+                                safeItems++; // yellow (8-30 days) + transparent (30+)
                             }
                         }
                     }

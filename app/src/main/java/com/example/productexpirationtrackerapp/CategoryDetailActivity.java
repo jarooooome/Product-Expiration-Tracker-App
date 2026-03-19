@@ -369,21 +369,23 @@ public class CategoryDetailActivity extends AppCompatActivity {
 
     private void updateCounts(List<Product> products) {
         Date today = new Date();
-        long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L;
+        long oneDayMillis    = 24 * 60 * 60 * 1000L;
+        long sevenDaysMillis = 7  * oneDayMillis;
 
         int expired = 0;
-        int soon = 0;
-        int safe = 0;
+        int soon = 0;    // orange: 1-7 days
+        int safe = 0;    // yellow (8-30) + transparent (30+)
 
         for (Product product : products) {
             Date expiryDate = product.getExpiryDate();
             if (expiryDate != null) {
+                long diff = expiryDate.getTime() - today.getTime();
                 if (expiryDate.before(today)) {
                     expired++;
-                } else if (expiryDate.getTime() - today.getTime() <= sevenDaysInMillis) {
-                    soon++;
+                } else if (diff <= sevenDaysMillis) {
+                    soon++; // 1-7 days → orange
                 } else {
-                    safe++;
+                    safe++; // 8-30 days → yellow, 30+ → transparent
                 }
             }
         }
@@ -397,7 +399,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
         filteredProducts.clear();
 
         Date today = new Date();
-        long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L;
+        long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L; // orange threshold (1-7 days)
 
         for (Product product : allCategoryProducts) {
             Date expiryDate = product.getExpiryDate();
@@ -408,13 +410,13 @@ public class CategoryDetailActivity extends AppCompatActivity {
                     break;
                 case "Safe":
                     if (expiryDate != null && expiryDate.getTime() - today.getTime() > sevenDaysInMillis) {
-                        filteredProducts.add(product);  // 8+ days left
+                        filteredProducts.add(product);  // 8+ days (yellow or transparent)
                     }
                     break;
                 case "Soon":
                     if (expiryDate != null && !expiryDate.before(today) &&
                             expiryDate.getTime() - today.getTime() <= sevenDaysInMillis) {
-                        filteredProducts.add(product);  // 1-7 days left
+                        filteredProducts.add(product);  // 1-7 days (orange)
                     }
                     break;
                 case "Expired":
@@ -455,12 +457,12 @@ public class CategoryDetailActivity extends AppCompatActivity {
         int mainBg        = isDark ? Color.parseColor("#121212")  : Color.parseColor("#F5F5F5");
         int cardBg        = isDark ? Color.parseColor("#1E1E1E")  : Color.WHITE;
         int navBg         = isDark ? ContextCompat.getColor(this, R.color.color_nav_background_black)
-                : ContextCompat.getColor(this, R.color.color_nav_background_white);
-        int fabBg         = isDark ? Color.parseColor("#1E1E1E")  // dark: near-black, NOT purple
-                : ContextCompat.getColor(this, R.color.color_fab_white);
+                : Color.WHITE;                          // light: white nav like Settings/Profile
+        int fabBg         = isDark ? Color.parseColor("#1E1E1E")  // dark: near-black
+                : Color.parseColor("#4CAF50");          // light: green FAB like other screens
         int primaryText   = isDark ? Color.WHITE                  : Color.parseColor("#1A1E2C");
         int secondaryText = isDark ? Color.LTGRAY                 : Color.parseColor("#8A8F9E");
-        int navIconColor  = isDark ? Color.WHITE                  : Color.WHITE; // nav always dark bg
+        int navIconColor  = isDark ? Color.WHITE                  : Color.BLACK; // light: black on white nav
 
         // Root background
         android.view.View mainLayout = findViewById(R.id.mainLayout);

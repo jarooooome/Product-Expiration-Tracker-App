@@ -253,8 +253,8 @@ public class SetupActivity extends AppCompatActivity {
             mainLayout.setBackgroundColor(backgroundColor);
         }
 
-        // Change the finish button color
-        finishButton.setBackgroundColor(primaryColor);
+        // Finish button — always light violet for visual consistency
+        finishButton.setBackgroundColor(Color.parseColor("#BB86FC"));
         finishButton.setTextColor(Color.WHITE);
 
         // Change radio button text colors dynamically
@@ -293,7 +293,7 @@ public class SetupActivity extends AppCompatActivity {
             }
         }
 
-        // Also update other text views
+        // Update all text views for dark mode adaptation
         TextView userNameLabel = findViewById(R.id.userNameLabel);
         TextView themeLabel = findViewById(R.id.themeLabel);
         TextView notificationLabel = findViewById(R.id.notificationLabel);
@@ -303,6 +303,28 @@ public class SetupActivity extends AppCompatActivity {
         if (themeLabel != null) themeLabel.setTextColor(textColor);
         if (notificationLabel != null) notificationLabel.setTextColor(textColor);
         if (notificationText != null) notificationText.setTextColor(textColor);
+
+        // Section labels and description texts (new IDs)
+        int secondaryColor = theme.equals("black") ? Color.parseColor("#B0B0B0") : Color.parseColor("#757575");
+        int dividerColor   = theme.equals("black") ? Color.parseColor("#2A2A2A") : Color.parseColor("#E0E0E0");
+
+        TextView sectionLabelProfile = findViewById(R.id.sectionLabelProfile);
+        TextView sectionLabelTheme   = findViewById(R.id.sectionLabelTheme);
+        TextView sectionLabelNotif   = findViewById(R.id.sectionLabelNotif);
+        TextView themeDescText       = findViewById(R.id.themeDescText);
+        TextView notifDescText       = findViewById(R.id.notifDescText);
+        android.view.View divider1   = findViewById(R.id.divider1);
+        android.view.View divider2   = findViewById(R.id.divider2);
+        android.view.View divider3   = findViewById(R.id.divider3);
+
+        if (sectionLabelProfile != null) sectionLabelProfile.setTextColor(textColor);
+        if (sectionLabelTheme   != null) sectionLabelTheme.setTextColor(textColor);
+        if (sectionLabelNotif   != null) sectionLabelNotif.setTextColor(textColor);
+        if (themeDescText       != null) themeDescText.setTextColor(secondaryColor);
+        if (notifDescText       != null) notifDescText.setTextColor(secondaryColor);
+        if (divider1 != null) divider1.setBackgroundColor(dividerColor);
+        if (divider2 != null) divider2.setBackgroundColor(dividerColor);
+        if (divider3 != null) divider3.setBackgroundColor(dividerColor);
 
         // Update EditText hint color
         userNameEditText.setHintTextColor(Color.argb(150,

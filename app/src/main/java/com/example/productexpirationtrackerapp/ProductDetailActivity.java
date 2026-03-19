@@ -348,14 +348,21 @@ public class ProductDetailActivity extends AppCompatActivity {
                 long daysLeft = diff / (24 * 60 * 60 * 1000);
 
                 if (daysLeft < 0) {
-                    daysLeftText.setText("⚠️ Expired");
-                    daysLeftText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
+                    // Red — expired
+                    daysLeftText.setText("⛔ Expired");
+                    daysLeftText.setTextColor(Color.parseColor("#D50000"));
                 } else if (daysLeft <= 7) {
-                    daysLeftText.setText("⚠️ " + daysLeft + " days left (Soon)");
-                    daysLeftText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_orange_dark));
+                    // Orange — warning (1-7 days)
+                    daysLeftText.setText("⚠️ " + daysLeft + " day" + (daysLeft == 1 ? "" : "s") + " left (Warning)");
+                    daysLeftText.setTextColor(Color.parseColor("#FF6D00"));
+                } else if (daysLeft <= 30) {
+                    // Yellow — caution (8-30 days)
+                    daysLeftText.setText("🔔 " + daysLeft + " days left (Caution)");
+                    daysLeftText.setTextColor(Color.parseColor("#FFC107"));
                 } else {
+                    // No badge — safe (30+ days)
                     daysLeftText.setText("✅ " + daysLeft + " days left (Safe)");
-                    daysLeftText.setTextColor(Color.parseColor("#00C853")); // green
+                    daysLeftText.setTextColor(Color.parseColor("#00C853"));
                 }
             }
 

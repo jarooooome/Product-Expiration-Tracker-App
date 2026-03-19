@@ -107,6 +107,18 @@ public class UserRepository {
         });
     }
 
+    // Update a full user object (used by Settings to save nickname)
+    public void updateUser(User user) {
+        executorService.execute(() -> {
+            try {
+                userDao.update(user);
+                Log.d(TAG, "updateUser: saved name=" + user.getUserName() + ", theme=" + user.getColorTheme());
+            } catch (Exception e) {
+                Log.e(TAG, "updateUser error: " + e.getMessage());
+            }
+        });
+    }
+
     // ✅ FIXED: Get user with callback
     public void getUser(UserRepositoryCallback callback) {
         executorService.execute(() -> {
