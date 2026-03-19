@@ -235,7 +235,8 @@
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="@android:color/transparent"
+                android:background="@drawable/button_rounded"
+                android:backgroundTint="?attr/colorPrimary"
                 android:stateListAnimator="@null"
                 android:layout_marginEnd="10dp" />
 
@@ -248,7 +249,8 @@
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="@android:color/transparent"
+                android:background="@drawable/button_rounded2"
+                android:backgroundTint="#F44336"
                 android:stateListAnimator="@null" />
 
         </LinearLayout>

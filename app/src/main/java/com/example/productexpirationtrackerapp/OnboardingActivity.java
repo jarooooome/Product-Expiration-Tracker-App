@@ -70,22 +70,22 @@ public class OnboardingActivity extends AppCompatActivity {
         // Setup onboarding pages
         List<OnboardingPage> pages = new ArrayList<>();
         pages.add(new OnboardingPage(
-                "Track what expires.",
+                "Track what expires",
                 "Add your products once. We'll handle the rest.",
                 R.drawable.ic_onboarding_box
         ));
         pages.add(new OnboardingPage(
-                "Always up to date.",
+                "Always up to date",
                 "Set expiry dates manually or scan a barcode.",
                 R.drawable.ic_onboarding_calendar
         ));
         pages.add(new OnboardingPage(
-                "Never miss a thing.",
+                "Never miss a thing",
                 "Get notified before anything expires.",
                 R.drawable.ic_onboarding_bell
         ));
         pages.add(new OnboardingPage(
-                "Make it yours.",
+                "Make it yours",
                 "Pick a theme and set your preferences.",
                 R.drawable.ic_onboarding_palette
         ));
