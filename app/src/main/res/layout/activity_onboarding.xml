@@ -41,12 +41,12 @@
         android:textStyle="bold"
         android:textColor="#FFFFFF"
         android:textAllCaps="false"
-        android:backgroundTint="#BB86FC"
-        android:stateListAnimator="@null"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/skipButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:background="@drawable/button_rounded"
+    android:stateListAnimator="@null"
+    android:visibility="gone"
+    app:layout_constraintBottom_toTopOf="@+id/skipButton"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Skip Button -->
     <Button
