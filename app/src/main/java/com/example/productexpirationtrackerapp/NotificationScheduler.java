@@ -1,254 +1,246 @@
 package com.example.productexpirationtrackerapp;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
 import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.ExistingWorkPolicy;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Handles exactly 3 notification types:
+ *  1. PRODUCT_ADDED  — fires immediately when a product is added
+ *  2. EXPIRY_7DAYS   — fires at 09:00 AM, 7 days before expiry date
+ *  3. EXPIRY_TODAY   — fires at 08:00 AM on the expiry date itself
+ */
 public class NotificationScheduler {
 
-    private Context context;
-    private WorkManager workManager;
-    private static final String TAG = "NOTIF_DEBUG";
+    private final Context context;
+    private final WorkManager workManager;
+    private static final String TAG = "NotificationScheduler";
 
-    // TEST MODE FLAG - Set to false for production!
-    private static final boolean TEST_MODE = true; // CHANGED TO FALSE FOR PRODUCTION
+    // Notification channel ID — single channel for all expiry alerts
+    public static final String CHANNEL_ID = "expiry_alerts";
+
+    // Worker input data keys
+    public static final String KEY_PRODUCT_ID   = "product_id";
+    public static final String KEY_PRODUCT_NAME = "product_name";
+    public static final String KEY_NOTIF_TYPE   = "notif_type";
+
+    // Notification type constants (passed to worker)
+    public static final String TYPE_ADDED      = "added";
+    public static final String TYPE_7DAYS      = "7days";
+    public static final String TYPE_EXPIRED    = "expired";
 
     public NotificationScheduler(Context context) {
         this.context = context;
         this.workManager = WorkManager.getInstance(context);
-        Log.d(TAG, "===== NOTIFICATION SCHEDULER INITIALIZED =====");
-        Log.d(TAG, "Android version: " + Build.VERSION.SDK_INT);
-        Log.d(TAG, "TEST MODE: " + (TEST_MODE ? "ENABLED - 1 minute notifications" : "DISABLED"));
-        Log.d(TAG, "✅ Using WorkManager for reliable background execution");
+        ensureNotificationChannel();
+    }
+
+    // ── Channel ───────────────────────────────────────────────────────────────
+
+    private void ensureNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager mgr =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (mgr == null) return;
+
+            // Read vibration pattern saved by Settings
+            SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+            String vibPref = prefs.getString("vibration_pattern", "default");
+
+            String channelId = "expiry_channel_" + vibPref;
+
+            // Delete old pattern channels so cached settings don't stick
+            for (String old : new String[]{
+                    "expiry_alerts", "expiry_channel_default",
+                    "expiry_channel_short", "expiry_channel_long", "expiry_channel_none"}) {
+                mgr.deleteNotificationChannel(old);
+            }
+
+            NotificationChannel ch = new NotificationChannel(
+                    channelId, "Expiry Alerts", NotificationManager.IMPORTANCE_HIGH);
+            ch.setDescription("Alerts for product expiry events");
+
+            if ("none".equals(vibPref)) {
+                ch.enableVibration(false);
+            } else {
+                ch.enableVibration(true);
+                switch (vibPref) {
+                    case "short": ch.setVibrationPattern(new long[]{0, 200, 100, 200}); break;
+                    case "long":  ch.setVibrationPattern(new long[]{0, 800, 200, 800}); break;
+                    default:      ch.setVibrationPattern(new long[]{0, 500, 200, 500}); break;
+                }
+            }
+            mgr.createNotificationChannel(ch);
+
+            // Persist for workers to use
+            prefs.edit().putString("notification_channel_id", channelId).apply();
+        }
+    }
+
+    // ── Public API ────────────────────────────────────────────────────────────
+
+    /**
+     * Call this immediately after a product is successfully added.
+     * Fires an instant notification + schedules the two expiry notifications.
+     */
+    public void onProductAdded(Product product) {
+        sendImmediateNotification(product);
+        scheduleExpiryNotifications(product);
     }
 
     /**
-     * Get user's preferred reminder days from SharedPreferences
+     * Call this after a product is edited.
+     * Cancels old scheduled notifications and reschedules from the new expiry date.
      */
-    private int getPreferredReminderDays() {
-        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
-        return prefs.getInt("reminder_days", 3);
+    public void onProductEdited(Product product) {
+        cancelScheduledNotifications(product.getId());
+        scheduleExpiryNotifications(product);
     }
 
     /**
-     * Get user's preferred notification hour from SharedPreferences
+     * Call this when a product is deleted or consumed.
+     * Cancels all pending scheduled notifications for that product.
      */
-    private int getNotificationHour() {
-        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
-        return prefs.getInt("notification_hour", 9); // Default: 9 AM
+    public void onProductRemoved(int productId) {
+        cancelScheduledNotifications(productId);
     }
 
     /**
-     * Get user's preferred notification minute from SharedPreferences
+     * Reschedule notifications for all products (called on boot / full refresh).
      */
-    private int getNotificationMinute() {
-        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
-        return prefs.getInt("notification_minute", 0); // Default: 0
+    public void rescheduleAll(List<Product> products) {
+        workManager.cancelAllWork();
+        for (Product p : products) {
+            scheduleExpiryNotifications(p);
+        }
+        Log.d(TAG, "Rescheduled notifications for " + products.size() + " products");
     }
 
-    /**
-     * Schedule notification for a product using WorkManager
-     * @param daysBefore How many days before expiry to notify
-     */
-    public void scheduleExpiryNotification(Product product, int daysBefore) {
+    // ── Notification 1: Immediate (product added) ─────────────────────────────
+
+    private void sendImmediateNotification(Product product) {
         try {
-            Log.d(TAG, "===== SCHEDULING NOTIFICATION =====");
-            Log.d(TAG, "Product: " + product.getName() + " (ID: " + product.getId() + ")");
-            Log.d(TAG, "Expiry date: " + product.getExpiryDate());
-            Log.d(TAG, "Days before: " + daysBefore);
+            SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+            String channelId = prefs.getString("notification_channel_id", CHANNEL_ID);
 
-            Date expiryDate = product.getExpiryDate();
-            if (expiryDate == null) {
-                Log.e(TAG, "❌ Expiry date is null!");
-                return;
+            Intent intent = new Intent(context, ProductListActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent pi = PendingIntent.getActivity(context,
+                    product.getId() * 10,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
+                    .setSmallIcon(R.drawable.app_logo)
+                    .setContentTitle("Product Added")
+                    .setContentText(product.getName() + " has been added to your tracker.")
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(product.getName() + " has been added to your tracker."))
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setAutoCancel(true)
+                    .setContentIntent(pi);
+
+            NotificationManager mgr =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (mgr != null) {
+                // Use product ID as notification ID so each product has its own
+                mgr.notify(product.getId() * 10, builder.build());
+                Log.d(TAG, "✅ Immediate notification sent: " + product.getName());
             }
-
-            // Calculate notification time
-            Calendar notificationCalendar = Calendar.getInstance();
-
-            if (TEST_MODE) {
-                // TEST MODE: Schedule for 1 minute from now
-                notificationCalendar = Calendar.getInstance();
-                notificationCalendar.add(Calendar.MINUTE, 1);
-                notificationCalendar.set(Calendar.SECOND, 0);
-                notificationCalendar.set(Calendar.MILLISECOND, 0);
-                Log.d(TAG, "🔴 TEST MODE ACTIVE - Scheduling for: " + notificationCalendar.getTime());
-            } else {
-                // NORMAL MODE: Calculate notification time based on expiry date
-                notificationCalendar.setTime(expiryDate);
-                notificationCalendar.add(Calendar.DAY_OF_YEAR, -daysBefore);
-
-                // ✅ USE USER'S SELECTED TIME FROM SETTINGS
-                notificationCalendar.set(Calendar.HOUR_OF_DAY, getNotificationHour());
-                notificationCalendar.set(Calendar.MINUTE, getNotificationMinute());
-                notificationCalendar.set(Calendar.SECOND, 0);
-                notificationCalendar.set(Calendar.MILLISECOND, 0);
-
-                Log.d(TAG, "Scheduled time: " + notificationCalendar.getTime());
-                Log.d(TAG, "Notification time: " + String.format("%02d:%02d",
-                        getNotificationHour(), getNotificationMinute()));
-            }
-
-            // Calculate delay
-            long now = System.currentTimeMillis();
-            long scheduledTime = notificationCalendar.getTimeInMillis();
-            long delayMillis = scheduledTime - now;
-
-            Log.d(TAG, "Current time: " + Calendar.getInstance().getTime());
-            Log.d(TAG, "Delay: " + delayMillis/1000 + " seconds");
-
-            // If the notification time is already passed, don't schedule
-            if (delayMillis <= 0) {
-                Log.d(TAG, "❌ Notification time already passed for: " + product.getName());
-                Log.d(TAG, "Time difference: " + delayMillis + "ms");
-                return;
-            }
-
-            // Check if product ID is valid
-            if (product.getId() <= 0) {
-                Log.e(TAG, "❌ Invalid product ID: " + product.getId());
-                return;
-            }
-
-            // Create unique work ID for this product and reminder day
-            String uniqueWorkName = "expiry_" + product.getId() + "_" + daysBefore;
-
-            // Prepare input data for the worker
-            Data inputData = new Data.Builder()
-                    .putInt("product_id", product.getId())
-                    .putString("product_name", product.getName())
-                    .putInt("days_left", daysBefore)
-                    .build();
-
-            // Create OneTimeWorkRequest
-            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(NotificationWorker.class)
-                    .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
-                    .setInputData(inputData)
-                    .addTag(uniqueWorkName)
-                    .addTag("product_" + product.getId())
-                    .build();
-
-            // Enqueue the work request with unique name (prevents duplicates)
-            workManager.enqueueUniqueWork(
-                    uniqueWorkName,
-                    ExistingWorkPolicy.REPLACE, // Replace existing work with same name
-                    workRequest
-            );
-
-            Log.d(TAG, "✅✅✅ WORK SCHEDULED with WorkManager");
-            Log.d(TAG, "   • Work ID: " + uniqueWorkName);
-            Log.d(TAG, "   • Product: " + product.getName());
-            Log.d(TAG, "   • Time: " + notificationCalendar.getTime());
-            Log.d(TAG, "   • Delay: " + delayMillis/1000 + " seconds");
-            Log.d(TAG, "   • ✅ Survives app force close");
-            Log.d(TAG, "   • ✅ Survives device reboot");
-            Log.d(TAG, "   • ✅ No permissions needed");
-            Log.d(TAG, "   • ✅ Battery efficient");
-            Log.d(TAG, "===== SCHEDULING COMPLETE =====\n");
-
         } catch (Exception e) {
-            Log.e(TAG, "❌ ERROR scheduling notification", e);
+            Log.e(TAG, "Error sending immediate notification", e);
         }
     }
 
-    /**
-     * Schedule all notifications for a product
-     */
-    public void scheduleAllNotifications(Product product) {
-        Log.d(TAG, "===== SCHEDULING ALL NOTIFICATIONS FOR: " + product.getName() + " =====");
+    // ── Notification 2 & 3: Scheduled ────────────────────────────────────────
 
-        if (TEST_MODE) {
-            Log.d(TAG, "🔴 TEST MODE: Scheduling single test notification");
-            scheduleExpiryNotification(product, 5);
-        } else {
-            int reminderDays = getPreferredReminderDays();
-            Log.d(TAG, "📅 User preferred reminder days: " + reminderDays);
-            Log.d(TAG, "⏰ User preferred notification time: " +
-                    String.format("%02d:%02d", getNotificationHour(), getNotificationMinute()));
-
-            if (reminderDays > 0) {
-                scheduleExpiryNotification(product, reminderDays);
-            } else {
-                Log.d(TAG, "ℹ️ User selected same-day notification only");
-            }
-
-            // Always schedule the day-of-expiry notification
-            scheduleExpiryNotification(product, 0);
-        }
-
-        Log.d(TAG, "===== FINISHED SCHEDULING ALL NOTIFICATIONS =====\n");
-    }
-
-    /**
-     * Schedule alarms for all products
-     */
-    public void scheduleAllAlarms(List<Product> products) {
-        Log.d(TAG, "===== SCHEDULING ALARMS FOR ALL PRODUCTS =====");
-        Log.d(TAG, "Total products: " + products.size());
-
-        if (products.isEmpty()) {
-            Log.d(TAG, "No products to schedule");
+    private void scheduleExpiryNotifications(Product product) {
+        Date expiryDate = product.getExpiryDate();
+        if (expiryDate == null) {
+            Log.w(TAG, "Skipping schedule — null expiry date for: " + product.getName());
             return;
         }
 
-        for (Product product : products) {
-            scheduleAllNotifications(product);
-        }
-        Log.d(TAG, "===== FINISHED SCHEDULING ALL ALARMS =====\n");
+        // Notification 2: 7 days before expiry at 09:00 AM
+        Calendar sevenDaysBefore = Calendar.getInstance();
+        sevenDaysBefore.setTime(expiryDate);
+        sevenDaysBefore.add(Calendar.DAY_OF_YEAR, -7);
+        sevenDaysBefore.set(Calendar.HOUR_OF_DAY, 9);
+        sevenDaysBefore.set(Calendar.MINUTE, 0);
+        sevenDaysBefore.set(Calendar.SECOND, 0);
+        sevenDaysBefore.set(Calendar.MILLISECOND, 0);
+        scheduleWorker(product, TYPE_7DAYS, sevenDaysBefore, "7days");
+
+        // Notification 3: On expiry day at 08:00 AM
+        Calendar expiryDay = Calendar.getInstance();
+        expiryDay.setTime(expiryDate);
+        expiryDay.set(Calendar.HOUR_OF_DAY, 8);
+        expiryDay.set(Calendar.MINUTE, 0);
+        expiryDay.set(Calendar.SECOND, 0);
+        expiryDay.set(Calendar.MILLISECOND, 0);
+        scheduleWorker(product, TYPE_EXPIRED, expiryDay, "expired");
     }
 
-    /**
-     * Cancel notification for a specific product
-     */
-    public void cancelNotification(Product product) {
-        try {
-            Log.d(TAG, "===== CANCELLING NOTIFICATION =====");
-            Log.d(TAG, "Product: " + product.getName() + " (ID: " + product.getId() + ")");
-
-            int[] reminderDays = {10, 5, 3, 1, 0};
-
-            for (int days : reminderDays) {
-                String uniqueWorkName = "expiry_" + product.getId() + "_" + days;
-
-                // Cancel work by unique name
-                workManager.cancelUniqueWork(uniqueWorkName);
-                Log.d(TAG, "✅ Cancelled work: " + uniqueWorkName);
-            }
-
-            // Also cancel all work with product tag
-            workManager.cancelAllWorkByTag("product_" + product.getId());
-            Log.d(TAG, "✅ Cancelled all work for product ID: " + product.getId());
-
-            Log.d(TAG, "===== CANCELLATION COMPLETE =====\n");
-
-        } catch (Exception e) {
-            Log.e(TAG, "❌ ERROR cancelling notification", e);
+    private void scheduleWorker(Product product, String type,
+                                Calendar scheduledTime, String suffix) {
+        long delayMs = scheduledTime.getTimeInMillis() - System.currentTimeMillis();
+        if (delayMs <= 0) {
+            Log.d(TAG, "Skipping past notification [" + type + "] for: " + product.getName());
+            return;
         }
+
+        String workName = "expiry_" + product.getId() + "_" + suffix;
+
+        Data inputData = new Data.Builder()
+                .putInt(KEY_PRODUCT_ID, product.getId())
+                .putString(KEY_PRODUCT_NAME, product.getName())
+                .putString(KEY_NOTIF_TYPE, type)
+                .build();
+
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(NotificationWorker.class)
+                .setInitialDelay(delayMs, TimeUnit.MILLISECONDS)
+                .setInputData(inputData)
+                .addTag("product_" + product.getId())
+                .build();
+
+        workManager.enqueueUniqueWork(workName, ExistingWorkPolicy.REPLACE, request);
+        Log.d(TAG, "✅ Scheduled [" + type + "] for " + product.getName()
+                + " at " + scheduledTime.getTime());
     }
 
-    /**
-     * Cancel all notifications (useful when clearing all data)
-     */
-    public void cancelAllNotifications() {
-        try {
-            Log.d(TAG, "===== CANCELLING ALL NOTIFICATIONS =====");
-            workManager.cancelAllWork();
-            Log.d(TAG, "✅ Cancelled all scheduled work");
-            Log.d(TAG, "===== CANCELLATION COMPLETE =====\n");
-        } catch (Exception e) {
-            Log.e(TAG, "❌ ERROR cancelling all notifications", e);
+    // ── Cancel ────────────────────────────────────────────────────────────────
+
+    private void cancelScheduledNotifications(int productId) {
+        workManager.cancelAllWorkByTag("product_" + productId);
+
+        // Also cancel the specific named workers
+        workManager.cancelUniqueWork("expiry_" + productId + "_7days");
+        workManager.cancelUniqueWork("expiry_" + productId + "_expired");
+
+        // Dismiss any showing notification for this product
+        NotificationManager mgr =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (mgr != null) {
+            mgr.cancel(productId * 10);      // added notification
+            mgr.cancel(productId * 10 + 1);  // 7-days notification
+            mgr.cancel(productId * 10 + 2);  // expired notification
         }
+        Log.d(TAG, "Cancelled all notifications for product ID: " + productId);
     }
 }

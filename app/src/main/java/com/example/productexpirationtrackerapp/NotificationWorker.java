@@ -1,61 +1,99 @@
 package com.example.productexpirationtrackerapp;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
-import java.util.Calendar;
 
 public class NotificationWorker extends Worker {
 
-    private static final String TAG = "NOTIF_WORKER";
+    private static final String TAG = "NotificationWorker";
 
-    public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
-        super(context, workerParams);
+    public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters params) {
+        super(context, params);
     }
 
     @NonNull
     @Override
     public Result doWork() {
         try {
-            // Get product details from input data
-            int productId = getInputData().getInt("product_id", -1);
-            String productName = getInputData().getString("product_name");
-            int daysLeft = getInputData().getInt("days_left", 0);
+            int productId    = getInputData().getInt(NotificationScheduler.KEY_PRODUCT_ID, -1);
+            String productName = getInputData().getString(NotificationScheduler.KEY_PRODUCT_NAME);
+            String type      = getInputData().getString(NotificationScheduler.KEY_NOTIF_TYPE);
 
-            Log.d(TAG, "===== WORKER TRIGGERED =====");
-            Log.d(TAG, "Product: " + productName + " (ID: " + productId + ")");
-            Log.d(TAG, "Days left: " + daysLeft);
-            Log.d(TAG, "Current time: " + Calendar.getInstance().getTime());
-
-            // Check if we have valid data
-            if (productId == -1 || productName == null) {
-                Log.e(TAG, "❌ Invalid product data received");
+            if (productId == -1 || productName == null || type == null) {
+                Log.e(TAG, "Invalid worker input data");
                 return Result.failure();
             }
 
-            // Create intent for the alarm receiver
-            Intent intent = new Intent(getApplicationContext(), ExpiryAlarmReceiver.class);
-            intent.putExtra("product_id", productId);
-            intent.putExtra("product_name", productName);
-            intent.putExtra("days_left", daysLeft);
-            intent.setAction("com.example.productexpirationtrackerapp.EXPIRY_ALARM_" + productId + "_" + daysLeft);
+            Log.d(TAG, "Worker fired — type=" + type + ", product=" + productName);
 
-            // Send broadcast
-            getApplicationContext().sendBroadcast(intent);
+            // Build title + body based on notification type
+            String title;
+            String body;
 
-            Log.d(TAG, "✅✅✅ WORKER EXECUTED SUCCESSFULLY");
-            Log.d(TAG, "   • Notification sent for: " + productName);
-            Log.d(TAG, "   • Days left: " + daysLeft);
-            Log.d(TAG, "===== WORKER COMPLETE =====\n");
+            switch (type) {
+                case NotificationScheduler.TYPE_7DAYS:
+                    title = "Expiring Soon";
+                    body  = productName + " expires in 7 days. Use it before it's too late!";
+                    break;
+                case NotificationScheduler.TYPE_EXPIRED:
+                    title = "Product Expired";
+                    body  = productName + " has expired today. Consider removing it.";
+                    break;
+                default:
+                    Log.w(TAG, "Unknown notification type: " + type);
+                    return Result.failure();
+            }
+
+            // Get channel ID saved by NotificationScheduler
+            SharedPreferences prefs = getApplicationContext()
+                    .getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+            String channelId = prefs.getString("notification_channel_id",
+                    NotificationScheduler.CHANNEL_ID);
+
+            // Tap notification → open ProductListActivity
+            Intent intent = new Intent(getApplicationContext(), ProductListActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent pi = PendingIntent.getActivity(
+                    getApplicationContext(),
+                    productId,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+            // Unique notification ID per product per type
+            int notifId = type.equals(NotificationScheduler.TYPE_7DAYS)
+                    ? productId * 10 + 1
+                    : productId * 10 + 2;
+
+            NotificationCompat.Builder builder =
+                    new NotificationCompat.Builder(getApplicationContext(), channelId)
+                            .setSmallIcon(R.drawable.app_logo)
+                            .setContentTitle(title)
+                            .setContentText(body)
+                            .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
+                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                            .setAutoCancel(true)
+                            .setContentIntent(pi);
+
+            NotificationManager mgr = (NotificationManager)
+                    getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            if (mgr != null) {
+                mgr.notify(notifId, builder.build());
+                Log.d(TAG, "✅ Notification shown — " + title + " for " + productName);
+            }
 
             return Result.success();
 
         } catch (Exception e) {
-            Log.e(TAG, "❌❌❌ WORKER FAILED", e);
-            e.printStackTrace();
+            Log.e(TAG, "Worker failed", e);
             return Result.failure();
         }
     }

@@ -18,7 +18,7 @@ public class BootReceiver extends BroadcastReceiver {
             // Run in background thread
             new Thread(() -> {
                 NotificationScheduler scheduler = new NotificationScheduler(context);
-                scheduler.scheduleAllAlarms(productDao.getAllProducts());
+                scheduler.rescheduleAll(productDao.getAllProducts());
             }).start();
         }
     }

@@ -34,7 +34,7 @@ public class ProductRepository {
 
             // Schedule notifications for this product
             if (notificationScheduler != null) {
-                notificationScheduler.scheduleAllNotifications(product);
+                notificationScheduler.onProductAdded(product);
             }
         });
     }
@@ -45,8 +45,7 @@ public class ProductRepository {
             productDao.update(product);
             // Optionally reschedule notifications after update
             if (notificationScheduler != null) {
-                notificationScheduler.cancelNotification(product);
-                notificationScheduler.scheduleAllNotifications(product);
+                notificationScheduler.onProductEdited(product);
             }
         });
     }
@@ -56,7 +55,7 @@ public class ProductRepository {
         executorService.execute(() -> {
             // Cancel scheduled notifications first
             if (notificationScheduler != null) {
-                notificationScheduler.cancelNotification(product);
+                notificationScheduler.onProductRemoved(product.getId());
             }
             productDao.delete(product);
         });
@@ -67,7 +66,7 @@ public class ProductRepository {
             // First get the product to cancel its notifications
             Product product = productDao.getProductById(productId);
             if (product != null && notificationScheduler != null) {
-                notificationScheduler.cancelNotification(product);
+                notificationScheduler.onProductRemoved(product.getId());
             }
             productDao.deleteById(productId);
         });
@@ -78,7 +77,7 @@ public class ProductRepository {
         executorService.execute(() -> {
             List<Product> products = productDao.getAllProducts();
             if (notificationScheduler != null) {
-                notificationScheduler.scheduleAllAlarms(products);
+                notificationScheduler.rescheduleAll(products);
             }
         });
     }
