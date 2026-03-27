@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Handles exactly 3 notification types:
  *  1. PRODUCT_ADDED  — fires immediately when a product is added
- *  2. EXPIRY_7DAYS   — fires at 09:00 AM, 7 days before expiry date
- *  3. EXPIRY_TODAY   — fires at 08:00 AM on the expiry date itself
+ *  2. EXPIRY_7DAYS   — fires at user's preferred notification time, 7 days before expiry
+ *  3. EXPIRY_TODAY   — fires at user's preferred notification time on the expiry date
  */
 public class NotificationScheduler {
 
@@ -170,6 +170,18 @@ public class NotificationScheduler {
 
     // ── Notification 2 & 3: Scheduled ────────────────────────────────────────
 
+    /** Read user's preferred notification hour from SharedPreferences (default 9 AM) */
+    private int getPreferredHour() {
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        return prefs.getInt("notification_hour", 9);
+    }
+
+    /** Read user's preferred notification minute from SharedPreferences (default 0) */
+    private int getPreferredMinute() {
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        return prefs.getInt("notification_minute", 0);
+    }
+
     private void scheduleExpiryNotifications(Product product) {
         Date expiryDate = product.getExpiryDate();
         if (expiryDate == null) {
@@ -177,21 +189,21 @@ public class NotificationScheduler {
             return;
         }
 
-        // Notification 2: 7 days before expiry at 09:00 AM
+        // Notification 2: 7 days before expiry at user's preferred notification time
         Calendar sevenDaysBefore = Calendar.getInstance();
         sevenDaysBefore.setTime(expiryDate);
         sevenDaysBefore.add(Calendar.DAY_OF_YEAR, -7);
-        sevenDaysBefore.set(Calendar.HOUR_OF_DAY, 9);
-        sevenDaysBefore.set(Calendar.MINUTE, 0);
+        sevenDaysBefore.set(Calendar.HOUR_OF_DAY, getPreferredHour());
+        sevenDaysBefore.set(Calendar.MINUTE, getPreferredMinute());
         sevenDaysBefore.set(Calendar.SECOND, 0);
         sevenDaysBefore.set(Calendar.MILLISECOND, 0);
         scheduleWorker(product, TYPE_7DAYS, sevenDaysBefore, "7days");
 
-        // Notification 3: On expiry day at 08:00 AM
+        // Notification 3: On expiry day at user's preferred notification time
         Calendar expiryDay = Calendar.getInstance();
         expiryDay.setTime(expiryDate);
-        expiryDay.set(Calendar.HOUR_OF_DAY, 8);
-        expiryDay.set(Calendar.MINUTE, 0);
+        expiryDay.set(Calendar.HOUR_OF_DAY, getPreferredHour());
+        expiryDay.set(Calendar.MINUTE, getPreferredMinute());
         expiryDay.set(Calendar.SECOND, 0);
         expiryDay.set(Calendar.MILLISECOND, 0);
         scheduleWorker(product, TYPE_EXPIRED, expiryDay, "expired");

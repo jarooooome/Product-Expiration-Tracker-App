@@ -19,9 +19,9 @@
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/app_logo"
-        android:label="@string/app_name"
-        android:roundIcon="@drawable/app_logo"
+        android:icon="@drawable/app_logo2"
+        android:label="Expiry Tracker"
+        android:roundIcon="@drawable/app_logo2"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProductExpirationTrackerApp">
 

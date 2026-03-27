@@ -49,6 +49,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Button saveNameButton;
     private Button cancelNameButton;
     private UserRepository userRepository;
+    private ProductRepository productRepository;
 
     // Bottom nav
     private LinearLayout navProfile, navProducts, navSettings;
@@ -93,6 +94,7 @@ public class SettingsActivity extends AppCompatActivity {
         preferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         editor = preferences.edit();
         userRepository = new UserRepository(getApplication());
+        productRepository = new ProductRepository(getApplication());
 
         initializeViews();
         applyTheme();
@@ -584,6 +586,10 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putInt(PREF_NOTIFICATION_HOUR, selectedHour);
         editor.putInt(PREF_NOTIFICATION_MINUTE, selectedMinute);
         editor.apply();
+
+        // Reschedule expiry-based notifications for all products with the new time
+        // (Does NOT affect the immediate "product added" notification)
+        productRepository.rescheduleAllNotifications();
 
         userRepository.updateTheme(theme);
         Log.d(TAG, "Settings saved. Theme: " + theme);

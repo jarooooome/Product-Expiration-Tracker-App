@@ -111,7 +111,7 @@
                     android:inputType="textPersonName"
                     android:maxLength="8"
                     android:maxLines="1"
-                    android:background="@drawable/edittext_background" />
+                    android:background="@android:color/transparent" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -229,6 +229,7 @@
             android:layout_marginBottom="24dp" />
 
         <!-- ══ NOTIFICATIONS ═════════════════════════════════════════════ -->
+        <!-- Hidden section label — kept so Java's sectionLabelNotif ref doesn't crash -->
         <TextView
             android:id="@+id/sectionLabelNotif"
             android:layout_width="match_parent"
@@ -237,8 +238,10 @@
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginBottom="6dp"
+            android:visibility="gone" />
 
+        <!-- Hidden description text — kept so Java's notifDescText ref doesn't crash -->
         <TextView
             android:id="@+id/notifDescText"
             android:layout_width="match_parent"
@@ -246,7 +249,8 @@
             android:text="Get alerts before your products expire"
             android:textSize="13sp"
             android:textColor="#757575"
-            android:layout_marginBottom="14dp" />
+            android:layout_marginBottom="14dp"
+            android:visibility="gone" />
 
         <!-- Notification wrapper — Java uses notificationCard for setCardBackgroundColor -->
         <androidx.cardview.widget.CardView
@@ -255,7 +259,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             app:cardCornerRadius="0dp"
-            app:cardElevation="0dp">
+            app:cardElevation="0dp"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -286,7 +291,8 @@
                         android:layout_weight="1"
                         android:text="Enable expiry reminders"
                         android:textSize="15sp"
-                        android:textColor="#333333" />
+                        android:textColor="#333333"
+                        android:visibility="gone" />
 
                     <Switch
                         android:id="@+id/notificationSwitch"
@@ -295,6 +301,9 @@
                         android:checked="true"
                         android:thumbTint="#4CAF50"
                         android:trackTint="#AAAAAA"
+                        android:alpha="0.0"
+                        android:clickable="false"
+                        android:focusable="false"
                         tools:ignore="TouchTargetSizeCheck" />
 
                 </LinearLayout>
@@ -307,7 +316,8 @@
             android:layout_height="1dp"
             android:background="#E0E0E0"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="32dp"
+            android:visibility="gone" />
 
         <!-- ── Finish Button ─────────────────────────────────────────── -->
         <Button
